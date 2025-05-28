@@ -1,4 +1,7 @@
-name: Build and deploy Next.js app to Azure Web App - grimoire
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy Node.js app to Azure Web App - grimoire
 
 on:
   push:
@@ -9,106 +12,26 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: read #This is required for actions/checkout
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
+          node-version: '20.x'
 
-      - name: npm install and build
-        env:
-          NEXTAUTH_URL: 'https://grimoire.tools'
-          MONGODB_URI: ${{ secrets.MONGODB_URI }}
-          NEXTAUTH_SECRET: ${{ secrets.AUTH_SECRET }}
-          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-          AZURE_STORAGE_CONTAINER_NAME: ${{ secrets.AZURE_STORAGE_CONTAINER_NAME }}
-          AZURE_RESOURCE_NAME: ${{ secrets.AZURE_RESOURCE_NAME }}
-          AZURE_API_KEY: ${{ secrets.AZURE_API_KEY }}
-          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
-          AZURE_OPENAI_API_BASE: ${{ secrets.AZURE_OPENAI_API_BASE }}
-          JWT: ${{ secrets.JWT }}
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      - name: npm install, build, and test
         run: |
-          npm install --legacy-peer-deps
-          npm run build
-      - name: Package standalone build
-        run: |
-          # Create deployment directory
-          mkdir -p deployment
-          
-          # Copy the standalone output
-          cp -r build/standalone/* deployment/
-          
-          # Create necessary directories
-          mkdir -p deployment/public
-          mkdir -p deployment/.next
-          
-          # Copy static and public files
-          cp -r public/* deployment/public/ || true
-          cp -r build/static deployment/.next/
-          cp -r .next/static/* deployment/.next/static/ || true
-          
-          # Ensure static directory exists in public for client-side files
-          mkdir -p deployment/public/_next
-          cp -r build/static deployment/public/_next/ || true
-          cp -r .next/static/* deployment/public/_next/static/ || true
-          
-          # Create production package.json
-          node -e "const pkg = require('./package.json'); delete pkg.devDependencies; delete pkg.scripts; require('fs').writeFileSync('deployment/package.json', JSON.stringify(pkg, null, 2));"
-          
-          # Install production dependencies
-          cd deployment
-          npm install --legacy-peer-deps --omit=dev
-          
-          # Create startup command file
-          echo "node server.js" > startup.sh
-          chmod +x startup.sh
-          
-          # Create web.config for Azure
-          echo '<?xml version="1.0" encoding="utf-8"?>
-          <configuration>
-            <system.webServer>
-              <handlers>
-                <add name="iisnode" path="server.js" verb="*" modules="iisnode" />
-              </handlers>
-              <rewrite>
-                <rules>
-                  <rule name="NodeInspector" patternSyntax="ECMAScript" stopProcessing="true">
-                    <match url="^server.js\/debug[\/]?" />
-                  </rule>
-                  <rule name="API">
-                    <match url="^api/.*" />
-                    <action type="Rewrite" url="server.js" />
-                  </rule>
-                  <rule name="StaticContent">
-                    <action type="Rewrite" url="public{REQUEST_URI}"/>
-                  </rule>
-                  <rule name="DynamicContent">
-                    <conditions>
-                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="True"/>
-                    </conditions>
-                    <action type="Rewrite" url="server.js"/>
-                  </rule>
-                </rules>
-              </rewrite>
-              <security>
-                <requestFiltering>
-                  <hiddenSegments>
-                    <remove segment="bin"/>
-                  </hiddenSegments>
-                </requestFiltering>
-              </security>
-              <httpErrors existingResponse="PassThrough" />
-            </system.webServer>
-          </configuration>' > web.config
-          
-          # Zip everything
-          cd ..
-          zip -r release.zip deployment/*
+          npm install
+          npm run build --if-present
+          npm run test --if-present
+
+      - name: Zip artifact for deployment
+        run: zip release.zip ./* -r
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -122,7 +45,8 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
 
     steps:
       - name: Download artifact from build job
@@ -131,14 +55,20 @@ jobs:
           name: node-app
 
       - name: Unzip artifact for deployment
-        run: |
-          unzip release.zip
-          rm release.zip
-        
+        run: unzip release.zip
+      
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C6C6A0A7089E4500879A027E143416C2 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_DA6FAAC7EA104A9DAA53969B9DDB2389 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_FB204EB807164D0692DD621610D0E800 }}
+
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@v3
         with:
           app-name: 'grimoire'
-          package: deployment
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_D6C1D695B47A4512B5C06ABA5CDBF0F1 }}
+          slot-name: 'Production'
+          package: .
+          
