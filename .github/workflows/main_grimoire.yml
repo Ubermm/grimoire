@@ -134,18 +134,11 @@ jobs:
         run: |
           unzip release.zip
           rm release.zip
-    
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C6C6A0A7089E4500879A027E143416C2 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_DA6FAAC7EA104A9DAA53969B9DDB2389 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_FB204EB807164D0692DD621610D0E800 }}
-
+        
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
+        uses: azure/webapps-deploy@v2
         with:
           app-name: 'grimoire'
           package: deployment
-          
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_D6C1D695B47A4512B5C06ABA5CDBF0F1 }}
