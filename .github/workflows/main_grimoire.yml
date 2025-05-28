@@ -16,11 +16,11 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
+          node-version: '20.x'
 
       - name: npm install and build
         env:
-          NEXTAUTH_URL: 'https://grimoire.tools'
+          NEXTAUTH_URL: 'https://grimoire-gqcbaddmdrave5ec.centralindia-01.azurewebsites.net'
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
           NEXTAUTH_SECRET: ${{ secrets.AUTH_SECRET }}
           AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
