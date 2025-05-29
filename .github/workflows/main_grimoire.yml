@@ -20,7 +20,7 @@ jobs:
 
       - name: npm install and build
         env:
-          NEXTAUTH_URL: 'https://grimoire-gqcbaddmdrave5ec.centralindia-01.azurewebsites.net'
+          NEXTAUTH_URL: 'https://grimoire-gqcbaddmdrave5ec.centralindia-01.azurewebsites.net/'
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
           NEXTAUTH_SECRET: ${{ secrets.AUTH_SECRET }}
           AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
@@ -33,7 +33,7 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps --omit=dev
           npm run build
       - name: Package standalone build
         run: |
