@@ -1,0 +1,66 @@
+FDA FORM 1571 - INVESTIGATIONAL NEW DRUG APPLICATION (IND)
+
+Serial Number: {{SERIAL_NUMBER}}
+Date: {{SUBMISSION_DATE}}
+
+SUBMISSION TYPE:
+☐ Initial Investigational New Drug Application (IND) {{CHECKBOX_INITIAL_IND}}
+☐ Protocol Amendment {{CHECKBOX_PROTOCOL_AMENDMENT}}
+☐ New Protocol {{CHECKBOX_NEW_PROTOCOL}}
+☐ Annual Report {{CHECKBOX_ANNUAL_REPORT}}
+☐ General Correspondence {{CHECKBOX_GENERAL_CORRESPONDENCE}}
+☐ Response to Clinical Hold {{CHECKBOX_CLINICAL_HOLD_RESPONSE}}
+☐ Request For Reactivation Or Reinstatement {{CHECKBOX_REACTIVATION}}
+
+SPONSOR INFORMATION:
+Name: {{SPONSOR_NAME}}
+Address: {{SPONSOR_ADDRESS_LINE1}}
+{{SPONSOR_ADDRESS_LINE2}}
+City: {{SPONSOR_CITY}}, State: {{SPONSOR_STATE}}, ZIP: {{SPONSOR_ZIP}}
+Contact Person: {{CONTACT_PERSON}}
+Telephone: {{CONTACT_PHONE}}
+Fax: {{CONTACT_FAX}}
+Email: {{CONTACT_EMAIL}}
+
+INVESTIGATIONAL DRUG INFORMATION:
+Generic Name: {{DRUG_GENERIC_NAME}}
+Trade Name: {{DRUG_TRADE_NAME}}
+Active Ingredients: {{ACTIVE_INGREDIENTS}}
+Pharmacological Class: {{PHARMACOLOGICAL_CLASS}}
+Dosage Form: {{DOSAGE_FORM}}
+Route of Administration: {{ROUTE_OF_ADMINISTRATION}}
+Structural Formula: {{STRUCTURAL_FORMULA}}
+
+STUDY INFORMATION:
+Study Title: {{STUDY_TITLE}}
+Principal Investigator: {{PRINCIPAL_INVESTIGATOR}}
+Study Phase: {{STUDY_PHASE}}
+Number of Subjects: {{NUMBER_OF_SUBJECTS}}
+Study Duration: {{STUDY_DURATION}}
+Study Objectives: {{STUDY_OBJECTIVES}}
+
+MONITORING INFORMATION:
+Monitor Name: {{MONITOR_NAME}}
+Monitor Title: {{MONITOR_TITLE}}
+Monitor Address: {{MONITOR_ADDRESS}}
+Monitor Phone: {{MONITOR_PHONE}}
+Monitor Email: {{MONITOR_EMAIL}}
+
+INVESTIGATOR INFORMATION:
+Name: {{INVESTIGATOR_NAME}}
+Institution: {{INVESTIGATOR_INSTITUTION}}
+Address: {{INVESTIGATOR_ADDRESS}}
+
+ATTACHMENTS:
+{{ATTACHMENT_LIST}}
+
+SPONSOR CERTIFICATION:
+I agree not to begin clinical investigations until 30 days after FDA's receipt of this IND unless I receive earlier notification by FDA that the studies may begin. I also agree not to begin or continue clinical investigations covered by the IND if those studies are placed on clinical hold.
+
+Sponsor Signature: _________________________ Date: {{SIGNATURE_DATE}}
+{{SPONSOR_SIGNATURE_NAME}}, {{SPONSOR_TITLE}}
+Sponsor Organization: {{SPONSOR_NAME}}
+
+REGULATORY CONTEXT:
+This IND application is submitted in accordance with 21 CFR 312 regulations.
+Related CFR codes that may apply: {{RELATED_CFR_CODES}}

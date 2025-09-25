@@ -1,0 +1,56 @@
+FDA FORM 1572 - STATEMENT OF INVESTIGATOR
+
+IND Number: {{IND_NUMBER}}
+Date: {{SUBMISSION_DATE}}
+
+INVESTIGATOR INFORMATION:
+Name: {{INVESTIGATOR_NAME}}
+Address: {{INVESTIGATOR_ADDRESS_LINE1}}
+{{INVESTIGATOR_ADDRESS_LINE2}}
+City: {{INVESTIGATOR_CITY}}, State: {{INVESTIGATOR_STATE}}, ZIP: {{INVESTIGATOR_ZIP}}
+Telephone: {{INVESTIGATOR_PHONE}}
+Email: {{INVESTIGATOR_EMAIL}}
+
+EDUCATION AND TRAINING:
+Education: {{INVESTIGATOR_EDUCATION}}
+Training: {{INVESTIGATOR_TRAINING}}
+Experience: {{INVESTIGATOR_EXPERIENCE}}
+
+STUDY INFORMATION:
+Protocol Title: {{STUDY_TITLE}}
+Protocol Number: {{PROTOCOL_NUMBER}}
+Sponsor: {{SPONSOR_NAME}}
+
+CLINICAL SITE INFORMATION:
+Institution: {{CLINICAL_SITE_NAME}}
+Address: {{CLINICAL_SITE_ADDRESS}}
+Facility Registration Number: {{FACILITY_REGISTRATION}}
+
+INVESTIGATOR COMMITMENTS:
+I agree to:
+1. Conduct the study in accordance with the relevant, current protocol and will only make changes after receiving written consent from the sponsor and approval from the Institutional Review Board (IRB) unless changes are necessary to eliminate apparent immediate hazards to the subjects.
+
+2. Comply with all requirements regarding the obligations of clinical investigators and all other pertinent FDA regulations.
+
+3. Personally conduct or supervise the described investigation.
+
+4. Inform any potential subjects that the drugs are being used for investigational purposes and ensure that the requirements relating to obtaining informed consent and IRB review are met.
+
+5. Report to the sponsor adverse experiences that occur in the course of the investigation in accordance with 21 CFR 312.64.
+
+6. Maintain adequate and accurate records as required by 21 CFR 312.62 and make those records available for inspection.
+
+7. Ensure that all associates, colleagues, and employees assisting in the conduct of the study are informed about their obligations.
+
+Sub-Investigators:
+{{SUB_INVESTIGATORS}}
+
+Investigator Signature: _________________________ Date: {{SIGNATURE_DATE}}
+{{INVESTIGATOR_SIGNATURE_NAME}}
+
+Witness Signature: _________________________ Date: {{WITNESS_DATE}}
+{{WITNESS_NAME}}
+
+REGULATORY CONTEXT:
+This form is submitted in accordance with 21 CFR 312.53 regulations.
+Related CFR codes: {{RELATED_CFR_CODES}}
