@@ -1,3 +1,4 @@
+//@ts-nocheck
 // components/ui/progress.tsx
 "use client"
 

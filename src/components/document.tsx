@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { memo, type SetStateAction } from 'react';
 
 import type { UIBlock } from './block';

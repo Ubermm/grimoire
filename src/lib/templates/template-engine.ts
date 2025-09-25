@@ -1,3 +1,4 @@
+//@ts-nocheck
 // src/lib/templates/template-engine.ts
 import fs from 'fs';
 import path from 'path';

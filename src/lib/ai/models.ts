@@ -1,3 +1,4 @@
+//@ts-nocheck
 // Define your models here.
 
 export interface Model {

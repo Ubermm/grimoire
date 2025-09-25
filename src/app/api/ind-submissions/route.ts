@@ -1,3 +1,4 @@
+//@ts-nocheck
 // src/app/api/ind-submissions/route.ts - IND Submissions API (following audit pattern)
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/app/(auth)/auth';

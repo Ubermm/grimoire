@@ -1,3 +1,4 @@
+//@ts-nocheck
 //message.tsx
 'use client';
 

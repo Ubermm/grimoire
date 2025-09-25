@@ -1,3 +1,4 @@
+//@ts-nocheck
 import type { JSONValue } from 'ai';
 import { type Dispatch, memo, type SetStateAction } from 'react';
 

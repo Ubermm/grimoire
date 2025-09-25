@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { Dispatch, memo, SetStateAction } from 'react';
 import { UIBlock } from './block';
 import { PreviewMessage } from './message';

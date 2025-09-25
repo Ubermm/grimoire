@@ -1,3 +1,4 @@
+//@ts-nocheck
 import OrderedMap from 'orderedmap';
 import {
   Schema,

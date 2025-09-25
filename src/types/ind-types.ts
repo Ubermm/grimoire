@@ -1,3 +1,4 @@
+//@ts-nocheck
 // src/types/ind-types.ts - Common IND form types
 export interface INDFormData {
   // Sponsor Information

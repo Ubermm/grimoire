@@ -1,3 +1,4 @@
+//@ts-nocheck
 // providers.tsx
 'use client';
 

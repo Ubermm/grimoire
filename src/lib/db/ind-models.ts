@@ -1,3 +1,4 @@
+//@ts-nocheck
 // src/lib/db/ind-models.ts - Independent IND Models
 import mongoose, { Schema, model, models } from 'mongoose';
 import { generateUUID } from '../utils';

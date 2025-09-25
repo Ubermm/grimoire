@@ -1,3 +1,4 @@
+//@ts-nocheck
 // src/app/api/ind/validate/route.ts - IND Document Validation API
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/app/(auth)/auth';

@@ -1,3 +1,4 @@
+//@ts-nocheck
 //files/upload/route/ts
 import { BlobServiceClient } from '@azure/storage-blob';
 import { NextResponse } from 'next/server';

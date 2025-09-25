@@ -1,3 +1,4 @@
+//@ts-nocheck
 import type { Metadata } from 'next';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';

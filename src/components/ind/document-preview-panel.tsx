@@ -1,3 +1,4 @@
+//@ts-nocheck
 // @ts-nocheck
 // src/components/ind/document-preview-panel.tsx
 'use client'

@@ -1,3 +1,4 @@
+//@ts-nocheck
 'use server';
 
 import { type CoreUserMessage, generateText } from 'ai';

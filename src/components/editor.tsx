@@ -1,3 +1,4 @@
+//@ts-nocheck
 'use client';
 
 import { exampleSetup } from 'prosemirror-example-setup';

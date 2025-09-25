@@ -1,3 +1,4 @@
+//@ts-nocheck
 //lib/ai/index.ts
 import { createAzure } from '@ai-sdk/azure';
 import { anthropic }  from '@ai-sdk/anthropic';

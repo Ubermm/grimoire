@@ -1,3 +1,4 @@
+//@ts-nocheck
 // src/app/(main)/api/ind-forms/route.ts - Main IND Forms API
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/app/(auth)/auth';

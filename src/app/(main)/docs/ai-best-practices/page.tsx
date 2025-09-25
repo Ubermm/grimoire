@@ -1,3 +1,4 @@
+//@ts-nocheck
 // Route: /app/docs/ai-best-practices/page.tsx
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";

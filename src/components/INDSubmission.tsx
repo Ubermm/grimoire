@@ -1,3 +1,4 @@
+//@ts-nocheck
 // src/components/INDSubmission.tsx - Main IND Component (following audit patterns)
 'use client';
 

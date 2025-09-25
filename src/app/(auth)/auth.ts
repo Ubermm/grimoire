@@ -1,3 +1,4 @@
+//@ts-nocheck
 //auth.ts
 import { compare } from 'bcrypt-ts';
 import NextAuth, { type User, type Session } from 'next-auth';

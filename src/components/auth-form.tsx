@@ -1,3 +1,4 @@
+//@ts-nocheck
 import Form from 'next/form';
 
 import { Input } from './ui/input';

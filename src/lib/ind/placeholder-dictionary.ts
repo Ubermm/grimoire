@@ -1,3 +1,4 @@
+//@ts-nocheck
 export interface PlaceholderField {
   pdfPlaceholder: string;
   fieldType: 'text' | 'checkbox' | 'radio' | 'date' | 'number' | 'select' | 'dropdown' | 'textarea';

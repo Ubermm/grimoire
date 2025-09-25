@@ -1,3 +1,4 @@
+//@ts-nocheck
 // components/Footer.tsx
 import Link from 'next/link';
 

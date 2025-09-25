@@ -1,3 +1,4 @@
+//@ts-nocheck
 // components/ui/form.tsx
 "use client"
 

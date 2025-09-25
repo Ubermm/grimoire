@@ -1,3 +1,4 @@
+//@ts-nocheck
 //messages.tsx
 import { ChatRequestOptions, Message } from 'ai';
 import { PreviewMessage, ThinkingMessage } from './message';

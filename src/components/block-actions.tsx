@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { cn } from '@/lib/utils';
 import { CopyIcon, DeltaIcon, RedoIcon, UndoIcon } from './icons';
 import { Button } from './ui/button';

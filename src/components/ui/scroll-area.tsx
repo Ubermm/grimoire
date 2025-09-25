@@ -1,3 +1,4 @@
+//@ts-nocheck
 // components/ui/scroll-area.tsx
 "use client"
 

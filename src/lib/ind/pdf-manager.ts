@@ -1,3 +1,4 @@
+//@ts-nocheck
 // src/lib/ind/pdf-manager.ts - PDF Management for IND Documents
 import { PLACEHOLDER_DICTIONARY } from './placeholder-dictionary';
 

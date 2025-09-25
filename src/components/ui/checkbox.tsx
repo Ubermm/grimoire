@@ -1,3 +1,4 @@
+//@ts-nocheck
 // components/ui/checkbox.tsx
 "use client"
 

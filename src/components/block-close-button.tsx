@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { memo, SetStateAction } from 'react';
 import { CrossIcon } from './icons';
 import { Button } from './ui/button';

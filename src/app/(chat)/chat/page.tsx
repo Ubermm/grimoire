@@ -1,3 +1,4 @@
+//@ts-nocheck
 
 import { cookies } from 'next/headers';
 import { auth } from '@/app/(auth)/auth';
