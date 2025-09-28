@@ -51,6 +51,7 @@ const DocsDropdown = () => {
   const docPages = [
     { href: '/docs/ai-best-practices', label: 'AI Best Practices', description: 'Guidelines for AI implementation' },
     { href: '/docs/similar-violations', label: 'Letter Similarity Search', description: 'Find Similar Warning Letters for Cross-reference' },
+    { href: '/docs/ind-submission', label: 'IND Submission', description: 'Guide to IND submission process' },
     { href: '/docs/letter-comparison', label: 'Letter Comparison', description: 'Compare document similarities' },
     { href: '/docs/overview', label: 'Overview', description: 'System architecture overview' },
     { href: '/docs/prolog-validation', label: 'Prolog Validation', description: 'Logic validation tools' },
@@ -191,7 +192,7 @@ export const NavBar = () => {
         <div className="container mx-auto px-4 lg:px-6 py-3">
           <div className="flex items-center justify-between">
             <Link href="/" className="my-font font-bold ">
-              Grimoire
+              Upwork Project
             </Link>
  
             <div className="hidden md:flex items-center space-x-1 bg-gray-700/40 p-2 rounded-full backdrop-blur-sm">
@@ -270,6 +271,7 @@ export const NavBar = () => {
               </span>
               {[
                 'AI Best Practices',
+                'IND Submission',
                 'Letter Comparison',
                 'Overview',
                 'Prolog Validation',

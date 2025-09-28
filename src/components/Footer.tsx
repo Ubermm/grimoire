@@ -8,7 +8,7 @@ export const Footer = () => {
       <div className="container mx-auto px-4 sm:px-6">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-white">Grimoire.corp</h3>
+            <h3 className="text-lg font-bold text-white">Upwork Project</h3>
             <p className="text-white/60 text-sm">
               Ensuring compliance through mathematical verification.
             </p>

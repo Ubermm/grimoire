@@ -465,7 +465,7 @@ const INDSubmissionComponent = () => {
   // Show existing submissions view (following audit pattern)
   if (showExistingSubmissions) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-6 bg-black">
         <Card className="w-full max-w-6xl mx-auto min-h-[700px]">
           <CardHeader>
             <div className="flex justify-between items-center">
