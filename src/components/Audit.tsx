@@ -2204,19 +2204,8 @@ if (showExistingAudits) {
                       <textarea
                         className="w-full min-h-[100px] p-2 border rounded-md"
                         placeholder="Enter comments for this section..."
-                        value={audit?.subsections[currentStep]?.comment || ""}
-                        onChange={(e) => {
-                          if (!audit) return;
-                          const updatedSubsections = [...audit.subsections];
-                          updatedSubsections[currentStep] = {
-                            ...updatedSubsections[currentStep],
-                            comment: e.target.value
-                          };
-                          setAudit({
-                            ...audit,
-                            subsections: updatedSubsections
-                          });
-                        }}
+                        defaultValue={audit?.subsections[currentStep]?.comment || ""}
+                        
                       />
                     </FormControl>
                   </FormItem>
