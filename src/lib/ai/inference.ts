@@ -1,6 +1,5 @@
 //@ts-nocheck
 import pl from 'tau-prolog';
-import { queryObjects } from 'v8';
 
 // Import and initialize the lists module
 const lists = require('tau-prolog/modules/lists');

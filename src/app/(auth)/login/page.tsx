@@ -29,8 +29,10 @@ export default function Page() {
 
     if (state.status === 'success' && state.redirectTo) {
       setIsSuccessful(true);
-      router.push(state.redirectTo);
-      window.location.reload();
+      // Full navigation (not router.push) so the freshly-set session cookie is sent
+      // on the request for the destination page. Doing router.push + reload races:
+      // the reload cancels the push and just reloads /login, resetting the form.
+      window.location.href = state.redirectTo;
     }
   }, [state, router]);
 

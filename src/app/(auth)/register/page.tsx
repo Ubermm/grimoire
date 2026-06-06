@@ -31,8 +31,9 @@ export default function Page() {
     if (state.status === 'success' && state.redirectTo) {
       toast.success('Account created successfully');
       setIsSuccessful(true);
-      router.push(state.redirectTo+'?from=register');
-      
+      // Full navigation so the new session cookie is sent for the destination page.
+      // (router.push + reload races: reload cancels the push and reloads /register.)
+      window.location.href = state.redirectTo + '?from=register';
     }
   }, [state, router]);
 

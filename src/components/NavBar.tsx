@@ -192,7 +192,7 @@ export const NavBar = () => {
         <div className="container mx-auto px-4 lg:px-6 py-3">
           <div className="flex items-center justify-between">
             <Link href="/" className="my-font font-bold ">
-              Upwork Project
+              GrimoireOne
             </Link>
  
             <div className="hidden md:flex items-center space-x-1 bg-gray-700/40 p-2 rounded-full backdrop-blur-sm">

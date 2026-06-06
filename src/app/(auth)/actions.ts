@@ -212,7 +212,7 @@ export const register = async (
     const validatedData = authFormSchema.parse({
       email: formData.get('email'),
       password: formData.get('password'),
-      callbackUrl: rawCallbackUrl || '/',
+      callbackUrl: rawCallbackUrl || '/audit',
     });
 
     // Check if user exists
@@ -231,19 +231,19 @@ export const register = async (
       email: validatedData.email,
       password: validatedData.password,
       redirect: false,
-      callbackUrl: "/",
+      callbackUrl: validatedData.callbackUrl,
     });
 
     if (!result) {
-      return { 
+      return {
         status: 'failed',
         error: 'Failed to sign in after registration'
       };
     }
 
-    const safeRedirectUrl = validatedData.callbackUrl.startsWith('/') 
-      ? validatedData.callbackUrl 
-      : '/';
+    const safeRedirectUrl = validatedData.callbackUrl.startsWith('/')
+      ? validatedData.callbackUrl
+      : '/audit';
 
     return {
       status: 'success',
