@@ -9,12 +9,10 @@ const nextConfig: NextConfig = {
   // NEXTAUTH_URL this way forces next-auth's browser client to fetch /api/auth/*
   // from that absolute origin instead of same-origin. Server code (route handlers,
   // server actions) reads process.env from .env automatically — no block needed.
-  experimental: {
-    ppr: true,
-    turbo: {
-      resolveAlias: {
-        canvas: './empty-module.ts',
-      },
+  // `experimental.turbo` was promoted to top-level `turbopack` in Next 15.3+.
+  turbopack: {
+    resolveAlias: {
+      canvas: './empty-module.ts',
     },
   },
   images: {
@@ -24,18 +22,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  eslint: {
-    ignoreDuringBuilds: true
-  },
-  webpack: (config, { dev }) => {
-    if (dev) {
-      config.watchOptions = {
-        poll: 1000,
-        aggregateTimeout: 300,
-      }
-    }
-    return config
-  },
+  // Next 16 notes:
+  // - `experimental.ppr` was removed (merged into the stricter `cacheComponents`).
+  //   Dropped here; the app uses standard rendering.
+  // - The `eslint` config key is no longer supported (next lint was removed). Run
+  //   ESLint via its own CLI instead.
+  // - `next build` uses Turbopack by default, so the old dev-only webpack polling
+  //   override was removed.
 };
 
 export default nextConfig;
