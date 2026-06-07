@@ -31,7 +31,7 @@ export function SystemRegistryTable({ systems, onDelete }: { systems: SystemRow[
           {systems.map((s) => (
             <tr key={s._id} className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50/60">
               <td className="px-5 py-3.5">
-                <Link href={`/ai-act/registry/${s._id}`} className="font-medium text-neutral-900 hover:text-[#10A37F]">
+                <Link href={`/ai-act/registry/${s._id}`} className="font-medium text-neutral-900 hover:text-[var(--acc)]">
                   {s.name}
                 </Link>
                 {s.isGPAI && <span className="ml-2 rounded bg-violet-50 px-1.5 py-0.5 text-[10px] font-medium text-violet-600">GPAI</span>}

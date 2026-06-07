@@ -10,10 +10,10 @@ import { cn } from '@/lib/utils';
 
 function Segmented({ options, value, onChange }: { options: string[]; value?: string; onChange: (v: string) => void }) {
   return (
-    <div className="inline-flex flex-wrap rounded-lg border border-neutral-200 bg-neutral-50 p-0.5">
+    <div className="inline-flex flex-wrap gap-0.5 rounded-full border border-[var(--line-strong)] bg-black/[0.03] p-1">
       {options.map((o) => (
         <button key={o} type="button" onClick={() => onChange(o)}
-          className={cn('rounded-md px-3 py-1 text-sm font-medium transition-colors', value === o ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-400 hover:text-neutral-600')}>
+          className={cn('rounded-full px-3.5 py-1 text-sm font-medium transition-colors', value === o ? 'bg-[var(--surface)] text-[var(--ink)] shadow-sm' : 'text-[var(--ink-faint)] hover:text-[var(--ink-muted)]')}>
           {o}
         </button>
       ))}
@@ -29,7 +29,7 @@ function Field({ q, value, onChange }: { q: any; value: any; onChange: (v: any) 
       <div className="flex flex-wrap gap-2">
         {(q.options || []).map((o: string) => (
           <button key={o} type="button" onClick={() => toggle(o)}
-            className={cn('rounded-full border px-3 py-1 text-xs font-medium transition-colors', arr.includes(o) ? 'border-[#10A37F] bg-[#10A37F]/10 text-[#10A37F]' : 'border-neutral-200 bg-white text-neutral-500 hover:border-neutral-300')}>
+            className={cn('rounded-full border px-3 py-1 text-xs font-medium transition-colors', arr.includes(o) ? 'border-[var(--acc)] bg-[var(--acc)]/10 text-[var(--acc)]' : 'border-neutral-200 bg-white text-neutral-500 hover:border-neutral-300')}>
             {o}
           </button>
         ))}
@@ -38,11 +38,11 @@ function Field({ q, value, onChange }: { q: any; value: any; onChange: (v: any) 
   }
   if (q.type === 'NUMERIC') {
     return <input type="number" value={value ?? ''} onChange={(e) => onChange(e.target.value)}
-      className="w-40 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm focus:border-[#10A37F] focus:outline-none focus:ring-1 focus:ring-[#10A37F]" />;
+      className="w-40 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm focus:border-[var(--acc)] focus:outline-none focus:ring-1 focus:ring-[var(--acc)]" />;
   }
   if (q.type === 'TEXT') {
     return <input value={value ?? ''} onChange={(e) => onChange(e.target.value)}
-      className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm focus:border-[#10A37F] focus:outline-none focus:ring-1 focus:ring-[#10A37F]" />;
+      className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm focus:border-[var(--acc)] focus:outline-none focus:ring-1 focus:ring-[var(--acc)]" />;
   }
   return <Segmented options={q.options || ['yes', 'no']} value={value} onChange={onChange} />;
 }

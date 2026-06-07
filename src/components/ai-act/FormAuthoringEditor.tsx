@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Plus, Trash2, Save } from 'lucide-react';
 import { Surface, AccentButton, Spinner } from './ui';
 
-const inp = 'w-full rounded-lg border border-neutral-200 px-2.5 py-1.5 text-sm focus:border-[#10A37F] focus:outline-none focus:ring-1 focus:ring-[#10A37F]';
+const inp = 'w-full rounded-lg border border-neutral-200 px-2.5 py-1.5 text-sm focus:border-[var(--acc)] focus:outline-none focus:ring-1 focus:ring-[var(--acc)]';
 const mono = inp + ' font-mono';
 
 function Section({ title, children, onAdd }: { title: string; children: React.ReactNode; onAdd: () => void }) {

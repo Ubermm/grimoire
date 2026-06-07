@@ -15,7 +15,7 @@ export function GpaiModule({ systemId }: { systemId?: string }) {
       <div className="grid gap-3 sm:grid-cols-3">
         {PILLARS.map((p) => (
           <Surface key={p.title} className="p-5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#10A37F]/10 text-[#10A37F]"><p.icon className="h-5 w-5" /></div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--acc)]/10 text-[var(--acc)]"><p.icon className="h-5 w-5" /></div>
             <p className="mt-3 font-medium text-neutral-900">{p.title}</p>
             <p className="mt-1 text-sm text-neutral-500">{p.desc}</p>
           </Surface>

@@ -1,0 +1,100 @@
+/* Scoped design system for the EU AI Act module.
+   A neutral, near-monochrome "platform" aesthetic (OpenAI-style): black primary
+   actions, hairline borders, generous whitespace, restrained colour. All tokens
+   are scoped to .ai-act-theme so nothing here leaks into the FDA (dark) surface. */
+
+.ai-act-theme {
+  /* Accent = near-black primary action (no more 2023 teal). */
+  --acc: #0d0d0d;
+  --acc-hover: #2a2a2a;
+  --acc-soft: #f4f4f5;
+  --acc-contrast: #ffffff;
+
+  /* Surfaces & lines. */
+  --canvas: #fafaf9;
+  --surface: #ffffff;
+  --line: #ececec;
+  --line-strong: #e0e0e0;
+
+  /* Text. */
+  --ink: #0d0d0d;
+  --ink-muted: #6b6b76;
+  --ink-faint: #9b9ba6;
+
+  color-scheme: light;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Soft text selection. */
+.ai-act-theme ::selection {
+  background: rgba(13, 13, 13, 0.1);
+}
+
+/* Thin, unobtrusive scrollbars inside the module. */
+.ai-act-theme *::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.ai-act-theme *::-webkit-scrollbar-thumb {
+  background: #d9d9d9;
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 9999px;
+}
+.ai-act-theme *::-webkit-scrollbar-thumb:hover {
+  background: #c2c2c2;
+  background-clip: content-box;
+}
+
+/* Faded grid backdrop for the canvas — subtle depth without colour. */
+.ai-act-canvas {
+  background-color: var(--canvas);
+  background-image:
+    radial-gradient(60rem 40rem at 50% -10%, rgba(13, 13, 13, 0.035), transparent 70%);
+}
+
+/* Consistent focus ring across native + custom controls. */
+.ai-act-theme :focus-visible {
+  outline: none;
+}
+
+/* Native form controls pick up the accent. */
+.ai-act-theme input[type="checkbox"],
+.ai-act-theme input[type="radio"] {
+  accent-color: var(--acc);
+}
+
+/* Reusable field used by inputs/selects/textareas. */
+.ai-field {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--ink);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.ai-field::placeholder {
+  color: var(--ink-faint);
+}
+.ai-field:focus {
+  outline: none;
+  border-color: var(--acc);
+  box-shadow: 0 0 0 3px rgba(13, 13, 13, 0.08);
+}
+
+/* Quiet entrance for content panels. */
+@keyframes ai-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.ai-rise {
+  animation: ai-rise 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-rise { animation: none; }
+}

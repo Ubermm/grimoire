@@ -59,7 +59,7 @@ export default function AuditRunPage({ params }: { params: Promise<{ id: string 
           {audit.subsections.map((s: any, i: number) => (
             <button key={s.id} onClick={() => setActive(i)}
               className={cn('flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
-                i === active ? 'bg-[#10A37F]/10 font-medium text-[#10A37F]' : 'text-neutral-600 hover:bg-neutral-50')}>
+                i === active ? 'bg-[var(--acc)]/10 font-medium text-[var(--acc)]' : 'text-neutral-600 hover:bg-neutral-50')}>
               {statusIcon(s.status)}
               <span className="truncate">{LABELS[s.code] || s.code}</span>
             </button>

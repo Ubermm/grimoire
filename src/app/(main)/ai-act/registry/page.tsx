@@ -5,7 +5,7 @@ import { PageHeader, AccentButton, GhostButton, Surface, Spinner, EmptyState } f
 import { SystemRegistryTable } from '@/components/ai-act/SystemRegistryTable';
 
 const inputCls =
-  'w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-[#10A37F] focus:outline-none focus:ring-1 focus:ring-[#10A37F]';
+  'w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-[var(--acc)] focus:outline-none focus:ring-1 focus:ring-[var(--acc)]';
 
 const empty = { name: '', description: '', provider: '', role: 'provider', isGPAI: false };
 
@@ -69,7 +69,7 @@ export default function RegistryPage() {
               </select>
             </div>
             <label className="flex items-center gap-2 self-end pb-2 text-sm text-neutral-600">
-              <input type="checkbox" checked={form.isGPAI} onChange={(e) => setForm({ ...form, isGPAI: e.target.checked })} className="h-4 w-4 rounded border-neutral-300 text-[#10A37F] focus:ring-[#10A37F]" />
+              <input type="checkbox" checked={form.isGPAI} onChange={(e) => setForm({ ...form, isGPAI: e.target.checked })} className="h-4 w-4 rounded border-neutral-300 text-[var(--acc)] focus:ring-[var(--acc)]" />
               General-purpose AI model (GPAI)
             </label>
           </div>

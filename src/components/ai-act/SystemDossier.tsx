@@ -37,7 +37,7 @@ export function SystemDossier({ system }: { system: any }) {
               <ShieldCheck className="h-3.5 w-3.5" /> Classification basis
             </p>
             <ul className="space-y-1.5 text-sm text-neutral-600">
-              {basis.map((b, i) => <li key={i} className="flex gap-2"><span className="text-[#10A37F]">•</span>{b}</li>)}
+              {basis.map((b, i) => <li key={i} className="flex gap-2"><span className="text-[var(--acc)]">•</span>{b}</li>)}
             </ul>
           </div>
         )}
@@ -90,7 +90,7 @@ export function SystemDossier({ system }: { system: any }) {
 function DossierAction({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) {
   return (
     <Link href={href} className="flex items-center gap-2.5 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm font-medium text-neutral-700 shadow-sm transition-colors hover:border-neutral-300 hover:bg-neutral-50">
-      <span className="text-[#10A37F]">{icon}</span>
+      <span className="text-[var(--acc)]">{icon}</span>
       {label}
     </Link>
   );

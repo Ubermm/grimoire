@@ -32,7 +32,7 @@ function Inner() {
         {systems.length > 0 && (
           <div className="mb-4">
             <label className="mb-1.5 block text-xs font-medium text-neutral-600">System</label>
-            <select value={systemId} onChange={(e) => setSystemId(e.target.value)} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:border-[#10A37F] focus:outline-none">
+            <select value={systemId} onChange={(e) => setSystemId(e.target.value)} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:border-[var(--acc)] focus:outline-none">
               <option value="">— describe manually below —</option>
               {systems.map((s) => <option key={s._id} value={s._id}>{s.name}</option>)}
             </select>
@@ -41,7 +41,7 @@ function Inner() {
         {!systemId && (
           <div className="mb-4">
             <label className="mb-1.5 block text-xs font-medium text-neutral-600">System profile</label>
-            <textarea value={profile} onChange={(e) => setProfile(e.target.value)} rows={3} placeholder="e.g. AI-powered diagnostic imaging tool used as a medical device…" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:border-[#10A37F] focus:outline-none" />
+            <textarea value={profile} onChange={(e) => setProfile(e.target.value)} rows={3} placeholder="e.g. AI-powered diagnostic imaging tool used as a medical device…" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:border-[var(--acc)] focus:outline-none" />
           </div>
         )}
         <AccentButton onClick={run} disabled={loading || (!systemId && !profile.trim())}>{loading ? <Spinner /> : <GitCompare className="h-4 w-4" />} Analyse overlap</AccentButton>

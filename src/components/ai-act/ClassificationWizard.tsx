@@ -19,15 +19,15 @@ const GROUPS: { title: string; ids: string[] }[] = [
 
 function Segmented({ options, value, onChange }: { options: string[]; value?: string; onChange: (v: string) => void }) {
   return (
-    <div className="inline-flex rounded-lg border border-neutral-200 bg-neutral-50 p-0.5">
+    <div className="inline-flex gap-0.5 rounded-full border border-[var(--line-strong)] bg-black/[0.03] p-1">
       {options.map((opt) => (
         <button
           key={opt}
           type="button"
           onClick={() => onChange(opt)}
           className={cn(
-            'rounded-md px-3 py-1 text-sm font-medium transition-colors',
-            value === opt ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'
+            'rounded-full px-3.5 py-1 text-sm font-medium transition-colors',
+            value === opt ? 'bg-[var(--surface)] text-[var(--ink)] shadow-sm' : 'text-[var(--ink-faint)] hover:text-[var(--ink-muted)]'
           )}
         >
           {opt}
@@ -48,7 +48,7 @@ function CheckChips({ options, value, onChange }: { options: string[]; value: st
           onClick={() => toggle(o)}
           className={cn(
             'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
-            value.includes(o) ? 'border-[#10A37F] bg-[#10A37F]/10 text-[#10A37F]' : 'border-neutral-200 bg-white text-neutral-500 hover:border-neutral-300'
+            value.includes(o) ? 'border-[var(--acc)] bg-[var(--acc)]/10 text-[var(--acc)]' : 'border-neutral-200 bg-white text-neutral-500 hover:border-neutral-300'
           )}
         >
           {o}
@@ -88,7 +88,7 @@ export function ClassificationWizard({ systemId, systemName }: { systemId?: stri
     return (
       <Surface className="p-8">
         <div className="flex items-center gap-3">
-          <CheckCircle2 className="h-6 w-6 text-[#10A37F]" />
+          <CheckCircle2 className="h-6 w-6 text-[var(--acc)]" />
           <h2 className="text-xl font-semibold text-neutral-900">Classification complete</h2>
         </div>
         <div className="mt-6 flex items-center gap-3">
@@ -99,7 +99,7 @@ export function ClassificationWizard({ systemId, systemName }: { systemId?: stri
         <div className="mt-5 rounded-lg border border-neutral-100 bg-neutral-50/60 p-4">
           <p className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-400">Basis (formally derived)</p>
           <ul className="space-y-1.5 text-sm text-neutral-600">
-            {cls.basis.map((b: string, i: number) => <li key={i} className="flex gap-2"><span className="text-[#10A37F]">•</span>{b}</li>)}
+            {cls.basis.map((b: string, i: number) => <li key={i} className="flex gap-2"><span className="text-[var(--acc)]">•</span>{b}</li>)}
           </ul>
         </div>
         {cls.article50Obligations?.length > 0 && (
@@ -128,7 +128,7 @@ export function ClassificationWizard({ systemId, systemName }: { systemId?: stri
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Name the AI system you're classifying"
-            className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-[#10A37F] focus:outline-none focus:ring-1 focus:ring-[#10A37F]"
+            className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-[var(--acc)] focus:outline-none focus:ring-1 focus:ring-[var(--acc)]"
           />
         </Surface>
       )}

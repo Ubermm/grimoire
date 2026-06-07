@@ -49,12 +49,12 @@ function Inner() {
         <Surface className="mb-6 p-5">
           <label className="mb-1.5 block text-xs font-medium text-neutral-600">Audit name</label>
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Q3 EU AI Act review"
-            className="mb-4 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:border-[#10A37F] focus:outline-none focus:ring-1 focus:ring-[#10A37F]" />
+            className="mb-4 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:border-[var(--acc)] focus:outline-none focus:ring-1 focus:ring-[var(--acc)]" />
 
           {systems.length > 0 && (
             <div className="mb-4">
               <label className="mb-1.5 block text-xs font-medium text-neutral-600">Linked system (optional)</label>
-              <select value={systemId} onChange={(e) => setSystemId(e.target.value)} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:border-[#10A37F] focus:outline-none">
+              <select value={systemId} onChange={(e) => setSystemId(e.target.value)} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:border-[var(--acc)] focus:outline-none">
                 <option value="">— none —</option>
                 {systems.map((s) => <option key={s._id} value={s._id}>{s.name}</option>)}
               </select>
@@ -66,7 +66,7 @@ function Inner() {
             {PROVISIONS.map((p) => (
               <button key={p.code} type="button" onClick={() => toggle(p.code)}
                 className={cn('rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-                  selected.includes(p.code) ? 'border-[#10A37F] bg-[#10A37F]/10 text-[#10A37F]' : 'border-neutral-200 bg-white text-neutral-500 hover:border-neutral-300')}>
+                  selected.includes(p.code) ? 'border-[var(--acc)] bg-[var(--acc)]/10 text-[var(--acc)]' : 'border-neutral-200 bg-white text-neutral-500 hover:border-neutral-300')}>
                 {p.label}
               </button>
             ))}

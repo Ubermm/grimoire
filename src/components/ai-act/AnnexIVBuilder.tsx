@@ -38,7 +38,7 @@ export function AnnexIVBuilder({ system }: { system: any }) {
           <span className="text-2xl font-semibold tabular-nums text-neutral-900">{pct}%</span>
         </div>
         <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-neutral-100">
-          <div className="h-full rounded-full bg-[#10A37F] transition-all" style={{ width: `${pct}%` }} />
+          <div className="h-full rounded-full bg-[var(--acc)] transition-all" style={{ width: `${pct}%` }} />
         </div>
       </Surface>
 
@@ -66,7 +66,7 @@ export function AnnexIVBuilder({ system }: { system: any }) {
               onChange={(e) => update(s.key, { content: e.target.value, status: doc.status === 'pending' && e.target.value ? 'in_progress' : doc.status })}
               rows={4}
               placeholder="Document this section…"
-              className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-800 placeholder:text-neutral-400 focus:border-[#10A37F] focus:outline-none focus:ring-1 focus:ring-[#10A37F]"
+              className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-800 placeholder:text-neutral-400 focus:border-[var(--acc)] focus:outline-none focus:ring-1 focus:ring-[var(--acc)]"
             />
           </Surface>
         );

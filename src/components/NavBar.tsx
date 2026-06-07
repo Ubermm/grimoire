@@ -17,16 +17,19 @@ import { usePathname, useRouter } from 'next/navigation';
 const NavLink = ({ href, label, description, icon }) => {
   const pathname = usePathname();
   const isActive = pathname === href;
+  const light = pathname?.startsWith('/ai-act');
   const [isHovered, setIsHovered] = useState(false);
 
   return (
     <div className="relative group">
-      <Link 
+      <Link
         href={href}
         className={`
           relative px-4 py-2 rounded-full transition-all duration-500
-          flex items-center gap-2 group-hover:bg-white/10
-          ${isActive ? 'text-black' : 'text-white/90 hover:text-white'}
+          flex items-center gap-2 ${light ? 'group-hover:bg-black/[0.05]' : 'group-hover:bg-white/10'}
+          ${isActive
+            ? (light ? 'text-white' : 'text-black')
+            : (light ? 'text-neutral-600 hover:text-neutral-900' : 'text-white/90 hover:text-white')}
         `}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -34,7 +37,7 @@ const NavLink = ({ href, label, description, icon }) => {
         {icon && <span className="transition-transform duration-300 group-hover:scale-110">{icon}</span>}
         <span className="relative z-10 text-sm font-medium">{label}</span>
         {isActive && (
-          <div className="absolute inset-0 bg-white/90 rounded-full transition-all duration-500 backdrop-blur-sm" />
+          <div className={`absolute inset-0 rounded-full transition-all duration-500 backdrop-blur-sm ${light ? 'bg-neutral-900' : 'bg-white/90'}`} />
         )}
       </Link>
       
@@ -48,6 +51,8 @@ const NavLink = ({ href, label, description, icon }) => {
 };
 
 const DocsDropdown = () => {
+  const pathname = usePathname();
+  const light = pathname?.startsWith('/ai-act');
   const docPages = [
     { href: '/docs/ai-best-practices', label: 'AI Best Practices', description: 'Guidelines for AI implementation' },
     { href: '/docs/similar-violations', label: 'Letter Similarity Search', description: 'Find Similar Warning Letters for Cross-reference' },
@@ -61,7 +66,7 @@ const DocsDropdown = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-2 text-white/90 hover:text-white px-4 py-2 rounded-full transition-all duration-300 hover:bg-white/10">
+        <button className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 ${light ? 'text-neutral-600 hover:text-neutral-900 hover:bg-black/[0.05]' : 'text-white/90 hover:text-white hover:bg-white/10'}`}>
           <Book className="w-4 h-4" />
           <span className="text-sm font-medium">Docs</span>
           <ChevronDown className="w-3 h-3 transition-transform duration-300 group-hover:rotate-180" />
@@ -83,6 +88,8 @@ const DocsDropdown = () => {
 
 const AuthButton = () => {
   const router = useRouter();
+  const pathname = usePathname();
+  const light = pathname?.startsWith('/ai-act');
   const { data: session, status } = useSession({
     required: false,
     onUnauthenticated() {
@@ -104,7 +111,7 @@ const AuthButton = () => {
   };
 
   if (status === 'loading') {
-    return <Button variant="ghost" className="text-white/80 text-sm">Loading...</Button>;
+    return <Button variant="ghost" className={`text-sm ${light ? 'text-neutral-500' : 'text-white/80'}`}>Loading...</Button>;
   }
 
   if (status === 'unauthenticated') {
@@ -117,9 +124,9 @@ const AuthButton = () => {
         >
           Login
         </Button>
-        <Button 
+        <Button
           variant="ghost"
-          className="text-black hover:text-white text-sm bg-white rounded-full hover:bg-black"
+          className={`text-sm rounded-full ${light ? 'text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-100' : 'text-black hover:text-white bg-white hover:bg-black'}`}
           onClick={handleRegister}
         >
           Sign up
@@ -131,7 +138,7 @@ const AuthButton = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="flex items-center gap-2 rounded-full hover:bg-white/10">
+        <Button variant="ghost" className={`flex items-center gap-2 rounded-full ${light ? 'hover:bg-black/[0.05]' : 'hover:bg-white/10'}`}>
           <Image
             src={`/logoo.png`}
             alt={session.user.email ?? 'User Avatar'}
@@ -139,7 +146,7 @@ const AuthButton = () => {
             height={36}
             className="rounded-full transition-transform duration-300 hover:scale-105"
           />
-          <span className="hidden md:inline text-sm text-white/90">{session.user.email}</span>
+          <span className={`hidden md:inline text-sm ${light ? 'text-neutral-700' : 'text-white/90'}`}>{session.user.email}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-black/95 border border-white/20 backdrop-blur-md">
@@ -158,6 +165,7 @@ const AuthButton = () => {
 export const NavBar = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const light = pathname?.startsWith('/ai-act');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -187,16 +195,16 @@ export const NavBar = () => {
       <nav className={`
         fixed top-0 left-0 right-0 z-50
         transition-all duration-500
-        ${scrolled ? 'bg-black/70 backdrop-blur-md' : 'bg-transparent'}
-        border-b border-white/10
+        ${light
+          ? 'bg-white/75 backdrop-blur-xl border-b border-black/[0.06]'
+          : `${scrolled ? 'bg-black/70 backdrop-blur-md' : 'bg-transparent'} border-b border-white/10`}
       `}>
         <div className="container mx-auto px-4 lg:px-6 py-3">
           <div className="flex items-center justify-between">
-            <Link href="/" className="my-font font-bold ">
-              GrimoireOne
-            </Link>
- 
-            <div className="hidden md:flex items-center space-x-1 bg-gray-700/40 p-2 rounded-full backdrop-blur-sm">
+            {/* Brand wordmark removed from the global header per design. */}
+            <div aria-hidden />
+
+            <div className={`hidden md:flex items-center space-x-1 p-2 rounded-full backdrop-blur-sm ${light ? 'bg-black/[0.04]' : 'bg-gray-700/40'}`}>
             <AuthButton />
               {navLinks.map((link) => (
                 <NavLink key={link.href} {...link} />
@@ -204,8 +212,8 @@ export const NavBar = () => {
               <DocsDropdown />
             </div>
 
-            <button 
-              className="md:hidden text-white/90 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all duration-300"
+            <button
+              className={`md:hidden p-2 rounded-full transition-all duration-300 ${light ? 'text-neutral-700 hover:text-neutral-900 hover:bg-black/[0.05]' : 'text-white/90 hover:text-white hover:bg-white/10'}`}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
             >
