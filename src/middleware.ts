@@ -8,6 +8,7 @@ export const config = {
   matcher: [
     '/analytics/:path*',
     '/audit/:path*',
+    '/ai-act/:path*',
     '/api/:path*',
     '/login',
     '/register',

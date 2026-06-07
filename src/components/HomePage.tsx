@@ -256,6 +256,30 @@ const HomePage = () => {
           </div>
         </section>
 
+        {/* Multi-regulation hub */}
+        <section className="bg-black py-16 sm:py-20 border-t border-white/10">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <h2 className="text-center text-2xl sm:text-3xl font-bold text-white mb-3">Formally Verified Regulatory Compliance</h2>
+            <p className="text-center text-white/60 mb-10 max-w-2xl mx-auto">
+              Compile regulations into executable logic. Prove compliance — don&apos;t just claim it.
+            </p>
+            <div className="grid gap-6 sm:grid-cols-2">
+              <Link href="/audit" className="group rounded-2xl border border-white/10 bg-white/5 p-8 transition-all hover:border-purple-500/50 hover:bg-white/10">
+                <div className="text-3xl mb-3">🇺🇸</div>
+                <h3 className="text-xl font-semibold text-white mb-2">FDA 21 CFR</h3>
+                <p className="text-white/60 text-sm mb-4">Title 21 compliance, warning-letter analysis, Prolog validation, and IND submissions.</p>
+                <span className="text-purple-400 text-sm font-medium group-hover:underline">Start audit →</span>
+              </Link>
+              <Link href="/ai-act" className="group rounded-2xl border border-white/10 bg-white/5 p-8 transition-all hover:border-purple-500/50 hover:bg-white/10">
+                <div className="text-3xl mb-3">🇪🇺</div>
+                <h3 className="text-xl font-semibold text-white mb-2">EU AI Act</h3>
+                <p className="text-white/60 text-sm mb-4">Risk classification, Article 5 &amp; 50 screening, GPAI obligations, and Annex IV documentation.</p>
+                <span className="text-purple-400 text-sm font-medium group-hover:underline">Start audit →</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* Stats Section */}
         <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4 sm:p-6 relative overflow-hidden">
           {/* Animated Graph Background */}

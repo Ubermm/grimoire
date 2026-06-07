@@ -622,6 +622,112 @@ const additionalSchema = new mongoose.Schema({
 
 export const CAdditional = models.additional || mongoose.model('additional', additionalSchema);
 
+// ============================================================
+// EU AI Act models (additive — parallel to the FDA collections,
+// reusing the same generic AuditSubsection/AuditResponse schemas)
+// ============================================================
+
+// Annex IV technical-documentation section (nested in AISystem)
+const AnnexIVSectionSchema = new Schema({
+  key: { type: String, required: true },
+  title: { type: String, required: true },
+  status: {
+    type: String,
+    enum: ['pending', 'in_progress', 'completed', 'flagged'],
+    default: 'pending'
+  },
+  content: { type: String, default: '' },
+  responses: [AuditResponseSchema],
+}, { _id: false });
+
+// Central AI System registry
+const AISystemSchema = new Schema({
+  _id: { type: Schema.Types.Mixed, default: () => generateUUID() },
+  userId: { type: String, ref: 'User', required: true },
+  name: { type: String, required: true },
+  description: { type: String, default: '' },
+  provider: { type: String },
+  role: {
+    type: String,
+    enum: ['provider', 'deployer', 'importer', 'distributor'],
+    default: 'provider'
+  },
+  isGPAI: { type: Boolean, default: false },
+  riskLevel: {
+    type: String,
+    enum: ['unclassified', 'prohibited', 'high', 'limited', 'minimal', 'gpai', 'gpai_systemic'],
+    default: 'unclassified'
+  },
+  classificationBasis: [String],
+  classificationResponses: Schema.Types.Mixed,
+  article50Obligations: [String],
+  technicalDocumentation: [AnnexIVSectionSchema],
+  validationResults: [{
+    formCode: String,
+    passed: [Boolean],
+    description: [String],
+    validatedAt: { type: Date, default: Date.now }
+  }],
+  status: {
+    type: String,
+    enum: ['draft', 'active', 'archived'],
+    default: 'draft'
+  },
+}, { timestamps: true });
+AISystemSchema.index({ userId: 1, riskLevel: 1 });
+
+export const CAISystem = models.AISystem || model('AISystem', AISystemSchema);
+
+// AI Act regulation text (parallel to CRegulation)
+const aiActRegulationSchema = new Schema({
+  _id: { type: Schema.Types.Mixed, default: () => generateUUID() },
+  RegCode: { type: String, required: true, unique: true },
+  RegText: { type: String, required: true },
+  category: {
+    type: String,
+    enum: ['prohibited', 'transparency', 'high_risk', 'gpai', 'tech_doc', 'general'],
+    default: 'general'
+  },
+  source: { type: String },
+  FormCode: { type: String },
+});
+export const CAIActRegulation = models.ai_act_regulations || model('ai_act_regulations', aiActRegulationSchema);
+
+// AI Act validation forms (parallel to CForm; supports hybrid LLM+human authoring)
+const aiActFormSchema = new Schema({
+  _id: { type: Schema.Types.Mixed, default: () => generateUUID() },
+  FormCode: { type: String, required: true, unique: true },
+  RegCode: { type: String },
+  FormText: { type: String, required: true },
+  generatedByLLM: { type: Boolean, default: false },
+  editedByUser: { type: Boolean, default: false },
+  version: { type: Number, default: 1 },
+}, { timestamps: true });
+export const CAIActForm = models.ai_act_forms || model('ai_act_forms', aiActFormSchema);
+
+// AI Act audit (reuses the generic AuditSubsection schema)
+const aiActAuditSchema = new Schema({
+  _id: { type: Schema.Types.Mixed, default: () => generateUUID() },
+  name: { type: String, required: true },
+  userId: { type: String, ref: 'User', required: true },
+  systemId: { type: String, ref: 'AISystem' },
+  status: {
+    type: String,
+    enum: ['draft', 'in_progress', 'under_review', 'completed', 'archived'],
+    default: 'draft'
+  },
+  checkpoint: { type: Number, default: 0, min: 0 },
+  subsections: [AuditSubsectionSchema],
+  metadata: {
+    regulation: String,
+    riskLevel: String,
+    reviewer: String,
+  },
+  completedAt: { type: Date },
+}, { timestamps: true });
+aiActAuditSchema.index({ userId: 1, status: 1 });
+export const CAIActAudit = models.ai_act_audits || model('ai_act_audits', aiActAuditSchema);
+
 // IND Form Response Schema (following audit pattern)
 const INDFormResponseSchema = new Schema({
   questionId: {

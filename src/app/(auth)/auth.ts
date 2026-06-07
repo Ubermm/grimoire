@@ -26,6 +26,9 @@ export const {
   signOut,
 } = NextAuth({
   ...authConfig,
+  // Trust the deployment host (e.g. grimoire-six.vercel.app) so callback/session
+  // URLs resolve against the request host in production without needing NEXTAUTH_URL.
+  trustHost: true,
   providers: [
     Credentials({
       async authorize(credentials) {

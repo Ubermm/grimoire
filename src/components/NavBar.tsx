@@ -179,6 +179,7 @@ export const NavBar = () => {
     { href: '/analytics', label: 'Analytics', description: 'Warning Letter Analysis' },
     { href: '/chat', label: 'Chat', description: 'Chat about 21 CFR Regulations with our AI' },
     { href: '/ind-creation', label: 'IND Submission', description: 'Create a New IND Submission' },
+    { href: '/ai-act', label: 'EU AI Act', description: 'EU AI Act compliance & classification' },
   ];
 
   return (
