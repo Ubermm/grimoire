@@ -89,14 +89,18 @@ export async function POST(request: NextRequest) {
       prologProgram += validation.rule.replaceAll("REPLACE_FOR_BACKSLASH","\\").replaceAll("\"", "\'") + '\n';
     });
 
-    // Initialize validation response arrays with the correct size
+    // Initialize validation response arrays with the correct size. `status`/`reason`
+    // carry the tri-state verdict (pass|fail|escalate) for auditor-authored rules;
+    // `passed` is kept for back-compat (passed === status==='pass').
     const validationResponse = {
       passed: new Array(form.queries.length).fill(false),
-      description: new Array(form.queries.length).fill('')
+      description: new Array(form.queries.length).fill(''),
+      status: new Array(form.queries.length).fill('fail'),
+      reason: new Array(form.queries.length).fill('')
     };
 
     // Process each query and prepare for execution
-    const queriesToExecute: { text: string; index: number }[] = [];
+    const queriesToExecute: { text: string; index: number; isStatus: boolean }[] = [];
     
     form.queries.forEach((queryDef, index) => {
       // Find all question IDs referenced in the query
@@ -108,12 +112,17 @@ export async function POST(request: NextRequest) {
       // Store description at the correct index
       validationResponse.description[index] = queryDef.description;
 
+      // Tri-state if explicitly flagged or the query binds a Status variable.
+      const isStatus = queryDef.mode === 'status' || /\bStatus\b/.test(queryDef.query);
+
       // Check if any referenced question has "Does not apply" as response
       const hasDoesNotApply = questionIds.some(qId => responses[qId] === "Does not apply");
-      
+
       if (hasDoesNotApply) {
         // Mark as passed if it contains "Does not apply"
         validationResponse.passed[index] = true;
+        validationResponse.status[index] = 'pass';
+        validationResponse.reason[index] = 'Does not apply.';
       } else {
         // Prepare query for execution
         let queryText = queryDef.query
@@ -135,7 +144,8 @@ export async function POST(request: NextRequest) {
 
         queriesToExecute.push({
           text: queryText,
-          index: index
+          index: index,
+          isStatus
         });
       }
     });
@@ -149,9 +159,22 @@ export async function POST(request: NextRequest) {
 
       // Process results and store at correct indices
       queryResults.forEach((result, execIndex) => {
-        const originalIndex = queriesToExecute[execIndex].index;
-        const queryPassed = result.answers.length > 0 && (result.answers[0] === 'true.' || result.answers[0] === 'true');
-        validationResponse.passed[originalIndex] = queryPassed;
+        const { index: originalIndex, isStatus } = queriesToExecute[execIndex];
+        if (isStatus) {
+          // Extract the Status/Reason binding from the first (highest-priority) answer.
+          const ans = (result.answers || []).find((a: string) => /Status\s*=/.test(a)) || result.answers?.[0] || '';
+          const sm = ans.match(/Status\s*=\s*(pass|fail|escalate)/i);
+          const rq = ans.match(/Reason\s*=\s*'([^']*)'/);
+          const ru = ans.match(/Reason\s*=\s*([^,\n]+)/);
+          const st = sm ? sm[1].toLowerCase() : 'fail';
+          validationResponse.status[originalIndex] = st;
+          validationResponse.passed[originalIndex] = st === 'pass';
+          validationResponse.reason[originalIndex] = rq ? rq[1] : (ru ? ru[1].replace(/\.\s*$/, '').trim() : '');
+        } else {
+          const queryPassed = result.answers.length > 0 && (result.answers[0] === 'true.' || result.answers[0] === 'true');
+          validationResponse.passed[originalIndex] = queryPassed;
+          validationResponse.status[originalIndex] = queryPassed ? 'pass' : 'fail';
+        }
       });
     }
     console.log(validationResponse);

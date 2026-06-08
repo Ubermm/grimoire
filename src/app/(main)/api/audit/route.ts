@@ -1,8 +1,24 @@
 //@ts-nocheck
 import { NextRequest } from 'next/server';
 import { auth } from '@/app/(auth)/auth';
-import { CAudit } from '@/lib/db/models';
+import { CAudit, CRegulation, CForm } from '@/lib/db/models';
 import { generateUUID } from '@/lib/utils';
+
+// Freeze the current template form into each subsection so the audit owns an
+// editable copy. Resolves CFR code → CRegulation.FormCode → CForm.FormText.
+async function snapshotForms(subsections: any[] = []) {
+  const codes = subsections.map((s) => s.code).filter(Boolean);
+  if (codes.length === 0) return subsections;
+  const regs = await CRegulation.find({ RegCode: { $in: codes } }).lean();
+  const formCodeByReg = Object.fromEntries(regs.map((r: any) => [r.RegCode, r.FormCode]));
+  const forms = await CForm.find({ FormCode: { $in: Object.values(formCodeByReg) } }).lean();
+  const textByForm = Object.fromEntries(forms.map((f: any) => [f.FormCode, f.FormText]));
+  return subsections.map((s) => {
+    if (s.form) return s; // respect a client-provided snapshot
+    const fc = formCodeByReg[s.code];
+    return fc && textByForm[fc] ? { ...s, form: textByForm[fc] } : s;
+  });
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -51,6 +67,9 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
+    if (Array.isArray(data.subsections)) {
+      data.subsections = await snapshotForms(data.subsections);
+    }
     const audit = await CAudit.create({
       _id: generateUUID(),
       userId: session.user.id,

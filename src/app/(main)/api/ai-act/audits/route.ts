@@ -4,7 +4,7 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@/app/(auth)/auth';
 import dbConnect from '@/lib/db/connection';
-import { CAIActAudit } from '@/lib/db/models';
+import { CAIActAudit, CAIActForm } from '@/lib/db/models';
 import { generateUUID } from '@/lib/utils';
 
 export async function GET() {
@@ -29,12 +29,17 @@ export async function POST(request: NextRequest) {
     if (!name || !Array.isArray(provisions) || provisions.length === 0) {
       return new Response('Missing name or provisions', { status: 400 });
     }
+    // Snapshot the current template form into each subsection so the audit owns
+    // an editable copy (provision code === FormCode for the AI Act).
+    const forms = await CAIActForm.find({ FormCode: { $in: provisions } }).lean();
+    const formByCode = Object.fromEntries(forms.map((f: any) => [f.FormCode, f.FormText]));
     const subsections = provisions.map((code: string, i: number) => ({
       id: generateUUID(),
       pos: String(i + 1),
       code, // = FormCode (e.g. AIACT_ART_5)
       status: 'pending',
       responses: [],
+      form: formByCode[code], // JSON string snapshot (undefined → run-flow falls back to global)
       validationResults: { passed: [], description: [] },
     }));
     const audit = await CAIActAudit.create({

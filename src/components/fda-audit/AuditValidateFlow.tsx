@@ -6,13 +6,15 @@
 // generates hindsight questions (/api/generate), then validates those too.
 // Mirrors the AI Act LeanValidateFlow; the engine APIs are untouched.
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, XCircle, ShieldCheck, Sparkles, RotateCcw } from 'lucide-react';
-import AutoFill from '@/components/AutoFill';
+import { CheckCircle2, XCircle, ShieldCheck, Sparkles, RotateCcw, AlertTriangle } from 'lucide-react';
 import { Surface, AccentButton, GhostButton, Spinner, EmptyState } from '@/components/module/ui';
+import { RuleAuthoringPanel } from '@/components/rules/RuleAuthoringPanel';
 import { cn } from '@/lib/utils';
 
 type Responses = Record<string, string>;
-type Result = { passed: boolean[]; description: string[] };
+type Result = { passed: boolean[]; description: string[]; status?: string[]; reason?: string[] };
+
+const statusOf = (r: Result, i: number) => r.status?.[i] || (r.passed[i] ? 'pass' : 'fail');
 
 function Segmented({ options, value, onChange }: { options: string[]; value?: string; onChange: (v: string) => void }) {
   return (
@@ -58,20 +60,31 @@ function QuestionField({ q, value, onChange }: { q: any; value: any; onChange: (
 }
 
 function ResultsPanel({ results }: { results: Result }) {
-  const overall = results.passed.every(Boolean);
+  const states = results.description.map((_, i) => statusOf(results, i));
+  const overall = states.every((s) => s === 'pass');
+  const anyFail = states.some((s) => s === 'fail');
+  const anyEscalate = states.some((s) => s === 'escalate');
   return (
     <Surface className={cn('p-6', overall ? 'border-emerald-200' : 'border-amber-200')}>
       <p className={cn('mb-4 flex items-center gap-2 text-sm font-semibold', overall ? 'text-emerald-700' : 'text-amber-700')}>
-        {overall ? <CheckCircle2 className="h-5 w-5" /> : <XCircle className="h-5 w-5" />}
-        {overall ? 'All requirements satisfied' : 'Issues found — see below'}
+        {overall ? <CheckCircle2 className="h-5 w-5" /> : anyFail ? <XCircle className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
+        {overall ? 'All requirements satisfied' : anyFail ? 'Issues found — see below' : 'Some items need review — see below'}
       </p>
       <ul className="space-y-2">
-        {results.description.map((d, i) => (
-          <li key={i} className="flex items-start gap-2 text-sm">
-            {results.passed[i] ? <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" /> : <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />}
-            <span className={results.passed[i] ? 'text-[var(--ink-muted)]' : 'text-[var(--ink)]'}>{d}</span>
-          </li>
-        ))}
+        {results.description.map((d, i) => {
+          const st = states[i];
+          return (
+            <li key={i} className="flex items-start gap-2 text-sm">
+              {st === 'pass' ? <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                : st === 'escalate' ? <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                : <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />}
+              <span className={st === 'pass' ? 'text-[var(--ink-muted)]' : 'text-[var(--ink)]'}>
+                {d}
+                {results.reason?.[i] ? <span className="text-[var(--ink-faint)]"> — {results.reason[i]}</span> : null}
+              </span>
+            </li>
+          );
+        })}
       </ul>
     </Surface>
   );
@@ -82,12 +95,14 @@ function QuestionSet({
   cfrCode,
   form,
   initial,
+  meta,
   onValidated,
   ctaLabel = 'Validate',
 }: {
   cfrCode: string;
   form: any;
   initial?: Responses;
+  meta?: Record<string, { confidence?: string; source?: string }>;
   onValidated?: (r: Result, responses: Responses) => void;
   ctaLabel?: string;
 }) {
@@ -108,10 +123,6 @@ function QuestionSet({
 
   const reset = () => { setResponses(buildDefaults()); setResults(null); };
 
-  const formFields = useMemo(
-    () => Object.fromEntries(form.questions.map((q: any) => [q.id, { id: q.id, type: q.type, question: q.text, value: responses[q.id] }])),
-    [form, responses]
-  );
   const answered = form.questions.filter((q: any) => responses[q.id] != null && responses[q.id] !== '').length;
 
   const validate = async () => {
@@ -131,9 +142,8 @@ function QuestionSet({
   return (
     <div className="space-y-5">
       <Surface className="p-6">
-        <div className="mb-5 flex items-center justify-between">
+        <div className="mb-5">
           <span className="text-sm text-[var(--ink-faint)]">{answered}/{form.questions.length} answered</span>
-          <AutoFill formFields={formFields} onAutofill={(vals: Record<string, any>) => setResponses((r) => ({ ...r, ...Object.fromEntries(Object.entries(vals).map(([k, v]) => [k, Array.isArray(v) ? v.join(',') : String(v)])) }))} />
         </div>
         <div className="space-y-5">
           {form.questions.map((q: any) => (
@@ -143,6 +153,17 @@ function QuestionSet({
                 {(q.reference || q.cfr_reference) && <p className="mt-0.5 text-xs text-[var(--ink-faint)]">{q.reference || q.cfr_reference}</p>}
               </div>
               <QuestionField q={q} value={responses[q.id]} onChange={(v) => setResponses({ ...responses, [q.id]: v })} />
+              {meta?.[q.id] && (
+                <p className="flex flex-wrap items-center gap-1.5 text-xs text-[var(--ink-faint)]">
+                  <span className={cn('font-accent rounded-full px-1.5 py-0.5 ring-1 ring-inset',
+                    meta[q.id].confidence === 'high' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                      : meta[q.id].confidence === 'medium' ? 'bg-amber-50 text-amber-700 ring-amber-200'
+                      : 'bg-neutral-100 text-neutral-500 ring-neutral-200')}>
+                    auto · {meta[q.id].confidence}
+                  </span>
+                  {meta[q.id].source && <span className="italic">{meta[q.id].source}</span>}
+                </p>
+              )}
             </div>
           ))}
         </div>
@@ -158,16 +179,24 @@ function QuestionSet({
 
 export function AuditValidateFlow({
   cfrCode,
+  initialForm,
+  regText,
   initialResponses,
   initialDeepResponses,
+  autofillMeta,
   onValidated,
   onDeepValidated,
+  onFormChange,
 }: {
   cfrCode: string;
+  initialForm?: string | any; // per-audit snapshot (JSON string or object); falls back to global
+  regText?: string;
   initialResponses?: Responses;
   initialDeepResponses?: Responses;
+  autofillMeta?: Record<string, { confidence?: string; source?: string }>;
   onValidated?: (r: Result, responses: Responses) => void;
   onDeepValidated?: (r: Result, responses: Responses) => void;
+  onFormChange?: (form: any) => void; // persist edited rules to the audit snapshot
 }) {
   const [form, setForm] = useState<any>(null);
   const [missing, setMissing] = useState(false);
@@ -181,6 +210,13 @@ export function AuditValidateFlow({
     let cancelled = false;
     (async () => {
       setForm(null); setMissing(false); setDeepForm(null); setDeepError(null);
+      // Per-audit snapshot wins over the global template.
+      if (initialForm) {
+        try {
+          const snap = typeof initialForm === 'string' ? JSON.parse(initialForm) : initialForm;
+          if (snap?.questions?.length) { if (!cancelled) setForm(snap); return; }
+        } catch { /* fall through to global fetch */ }
+      }
       try {
         const regRes = await fetch(`/api/regulations?code=${encodeURIComponent(cfrCode)}`);
         if (!regRes.ok) { if (!cancelled) setMissing(true); return; }
@@ -198,7 +234,7 @@ export function AuditValidateFlow({
       }
     })();
     return () => { cancelled = true; };
-  }, [cfrCode]);
+  }, [cfrCode, initialForm]);
 
   const runDeep = async () => {
     if (!form) return;
@@ -232,7 +268,10 @@ export function AuditValidateFlow({
 
   return (
     <div className="space-y-8">
-      <QuestionSet cfrCode={cfrCode} form={form} initial={initialResponses} onValidated={onValidated} />
+      <QuestionSet cfrCode={cfrCode} form={form} initial={initialResponses} meta={autofillMeta} onValidated={onValidated} />
+
+      {/* Inline rule authoring — edits persist to this audit's snapshot only. */}
+      {onFormChange && <RuleAuthoringPanel form={form} regText={regText} onChange={(f) => { setForm(f); onFormChange(f); }} />}
 
       {/* Deep validation — hindsight questions derived from real FDA warning letters. */}
       <div className="rounded-2xl border border-dashed border-[var(--line-strong)] bg-black/[0.015] p-6">

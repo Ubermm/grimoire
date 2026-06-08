@@ -3,10 +3,12 @@
 // shared /api/validate, and shows a light OpenAI-style results panel. Optionally
 // persists the result onto an AISystem (merged by FormCode).
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, XCircle, ShieldCheck } from 'lucide-react';
-import AutoFill from '@/components/AutoFill';
+import { CheckCircle2, XCircle, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { Surface, AccentButton, Spinner, EmptyState } from './ui';
+import { RuleAuthoringPanel } from '@/components/rules/RuleAuthoringPanel';
 import { cn } from '@/lib/utils';
+
+const statusOf = (r: any, i: number) => r.status?.[i] || (r.passed[i] ? 'pass' : 'fail');
 
 function Segmented({ options, value, onChange }: { options: string[]; value?: string; onChange: (v: string) => void }) {
   return (
@@ -47,7 +49,7 @@ function Field({ q, value, onChange }: { q: any; value: any; onChange: (v: any) 
   return <Segmented options={q.options || ['yes', 'no']} value={value} onChange={onChange} />;
 }
 
-export function LeanValidateFlow({ formCode, systemId, initialResponses, onValidated }: { formCode: string; systemId?: string; initialResponses?: Record<string, string>; onValidated?: (r: any, responses: Record<string, string>) => void }) {
+export function LeanValidateFlow({ formCode, initialForm, regText, systemId, initialResponses, autofillMeta, onValidated, onFormChange }: { formCode: string; initialForm?: string | any; regText?: string; systemId?: string; initialResponses?: Record<string, string>; autofillMeta?: Record<string, any>; onValidated?: (r: any, responses: Record<string, string>) => void; onFormChange?: (form: any) => void }) {
   const [form, setForm] = useState<any>(null);
   const [missing, setMissing] = useState(false);
   const [responses, setResponses] = useState<Record<string, string>>(initialResponses || {});
@@ -55,16 +57,18 @@ export function LeanValidateFlow({ formCode, systemId, initialResponses, onValid
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Per-audit snapshot wins over the global template.
+    if (initialForm) {
+      try {
+        const snap = typeof initialForm === 'string' ? JSON.parse(initialForm) : initialForm;
+        if (snap?.questions?.length) { setForm(snap); return; }
+      } catch { /* fall through to global fetch */ }
+    }
     fetch(`/api/ai-act/forms?code=${formCode}`).then(async (r) => {
       if (r.ok) { const f = await r.json(); setForm(JSON.parse(f.FormText)); }
       else setMissing(true);
     });
-  }, [formCode]);
-
-  const formFields = useMemo(() => {
-    if (!form) return {};
-    return Object.fromEntries(form.questions.map((q: any) => [q.id, { id: q.id, type: q.type, question: q.text, value: responses[q.id] }]));
-  }, [form, responses]);
+  }, [formCode, initialForm]);
 
   const answered = form ? form.questions.filter((q: any) => responses[q.id] != null && responses[q.id] !== '').length : 0;
 
@@ -92,14 +96,15 @@ export function LeanValidateFlow({ formCode, systemId, initialResponses, onValid
   if (missing) return <EmptyState title="Form not available" hint={`No seeded form for ${formCode}. Generate one in the Rule authoring tool.`} />;
   if (!form) return <div className="flex justify-center py-16"><Spinner className="h-6 w-6 text-neutral-400" /></div>;
 
-  const overall = results ? results.passed.every(Boolean) : null;
+  const states = results ? results.description.map((_: any, i: number) => statusOf(results, i)) : [];
+  const overall = results ? states.every((s: string) => s === 'pass') : null;
+  const anyFail = states.some((s: string) => s === 'fail');
 
   return (
     <div className="space-y-5">
       <Surface className="p-6">
-        <div className="mb-5 flex items-center justify-between">
+        <div className="mb-5">
           <span className="text-sm text-neutral-500">{answered}/{form.questions.length} answered</span>
-          <AutoFill formFields={formFields} onAutofill={(vals: Record<string, any>) => setResponses((r) => ({ ...r, ...Object.fromEntries(Object.entries(vals).map(([k, v]) => [k, Array.isArray(v) ? v.join(',') : String(v)])) }))} />
         </div>
         <div className="space-y-5">
           {form.questions.map((q: any) => (
@@ -109,6 +114,17 @@ export function LeanValidateFlow({ formCode, systemId, initialResponses, onValid
                 {q.reference && <p className="mt-0.5 text-xs text-neutral-400">{q.reference}</p>}
               </div>
               <Field q={q} value={responses[q.id]} onChange={(v) => setResponses({ ...responses, [q.id]: v })} />
+              {autofillMeta?.[q.id] && (
+                <p className="flex flex-wrap items-center gap-1.5 text-xs text-neutral-400">
+                  <span className={cn('rounded-full px-1.5 py-0.5 ring-1 ring-inset',
+                    autofillMeta[q.id].confidence === 'high' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                      : autofillMeta[q.id].confidence === 'medium' ? 'bg-amber-50 text-amber-700 ring-amber-200'
+                      : 'bg-neutral-100 text-neutral-500 ring-neutral-200')}>
+                    auto · {autofillMeta[q.id].confidence}
+                  </span>
+                  {autofillMeta[q.id].source && <span className="italic">{autofillMeta[q.id].source}</span>}
+                </p>
+              )}
             </div>
           ))}
         </div>
@@ -117,19 +133,28 @@ export function LeanValidateFlow({ formCode, systemId, initialResponses, onValid
         </div>
       </Surface>
 
+      {onFormChange && <RuleAuthoringPanel form={form} regText={regText} onChange={(f) => { setForm(f); onFormChange(f); }} />}
+
       {results && (
         <Surface className={cn('p-6', overall ? 'border-emerald-200' : 'border-amber-200')}>
           <p className={cn('mb-4 flex items-center gap-2 text-sm font-semibold', overall ? 'text-emerald-700' : 'text-amber-700')}>
-            {overall ? <CheckCircle2 className="h-5 w-5" /> : <XCircle className="h-5 w-5" />}
-            {overall ? 'All requirements satisfied' : 'Issues found — see below'}
+            {overall ? <CheckCircle2 className="h-5 w-5" /> : anyFail ? <XCircle className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
+            {overall ? 'All requirements satisfied' : anyFail ? 'Issues found — see below' : 'Some items need review — see below'}
           </p>
           <ul className="space-y-2">
-            {results.description.map((d: string, i: number) => (
-              <li key={i} className="flex items-start gap-2 text-sm">
-                {results.passed[i] ? <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" /> : <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />}
-                <span className={results.passed[i] ? 'text-neutral-600' : 'text-neutral-800'}>{d}</span>
-              </li>
-            ))}
+            {results.description.map((d: string, i: number) => {
+              const st = states[i];
+              return (
+                <li key={i} className="flex items-start gap-2 text-sm">
+                  {st === 'pass' ? <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                    : st === 'escalate' ? <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                    : <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />}
+                  <span className={st === 'pass' ? 'text-neutral-600' : 'text-neutral-800'}>
+                    {d}{results.reason?.[i] ? <span className="text-neutral-400"> — {results.reason[i]}</span> : null}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         </Surface>
       )}

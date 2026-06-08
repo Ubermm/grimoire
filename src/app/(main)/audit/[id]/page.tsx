@@ -9,12 +9,13 @@ import Link from 'next/link';
 import { ArrowLeft, CheckCircle2, Circle, AlertCircle, FileDown, X } from 'lucide-react';
 import { Surface, Spinner, PageHeader, AccentButton, GhostButton } from '@/components/module/ui';
 import { AuditValidateFlow } from '@/components/fda-audit/AuditValidateFlow';
+import { AuditContextPanel } from '@/components/audit-shared/AuditContextPanel';
 import { cn } from '@/lib/utils';
 
 // react-pdf needs the browser; keep it out of SSR + the initial bundle.
 const AuditReport = dynamic(() => import('@/components/AuditReport'), { ssr: false, loading: () => <div className="flex justify-center py-16"><Spinner className="h-6 w-6 text-[var(--ink-faint)]" /></div> });
 
-type Result = { passed: boolean[]; description: string[] };
+type Result = { passed: boolean[]; description: string[]; status?: string[]; reason?: string[] };
 
 export default function AuditRunPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -22,6 +23,8 @@ export default function AuditRunPage({ params }: { params: Promise<{ id: string 
   const [missing, setMissing] = useState(false);
   const [active, setActive] = useState(0);
   const [report, setReport] = useState(false);
+  const [autofillMeta, setAutofillMeta] = useState<any[]>([]);
+  const [fillNonce, setFillNonce] = useState(0);
 
   useEffect(() => {
     fetch(`/api/audit?id=${id}`).then(async (r) => { if (r.ok) setAudit(await r.json()); else setMissing(true); });
@@ -40,11 +43,43 @@ export default function AuditRunPage({ params }: { params: Promise<{ id: string 
       i === idx ? {
         ...s,
         responses: Object.entries(responses).map(([questionId, answer]) => ({ questionId, answer: String(answer), lastModified: new Date() })),
-        validationResults: { passed: data.passed.map((b) => (b ? 'true' : 'false')), description: data.description },
+        validationResults: {
+          passed: data.passed.map((b) => (b ? 'true' : 'false')),
+          description: data.description,
+          status: data.status || data.passed.map((b) => (b ? 'pass' : 'fail')),
+          reason: data.reason || [],
+        },
         status: data.passed.every(Boolean) ? 'completed' : 'flagged',
       } : s
     );
     persist(subs);
+  };
+
+  // Persist auditor-edited rules to this audit's per-subsection snapshot only.
+  const saveForm = (idx: number, formObj: any) => {
+    const subs = audit.subsections.map((s: any, i: number) => (i === idx ? { ...s, form: JSON.stringify(formObj) } : s));
+    setAudit({ ...audit, subsections: subs });
+    fetch('/api/audit', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ _id: id, subsections: subs }) });
+  };
+
+  const saveDossier = (d: any) => {
+    setAudit((a: any) => ({ ...a, contextDossier: d }));
+    fetch('/api/audit', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ _id: id, contextDossier: d }) });
+  };
+
+  // Bulk autofill across all subsections: merge deduced answers into responses,
+  // keep confidence/source meta for review, remount the active flow to show them.
+  const onFilled = (perSub: any[]) => {
+    const subs = audit.subsections.map((s: any, i: number) => {
+      const f = perSub[i];
+      if (!f || !Object.keys(f.responses).length) return s;
+      const merged = { ...Object.fromEntries((s.responses || []).map((r: any) => [r.questionId, r.answer])), ...f.responses };
+      return { ...s, responses: Object.entries(merged).map(([questionId, answer]) => ({ questionId, answer: String(answer) })) };
+    });
+    setAudit({ ...audit, subsections: subs });
+    setAutofillMeta(perSub.map((f: any) => f.meta));
+    setFillNonce((n) => n + 1);
+    fetch('/api/audit', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ _id: id, subsections: subs }) });
   };
 
   const saveDeep = (idx: number, responses: Record<string, string>, data: Result) => {
@@ -77,6 +112,10 @@ export default function AuditRunPage({ params }: { params: Promise<{ id: string 
         action={<GhostButton onClick={() => setReport(true)}><FileDown className="h-4 w-4" /> Report</GhostButton>}
       />
 
+      <div className="mb-6">
+        <AuditContextPanel subsections={audit.subsections} dossier={audit.contextDossier} onDossierChange={saveDossier} onFilled={onFilled} />
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-[260px_1fr] lg:items-start">
         {/* subsection nav — sticky so it follows the form as you scroll */}
         <div className="lg:sticky lg:top-24">
@@ -97,12 +136,15 @@ export default function AuditRunPage({ params }: { params: Promise<{ id: string 
         <div className="min-w-0">
           <h2 className="mb-4 text-lg font-semibold text-[var(--ink)]">{sub.code}</h2>
           <AuditValidateFlow
-            key={sub.id}
+            key={`${sub.id}:${fillNonce}`}
             cfrCode={sub.code}
+            initialForm={sub.form}
             initialResponses={initialResponses}
             initialDeepResponses={initialDeepResponses}
+            autofillMeta={autofillMeta[active]}
             onValidated={(data, responses) => saveMain(active, responses, data)}
             onDeepValidated={(data, responses) => saveDeep(active, responses, data)}
+            onFormChange={(f) => saveForm(active, f)}
           />
         </div>
       </div>

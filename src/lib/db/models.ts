@@ -503,13 +503,25 @@ const AuditSubsectionSchema = new Schema({
   },
   responses: [AuditResponseSchema],
   deepResponses: [AuditResponseSchema],
+  // Per-audit snapshot of the validation form (JSON string of {questions,facts,
+  // validations,queries}). Frozen at create time so auditors can edit/add rules
+  // without touching the shared global template; absent on legacy audits.
+  form: {
+    type: String,
+    required: false
+  },
   validationResults: {
     passed: [String],
-    description: [String]
+    description: [String],
+    // Tri-state verdict (pass|fail|escalate) + cited reason, aligned to queries.
+    status: [String],
+    reason: [String]
   },
   deepValidationResults: {
     passed: [String],
-    description: [String]
+    description: [String],
+    status: [String],
+    reason: [String]
   },
   comment: {
     type: String,
@@ -547,6 +559,12 @@ const AuditSchema = new Schema<SchemaTypes.Audit>({
     auditType: String,
     department: String,
     reviewer: String
+  },
+  // Free-text + uploaded documents the auditor provides once; used to auto-fill
+  // answers across all subsections with citations + confidence.
+  contextDossier: {
+    text: String,
+    files: [{ url: String, name: String, contentType: String }]
   },
   completedAt: {
     type: Date
@@ -722,6 +740,10 @@ const aiActAuditSchema = new Schema({
     regulation: String,
     riskLevel: String,
     reviewer: String,
+  },
+  contextDossier: {
+    text: String,
+    files: [{ url: String, name: String, contentType: String }]
   },
   completedAt: { type: Date },
 }, { timestamps: true });
