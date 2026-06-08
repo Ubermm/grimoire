@@ -1,9 +1,9 @@
 name: Build and deploy Next.js app to Azure Web App - grimoire
 
+# DISABLED: the app deploys via Vercel's Git integration, not this workflow.
+# Auto-deploy on push is turned off so failed Azure deploys don't spam the
+# Actions tab. Run manually from the Actions tab if Azure is ever revived.
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
