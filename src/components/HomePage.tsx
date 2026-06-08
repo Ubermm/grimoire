@@ -158,17 +158,39 @@ Risk = <span className="text-emerald-300">high</span>.  <span className="text-em
             </div>
           </Reveal>
           <Reveal delay={0.1} className="lg:order-1">
-            <Panel className="p-6">
-              <div className="flex items-center justify-between">
-                <span className="font-plex text-xs uppercase tracking-wide text-white/40">Evidence report</span>
-                <span className="font-plex rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-300 ring-1 ring-inset ring-emerald-400/20">Passed</span>
+            <Panel className="overflow-hidden">
+              <div className="flex items-center justify-between border-b border-white/10 px-5 py-3.5">
+                <div className="flex items-center gap-2">
+                  <FileCheck2 className="h-4 w-4 text-white/40" />
+                  <span className="font-plex text-[0.7rem] uppercase tracking-[0.16em] text-white/40">Evidence report</span>
+                </div>
+                <span className="font-plex text-xs text-white/30">ACT-7F3A</span>
               </div>
-              <div className="mt-4 space-y-2.5">
-                {['Article 5 — no prohibited practice', 'Annex III(4) — employment use identified', 'Annex IV — 9/9 sections complete', 'Article 50 — transparency disclosed'].map((t, i) => (
-                  <div key={t} className="flex items-center gap-2.5 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-white/65">
-                    <Check className="h-4 w-4 shrink-0 text-emerald-300" /> {t}
+
+              <div className="px-5 pt-4">
+                <p className="text-sm font-medium text-white/90">ACME Hiring Model v2.3</p>
+                <p className="font-plex mt-0.5 text-xs text-white/40">high-risk · Reg (EU) 2024/1689</p>
+              </div>
+
+              <div className="mt-4 border-t border-white/[0.06]">
+                {[
+                  ['Article 5', 'Prohibited practices', 'clear'],
+                  ['Annex III(4)', 'Employment use', 'identified'],
+                  ['Annex IV', 'Technical file', '9 / 9'],
+                  ['Article 50', 'Transparency', 'disclosed'],
+                ].map(([ref, label, val]) => (
+                  <div key={ref} className="flex items-center justify-between gap-4 border-b border-white/[0.06] px-5 py-2.5 last:border-b-0">
+                    <div className="flex min-w-0 items-baseline gap-3">
+                      <span className="font-plex w-[5.5rem] shrink-0 text-xs text-white/45">{ref}</span>
+                      <span className="truncate text-sm text-white/70">{label}</span>
+                    </div>
+                    <span className="font-plex text-xs text-white/80">{val}</span>
                   </div>
                 ))}
+              </div>
+
+              <div className="flex items-center border-t border-white/10 px-5 py-3">
+                <span className="font-plex text-[0.7rem] text-white/30">Derived by the Prolog engine · Reg (EU) 2024/1689</span>
               </div>
             </Panel>
           </Reveal>

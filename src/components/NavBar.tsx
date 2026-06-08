@@ -2,7 +2,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, Bell, Home, Book, ChevronDown } from "lucide-react";
+import { Menu, X, LogOut, Bell, Home, Book, ChevronDown, ArrowRight } from "lucide-react";
 import Link from 'next/link';
 import { signOut, useSession } from 'next-auth/react';
 import {
@@ -115,25 +115,34 @@ const AuthButton = () => {
   }
 
   if (status === 'unauthenticated') {
+    // Twinned auth pair — a bold-outlined Log in + a darker slate-blue Sign up,
+    // matched in size so they read as one symmetric whole.
     return (
-      <div className="flex gap-2">
-        <Button 
-          variant="ghost" 
-          className="text-white text-sm bg-black rounded-full hover:bg-white hover:text-black"
+      <div className="flex items-center gap-2">
+        <button
           onClick={handleLogin}
+          className={`rounded-full border-2 bg-transparent px-4 py-1.5 text-sm font-medium transition-colors ${light ? 'border-slate-400 text-slate-700 hover:border-slate-500 hover:bg-slate-100' : 'border-slate-500 text-slate-100 hover:border-slate-400 hover:bg-slate-500/15'}`}
         >
-          Login
-        </Button>
-        <Button
-          variant="ghost"
-          className={`text-sm rounded-full ${light ? 'text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-100' : 'text-black hover:text-white bg-white hover:bg-black'}`}
+          Log in
+        </button>
+        <button
           onClick={handleRegister}
+          className="group inline-flex items-center gap-1 rounded-full border-2 border-slate-700 bg-slate-700 px-4 py-1.5 text-sm font-medium text-white shadow-sm transition-all hover:border-slate-600 hover:bg-slate-600"
         >
           Sign up
-        </Button>
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+        </button>
       </div>
     );
   }
+
+  // Prefer a display name; fall back to the email's local part (domain hidden)
+  // so we never surface the full email address in the chrome.
+  const displayName =
+    session?.user?.name?.trim() ||
+    (session?.user?.email
+      ? session.user.email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+      : 'Account');
 
   return (
     <DropdownMenu>
@@ -141,12 +150,12 @@ const AuthButton = () => {
         <Button variant="ghost" className={`flex items-center gap-2 rounded-full ${light ? 'hover:bg-black/[0.05]' : 'hover:bg-white/10'}`}>
           <Image
             src={`/logoo.png`}
-            alt={session.user.email ?? 'User Avatar'}
+            alt={displayName}
             width={36}
             height={36}
             className="rounded-full transition-transform duration-300 hover:scale-105"
           />
-          <span className={`hidden md:inline text-sm ${light ? 'text-neutral-700' : 'text-white/90'}`}>{session.user.email}</span>
+          <span className={`hidden md:inline text-sm ${light ? 'text-neutral-700' : 'text-white/90'}`}>{displayName}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-black/95 border border-white/20 backdrop-blur-md">
@@ -201,17 +210,19 @@ export const NavBar = () => {
           <div className="flex items-center justify-between">
             <Link
               href="/"
-              className={`font-plex text-base font-semibold tracking-tight transition-colors ${light ? 'text-neutral-900 hover:text-black' : 'text-white hover:text-white/80'}`}
+              className={`font-plex text-xl font-semibold tracking-tight transition-colors ${light ? 'text-neutral-900 hover:text-black' : 'text-white hover:text-white/80'}`}
             >
               Grimoire One
             </Link>
 
-            <div className={`hidden md:flex items-center space-x-1 p-2 rounded-full backdrop-blur-sm ${light ? 'bg-black/[0.04]' : 'bg-gray-700/40'}`}>
-            <AuthButton />
-              {navLinks.map((link) => (
-                <NavLink key={link.href} {...link} />
-              ))}
-              <DocsDropdown />
+            <div className="hidden md:flex items-center gap-3">
+              <div className={`flex items-center space-x-1 p-2 rounded-full backdrop-blur-sm ${light ? 'bg-black/[0.04]' : 'bg-gray-700/40'}`}>
+                {navLinks.map((link) => (
+                  <NavLink key={link.href} {...link} />
+                ))}
+                <DocsDropdown />
+              </div>
+              <AuthButton />
             </div>
 
             <button
