@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-export const EASE = [0.22, 1, 0.36, 1];
+export const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export function MarketingPage({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={cn('bg-[#09090b] text-white', className)}>{children}</div>;
