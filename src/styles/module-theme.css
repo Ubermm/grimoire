@@ -1,10 +1,12 @@
-/* Scoped design system for the EU AI Act module.
-   A neutral, near-monochrome "platform" aesthetic (OpenAI-style): black primary
-   actions, hairline borders, generous whitespace, restrained colour. All tokens
-   are scoped to .ai-act-theme so nothing here leaks into the FDA (dark) surface. */
+/* Shared design system for the Grimoire One product modules (FDA Audit + EU AI Act).
+   A neutral, near-monochrome "platform" aesthetic (lyzr / architect.new): clean
+   light surfaces, hairline borders, generous whitespace, and IBM Plex Mono as an
+   accent typeface (headings, labels, badges, nav, code) over the sans body.
+   All tokens are scoped to .module-theme so nothing here leaks into the dark
+   marketing landing or the global navbar. */
 
-.ai-act-theme {
-  /* Accent = near-black primary action (no more 2023 teal). */
+.module-theme {
+  /* Accent = near-black primary action. */
   --acc: #0d0d0d;
   --acc-hover: #2a2a2a;
   --acc-soft: #f4f4f5;
@@ -21,48 +23,62 @@
   --ink-muted: #6b6b76;
   --ink-faint: #9b9ba6;
 
+  /* Accent typeface (IBM Plex Mono, loaded via next/font in the root layout). */
+  --font-accent: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
   color-scheme: light;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
+/* Mono accents — headings + opt-in .font-accent utility, scoped to the modules. */
+.module-theme h1,
+.module-theme h2,
+.module-theme h3 {
+  font-family: var(--font-accent);
+  letter-spacing: -0.01em;
+}
+.module-theme .font-accent {
+  font-family: var(--font-accent);
+}
+
 /* Soft text selection. */
-.ai-act-theme ::selection {
+.module-theme ::selection {
   background: rgba(13, 13, 13, 0.1);
 }
 
 /* Thin, unobtrusive scrollbars inside the module. */
-.ai-act-theme *::-webkit-scrollbar {
+.module-theme *::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
-.ai-act-theme *::-webkit-scrollbar-thumb {
+.module-theme *::-webkit-scrollbar-thumb {
   background: #d9d9d9;
   border: 3px solid transparent;
   background-clip: content-box;
   border-radius: 9999px;
 }
-.ai-act-theme *::-webkit-scrollbar-thumb:hover {
+.module-theme *::-webkit-scrollbar-thumb:hover {
   background: #c2c2c2;
   background-clip: content-box;
 }
 
 /* Faded grid backdrop for the canvas — subtle depth without colour. */
-.ai-act-canvas {
+.module-canvas {
   background-color: var(--canvas);
   background-image:
     radial-gradient(60rem 40rem at 50% -10%, rgba(13, 13, 13, 0.035), transparent 70%);
 }
 
 /* Consistent focus ring across native + custom controls. */
-.ai-act-theme :focus-visible {
+.module-theme :focus-visible {
   outline: none;
 }
 
 /* Native form controls pick up the accent. */
-.ai-act-theme input[type="checkbox"],
-.ai-act-theme input[type="radio"] {
+.module-theme input[type="checkbox"],
+.module-theme input[type="radio"] {
   accent-color: var(--acc);
 }
 

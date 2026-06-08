@@ -39,12 +39,12 @@ export async function POST(request: Request) {
       };
 
       // Send to both email addresses
-      const recipients = ['halagalisupreet@gmail.com', 'support@grimoire.tools'];
+      const recipients = ['halagalisupreet@gmail.com', 'support@grimoireone.com'];
       
       await Promise.all(
         recipients.map(recipient => 
           emailClient.beginSend({
-            senderAddress: 'DoNotReply@grimoire.tools',
+            senderAddress: 'DoNotReply@grimoireone.com',
             content: emailContent,
             recipients: {
               to: [{ address: recipient }],

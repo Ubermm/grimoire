@@ -118,7 +118,7 @@ async function sendRegisterEmail(userEmail: string) {
                 <a href="https://grimoire.tools/dashboard" class="button">Go to Dashboard</a>
             </div>
             
-            <p>If you have any questions or need assistance, don't hesitate to contact our support team: <a href="mailto:support@grimoire.tools" style="color: #4A90E2;">support@grimoire.tools</a></p>
+            <p>If you have any questions or need assistance, don't hesitate to contact our support team: <a href="mailto:support@grimoireone.com" style="color: #4A90E2;">support@grimoireone.com</a></p>
         </div>
         
         <div class="footer">
@@ -131,7 +131,7 @@ async function sendRegisterEmail(userEmail: string) {
       `,
     };
     const poller = await emailClient.beginSend({
-      senderAddress: 'DoNotReply@grimoire.tools',
+      senderAddress: 'DoNotReply@grimoireone.com',
       content: emailContent,
       recipients: {
         to: [{ address: userEmail }],

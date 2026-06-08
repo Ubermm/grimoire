@@ -17,7 +17,7 @@ import { usePathname, useRouter } from 'next/navigation';
 const NavLink = ({ href, label, description, icon }) => {
   const pathname = usePathname();
   const isActive = pathname === href;
-  const light = pathname?.startsWith('/ai-act');
+  const light = pathname?.startsWith('/ai-act') || pathname?.startsWith('/audit') || pathname?.startsWith('/analytics') || pathname?.startsWith('/docs');
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -52,15 +52,15 @@ const NavLink = ({ href, label, description, icon }) => {
 
 const DocsDropdown = () => {
   const pathname = usePathname();
-  const light = pathname?.startsWith('/ai-act');
+  const light = pathname?.startsWith('/ai-act') || pathname?.startsWith('/audit') || pathname?.startsWith('/analytics') || pathname?.startsWith('/docs');
   const docPages = [
-    { href: '/docs/ai-best-practices', label: 'AI Best Practices', description: 'Guidelines for AI implementation' },
-    { href: '/docs/similar-violations', label: 'Letter Similarity Search', description: 'Find Similar Warning Letters for Cross-reference' },
-    { href: '/docs/ind-submission', label: 'IND Submission', description: 'Guide to IND submission process' },
-    { href: '/docs/letter-comparison', label: 'Letter Comparison', description: 'Compare document similarities' },
     { href: '/docs/overview', label: 'Overview', description: 'System architecture overview' },
-    { href: '/docs/prolog-validation', label: 'Prolog Validation', description: 'Logic validation tools' },
     { href: '/docs/quickstart', label: 'Quickstart', description: 'Get started quickly' },
+    { href: '/docs/eu-ai-act', label: 'EU AI Act', description: 'Classify, screen & audit AI systems' },
+    { href: '/docs/prolog-validation', label: 'Prolog Validation', description: 'Logic validation tools' },
+    { href: '/docs/letter-comparison', label: 'Letter Comparison', description: 'Compare document similarities' },
+    { href: '/docs/similar-violations', label: 'Letter Similarity Search', description: 'Find Similar Warning Letters for Cross-reference' },
+    { href: '/docs/ai-best-practices', label: 'AI Best Practices', description: 'Guidelines for AI implementation' },
   ];
 
   return (
@@ -89,7 +89,7 @@ const DocsDropdown = () => {
 const AuthButton = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const light = pathname?.startsWith('/ai-act');
+  const light = pathname?.startsWith('/ai-act') || pathname?.startsWith('/audit') || pathname?.startsWith('/analytics') || pathname?.startsWith('/docs');
   const { data: session, status } = useSession({
     required: false,
     onUnauthenticated() {
@@ -165,7 +165,7 @@ const AuthButton = () => {
 export const NavBar = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const light = pathname?.startsWith('/ai-act');
+  const light = pathname?.startsWith('/ai-act') || pathname?.startsWith('/audit') || pathname?.startsWith('/analytics') || pathname?.startsWith('/docs');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -185,8 +185,6 @@ export const NavBar = () => {
     { href: '/', label: 'Home', description: 'Return to homepage' },
     { href: '/audit', label: 'Audits', description: 'View your Audit Flows' },
     { href: '/analytics', label: 'Analytics', description: 'Warning Letter Analysis' },
-    { href: '/chat', label: 'Chat', description: 'Chat about 21 CFR Regulations with our AI' },
-    { href: '/ind-creation', label: 'IND Submission', description: 'Create a New IND Submission' },
     { href: '/ai-act', label: 'EU AI Act', description: 'EU AI Act compliance & classification' },
   ];
 
@@ -201,8 +199,12 @@ export const NavBar = () => {
       `}>
         <div className="container mx-auto px-4 lg:px-6 py-3">
           <div className="flex items-center justify-between">
-            {/* Brand wordmark removed from the global header per design. */}
-            <div aria-hidden />
+            <Link
+              href="/"
+              className={`font-plex text-base font-semibold tracking-tight transition-colors ${light ? 'text-neutral-900 hover:text-black' : 'text-white hover:text-white/80'}`}
+            >
+              Grimoire One
+            </Link>
 
             <div className={`hidden md:flex items-center space-x-1 p-2 rounded-full backdrop-blur-sm ${light ? 'bg-black/[0.04]' : 'bg-gray-700/40'}`}>
             <AuthButton />
@@ -279,13 +281,12 @@ export const NavBar = () => {
                 Documentation
               </span>
               {[
-                'AI Best Practices',
-                'IND Submission',
-                'Letter Comparison',
                 'Overview',
-                'Prolog Validation',
                 'Quickstart',
-                'Similar Violations'
+                'EU AI Act',
+                'Prolog Validation',
+                'Letter Comparison',
+                'AI Best Practices',
               ].map((item) => (
                 <Link
                   key={item}

@@ -17,13 +17,6 @@ interface SuggestedActionsProps {
 function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
   const suggestedActions = [
     {
-      title: 'Create IND Documents',
-      label: 'Structured UI Form',
-      action: 'Open IND Document Creation',
-      isLink: true,
-      href: '/ind-creation'
-    },
-    {
       title: 'What is the weather',
       label: 'in San Francisco?',
       action: 'What is the weather in San Francisco?',

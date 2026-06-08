@@ -58,7 +58,7 @@ const TermsPage = () => {
 
               <section>
                 <h2 className="text-2xl font-semibold text-white mb-4">9. Contact Information</h2>
-                <p>For questions about these Terms, please contact us at support@grimoire.corp</p>
+                <p>For questions about these Terms, please contact us at support@grimoireone.com</p>
               </section>
             </CardContent>
           </Card>

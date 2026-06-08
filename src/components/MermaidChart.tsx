@@ -18,17 +18,18 @@ const MermaidChart = ({ chart }) => {
     try {
       await mermaid.initialize({
         startOnLoad: true,
-        theme: 'dark',
+        theme: 'base',
         securityLevel: 'loose',
         themeVariables: {
-          primaryColor: '#7c3aed',
-          primaryTextColor: '#fff',
-          primaryBorderColor: '#7c3aed',
-          lineColor: '#fff',
-          secondaryColor: '#4c1d95',
-          tertiaryColor: '#2d1264'
+          primaryColor: '#f4f4f5',
+          primaryTextColor: '#0d0d0d',
+          primaryBorderColor: '#e0e0e0',
+          lineColor: '#9b9ba6',
+          secondaryColor: '#ececec',
+          tertiaryColor: '#fafaf9',
+          fontFamily: 'inherit',
         },
-        fontSize: 20,
+        fontSize: 18,
       });
 
       const uniqueId = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
@@ -72,7 +73,7 @@ const MermaidChart = ({ chart }) => {
         
         <button
           onClick={() => setIsOpen(true)}
-          className="absolute top-2 right-2 bg-black/20 hover:bg-black/40 text-white/80 rounded-md px-3 py-1.5 text-sm font-medium flex items-center gap-2 transition-colors backdrop-blur-sm"
+          className="absolute top-2 right-2 flex items-center gap-2 rounded-md border border-[var(--line)] bg-white/80 px-3 py-1.5 text-sm font-medium text-[var(--ink-muted)] backdrop-blur-sm transition-colors hover:text-[var(--ink)]"
         >
           <Maximize2 className="w-4 h-4" />
           View
@@ -81,7 +82,7 @@ const MermaidChart = ({ chart }) => {
 
       {/* Modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="w-auto h-auto min-w-[85vw] max-w-[90vw] min-h-[85vh] max-h-[90vh] p-8 bg-black border border-white/10">
+        <DialogContent className="w-auto h-auto min-w-[85vw] max-w-[90vw] min-h-[85vh] max-h-[90vh] p-8 bg-white border border-[var(--line)]">
           <DialogTitle className="sr-only">
             Enlarged Diagram View
           </DialogTitle>

@@ -22,6 +22,19 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // IND Submission and Chat are retired from the product surface. Their code
+  // stays in the repo (inert); these redirects send any direct visits home.
+  // Matches public paths regardless of the (main)/(chat) route groups.
+  async redirects() {
+    return [
+      { source: '/chat', destination: '/', permanent: false },
+      { source: '/chat/:path*', destination: '/', permanent: false },
+      { source: '/ind-creation', destination: '/', permanent: false },
+      { source: '/ind-creation/:path*', destination: '/', permanent: false },
+      { source: '/ind-forms/:path*', destination: '/', permanent: false },
+      { source: '/docs/ind-submission', destination: '/', permanent: false },
+    ];
+  },
   // Next 16 notes:
   // - `experimental.ppr` was removed (merged into the stricter `cacheComponents`).
   //   Dropped here; the app uses standard rendering.

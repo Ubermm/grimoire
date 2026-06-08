@@ -2,8 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { toast, Toaster } from 'sonner';
-import ComplianceDashboard from '@/components/ComplianceDashboard';
+import AnalyticsDashboard from '@/components/analytics/AnalyticsDashboard';
 
 export default function HomePage() {
   const [isMobile, setIsMobile] = useState(false);
@@ -36,9 +35,5 @@ export default function HomePage() {
         </div>
       );
     }
-  return (
-    <>
-      <ComplianceDashboard />
-    </>
-  );
+  return <AnalyticsDashboard />;
 }

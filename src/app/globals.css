@@ -168,3 +168,41 @@ img[alt=md-image] {
   font-size: 38px;
   letter-spacing: 2px;
 }
+
+/* IBM Plex Mono accent utility, usable anywhere (the variable is set on <html>
+   by next/font in the root layout). Lets the dark landing + global chrome use
+   the accent typeface without depending on the .module-theme scope. */
+.font-plex {
+  font-family: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ---- Landing (dark, premium) animated backdrop --------------------------- */
+.hero-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 52px 52px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 78%);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 78%);
+}
+@keyframes glow-drift {
+  0%   { transform: translate(-8%, -6%) scale(1); }
+  50%  { transform: translate(8%, 6%) scale(1.08); }
+  100% { transform: translate(-8%, -6%) scale(1); }
+}
+.hero-glow { animation: glow-drift 16s ease-in-out infinite; }
+@keyframes sheen {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.text-sheen {
+  background: linear-gradient(100deg, #fafafa 30%, #9b9b9b 50%, #fafafa 70%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: sheen 6s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-glow, .text-sheen { animation: none; }
+}

@@ -1,547 +1,262 @@
 //@ts-nocheck
 'use client';
-
-import React, { useState, useEffect, useRef, Suspense, useMemo } from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Search, ArrowRightLeft, AlertCircle, Users, Target, LineChart, Code2, Binary, Lock, BookOpen, FileCheck, Zap, Shield } from "lucide-react";
+import React from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
-import { toast } from 'sonner';
-import Lattice from './Lattice';
-import { AnimatePresence } from 'framer-motion';
-import Head from 'next/head';
+import {
+  ShieldCheck, Sparkles, ArrowRight, ArrowUpRight, Cpu, ScrollText, GitCompare,
+  FileCheck2, Workflow, Layers, Check, ChevronDown,
+} from 'lucide-react';
+import {
+  MarketingPage, Reveal, Counter, Eyebrow, SectionHeading, Panel, Glow, PrimaryCTA, SecondaryCTA, EASE,
+} from '@/components/landing/ui';
 
-const UnderlinedWords = ({ words, activeIndex }) => {
-  const containerRef = useRef(null);
-  const [underlineProps, setUnderlineProps] = useState({ left: 0, width: 0 });
-  const wordRefs = useRef([]);
+const HeroLottie = dynamic(() => import('@/components/landing/HeroLottie'), { ssr: false });
 
-  useEffect(() => {
-    if (wordRefs.current[activeIndex] && containerRef.current) {
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const wordRect = wordRefs.current[activeIndex].getBoundingClientRect();
-      
-      // Get the position relative to the container
-      setUnderlineProps({
-        left: wordRect.left - containerRect.left,
-        width: wordRect.width,
-      });
-    }
-  }, [activeIndex, words]);
+const FRAMEWORKS = ['FDA 21 CFR', 'EU AI Act 2024/1689', 'GxP', 'ISO/IEC 42001', '21 CFR Part 11'];
 
+const REGS = [
+  { href: '/audit', icon: ShieldCheck, title: 'FDA 21 CFR', desc: 'Title 21 audits, warning-letter analysis and Prolog validation — proven, not claimed.', cta: 'Start an audit' },
+  { href: '/ai-act', icon: Sparkles, title: 'EU AI Act', desc: 'Risk classification, Article 5 & 50 screening, GPAI obligations and Annex IV docs.', cta: 'Classify a system' },
+];
+
+const STEPS = [
+  { icon: Layers, title: 'Compile the rule', body: 'Regulatory text is compiled into an executable Prolog program — the law as logic.' },
+  { icon: FileCheck2, title: 'Answer & assert', body: 'Your responses become facts. Documents autofill the forms; nothing is hand-waved.' },
+  { icon: Workflow, title: 'Prove compliance', body: 'The engine derives a pass/fail verdict and records the exact rules behind it.' },
+];
+
+const FAQ = [
+  { q: 'How is this different from a compliance checklist?', a: 'Checklists record opinions. Grimoire One compiles the regulation into a Prolog program and derives a verdict from your evidence — every pass or fail is backed by the exact rules that fired.' },
+  { q: 'Which regulations are supported?', a: 'FDA Title 21 CFR (audits, Part 11, warning-letter analysis) and the EU AI Act (Regulation 2024/1689) today, with a shared engine designed to take on more.' },
+  { q: 'Can I export evidence for an auditor?', a: 'Yes. Every classification and audit produces a report containing the verdict, its basis, the underlying Prolog, and timestamps — ready to hand over.' },
+  { q: 'Do I have to write Prolog?', a: 'No. You answer plain-language screening forms (and can autofill them from documents). The logic runs underneath.' },
+];
+
+export default function HomePage() {
   return (
-    <div className="relative flex flex-col items-center" ref={containerRef}>
-      <div className="flex items-center justify-center">
-        <span className="mr-2">Grimoire Works with</span>
-        <div className="relative inline-flex">
-          {words.map((word, index) => (
-            <span
-              key={index}
-              ref={el => wordRefs.current[index] = el}
-              className={`mx-1 text-white ${index === activeIndex ? 'opacity-100' : 'opacity-0 absolute'}`}
-              style={{
-                position: index === activeIndex ? 'relative' : 'absolute',
-                left: index === activeIndex ? 'auto' : '50%',
-                transform: index === activeIndex ? 'none' : 'translateX(-50%)'
-              }}
-            >
-              {word}
-            </span>
-          ))}
+    <MarketingPage>
+      {/* ============================================================ Hero */}
+      <section className="relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-0">
+          <Glow className="left-1/2 top-[-22%] h-[52rem] w-[52rem] -translate-x-1/2" />
+          <div className="absolute inset-0 hero-grid opacity-60" />
+          <HeroLottie src="/lottie/network.json" className="absolute right-[-10%] top-[4%] hidden h-[36rem] w-[36rem] opacity-[0.16] [filter:grayscale(1)] lg:block" />
         </div>
-      </div>
-      {/* Animated underline */}
-      <div
-        className="absolute bottom-0 h-0.5 bg-white transition-all duration-300 ease-in-out"
-        style={{
-          left: `${underlineProps.left}px`,
-          width: `${underlineProps.width}px`
-        }}
-      />
-    </div>
-  );
-};
-const HomePage = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  
-  useEffect(() => {
-    // Check if the 'from' search parameter is 'register'
-    if (searchParams.get('from') === 'register') {
-      window.history.pushState({}, '', '/');
-      window.location.reload();
-    }
-  }, [searchParams]);
 
-  const [currentTermIndex, setCurrentTermIndex] = useState(0);
-  const terms = ["Formal Verification", "Logic Engines", "Proof Systems"];
-  const painPoints = [
-    "We had to recall thousands of units due to compliance gaps.",
-    "Regulatory audits keep catching inconsistencies in our records.",
-    "Supply chain issues disrupt our validation processes.",
-    "We struggle to prove compliance with evolving FDA regulations."
-  ];
-  
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTermIndex((prevIndex) => (prevIndex + 1) % terms.length);
-    }, 2500); // Change terms every 2.5 seconds
-    
-    return () => clearInterval(interval);
-  }, []);
-
-  const [activeWordIndex, setActiveWordIndex] = useState(0);
-  const words = ["cGMP Consultants", "Pharmaceutical Companies", "CROs"];
-
-  // Cycle the active word using a timeout
-  useEffect(() => {
-    let timeoutId;
-    const cycleWords = () => {
-      setActiveWordIndex(prev => (prev + 1) % words.length);
-      timeoutId = setTimeout(cycleWords, 2500); // Change active word every 2.5 seconds
-    };
-    timeoutId = setTimeout(cycleWords, 2500);
-    return () => clearTimeout(timeoutId);
-  }, []);
-
-  const wordsMemo = useMemo(() => words, []);
-  const stats = [
-    { value: "3,000+", label: "FDA Warning Letters Analyzed" },
-    { value: "50+", label: "Regulatory Citations Per Letter" },
-    { value: "100%", label: "Title 21 CFR Sections Coverage" }
-  ];
-  
-  return (
-    <>
-      <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-      </Head>
-      <div className="min-h-screen bg-black">
-        <style jsx global>{`
-        @media (max-width: 768px) {  /* Adjust for your breakpoint */
-            .hide-on-mobile {
-              display: none !important;
-            }
-          }
-          @media (max-width: 640px) {
-            html, body {
-              overflow-x: hidden;
-              width: 100%;
-              position: relative;
-            }
-            .container {
-              padding-left: 1rem;
-              padding-right: 1rem;
-            }
-          }
-          
-          @media (max-width: 768px) {
-            .text-3xl {
-              font-size: 1.75rem;
-            }
-            .text-5xl {
-              font-size: 2.25rem;
-            }
-            .text-4xl {
-              font-size: 1.875rem;
-            }
-            .text-2xl {
-              font-size: 1.5rem;
-            }
-            .grid {
-              grid-template-columns: repeat(1, minmax(0, 1fr));
-            }
-            .flex-col-reverse-mobile {
-              flex-direction: column-reverse;
-            }
-            .mb-10-mobile {
-              margin-bottom: 2.5rem;
-            }
-          }
-          
-          @media (orientation: landscape) and (max-height: 500px) {
-            .min-h-screen {
-              min-height: 100%;
-            }
-          }
-          
-          * {
-            -webkit-tap-highlight-color: transparent;
-          }
-          
-          input, button {
-            font-size: 16px;
-          }
-        `}</style>
-
-        {/* Hero Section */}
-        <section
-          className="relative flex items-center justify-center min-h-[85vh] bg-black bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: "url('/Header.jpg')" }}
-        >
-          {/* Glassmorphic Overlay */}
-          <div className="absolute inset-0 bg-black/50" />
-
-          {/* Content Container */}
-          <div className="relative z-10 text-center px-4 sm:px-6 py-10 max-w-4xl mx-auto">
-            {/* Headline */}
-            <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-8 pt-10 sm:pt-20">
-              Power FDA Compliance Audits With
-              <div className="relative h-8 sm:h-10 md:h-12 mt-2 overflow-hidden">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={terms[currentTermIndex]}
-                    className="absolute w-full text-purple-500"
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: -20, opacity: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    {terms[currentTermIndex]}
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            </h1>
-            
-            {/* Secondary Headline */}
-            <motion.h2
-              className="text-xl xs:text-2xl sm:text-3xl md:text-4xl font-semibold text-white mb-6 pt-2 sm:pt-4"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              We Help <span className="text-white/80">Audit Documentation</span> Not Just Store it 
-            </motion.h2>
-
-            {/* Compliance Description */}
-            <motion.div
-              className="text-sm sm:text-base md:text-lg text-white/70 mb-8 sm:mb-10 max-w-2xl mx-auto"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-            >
-              Grimoire is a protocol validation layer, designed for manufacturers of FDA-regulated products, helping streamline clinical trial audits, automate CFR references, and provide direct access to relevant FDA warning letters and regulatory texts for better compliance and risk management.
-            </motion.div>
-
-            {/* CTA Buttons */}
-            <motion.div
-              className="flex flex-col xs:flex-row items-center justify-center gap-4"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.8 }}
-            >
-              <Link href="/demo">
-                <Button className="hidden bg-white text-black px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base hover:bg-gray-200 w-full xs:w-auto">
-                  Book a Demo
-                </Button>
-              </Link>
-              <Link href="/audit">
-                <Button variant="outline" className="border-white text-white hover:bg-white/10 px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base w-full xs:w-auto">
-                  Build an Audit
-                </Button>
-              </Link>
-            </motion.div>
-
-            {/* Animated Underlined Entities */}
-            <motion.div
-              className="text-base sm:text-lg md:text-xl text-white/90 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed pt-10 sm:pt-14"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-            >
-              <></>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Multi-regulation hub */}
-        <section className="bg-black py-16 sm:py-20 border-t border-white/10">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <h2 className="text-center text-2xl sm:text-3xl font-bold text-white mb-3">Formally Verified Regulatory Compliance</h2>
-            <p className="text-center text-white/60 mb-10 max-w-2xl mx-auto">
-              Compile regulations into executable logic. Prove compliance — don&apos;t just claim it.
-            </p>
-            <div className="grid gap-6 sm:grid-cols-2">
-              <Link href="/audit" className="group rounded-2xl border border-white/10 bg-white/5 p-8 transition-all hover:border-purple-500/50 hover:bg-white/10">
-                <div className="text-3xl mb-3">🇺🇸</div>
-                <h3 className="text-xl font-semibold text-white mb-2">FDA 21 CFR</h3>
-                <p className="text-white/60 text-sm mb-4">Title 21 compliance, warning-letter analysis, Prolog validation, and IND submissions.</p>
-                <span className="text-purple-400 text-sm font-medium group-hover:underline">Start audit →</span>
-              </Link>
-              <Link href="/ai-act" className="group rounded-2xl border border-white/10 bg-white/5 p-8 transition-all hover:border-purple-500/50 hover:bg-white/10">
-                <div className="text-3xl mb-3">🇪🇺</div>
-                <h3 className="text-xl font-semibold text-white mb-2">EU AI Act</h3>
-                <p className="text-white/60 text-sm mb-4">Risk classification, Article 5 &amp; 50 screening, GPAI obligations, and Annex IV documentation.</p>
-                <span className="text-purple-400 text-sm font-medium group-hover:underline">Start audit →</span>
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Stats Section */}
-        <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4 sm:p-6 relative overflow-hidden">
-          {/* Animated Graph Background */}
-          <div className="absolute inset-0 opacity-20">
-            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <motion.path 
-                d="M0,80 C20,40 40,60 60,30 C80,0 100,50 120,20" 
-                stroke="red" 
-                strokeWidth="1" 
-                fill="transparent"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
-              />
-            </svg>
-          </div>
-          
-          <motion.h1 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center relative z-10"
+        <div className="relative mx-auto max-w-5xl px-6 pb-24 pt-28 text-center sm:pt-36">
+          <motion.h1
+            initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.05, ease: EASE }}
+            className="mx-auto max-w-4xl text-4xl font-semibold leading-[1.05] tracking-tight sm:text-6xl"
           >
-            Exhaustive Verification Made Possible
+            Prove compliance.<br /><span className="text-sheen">Don&apos;t just claim it.</span>
           </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
-            className="text-base sm:text-lg text-gray-400 mt-4 text-center max-w-2xl px-4 relative z-10"
+
+          <motion.p
+            initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.14, ease: EASE }}
+            className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/55 sm:text-lg"
           >
-            We provide full validation over sampling, ensuring compliance with every aspect of Title 21 CFR.
+            Grimoire One compiles regulations into executable logic and validates your evidence against them — turning FDA 21 CFR and the EU AI Act into provable, auditable verdicts.
           </motion.p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mt-8 sm:mt-10 w-full max-w-5xl px-4 relative z-10">
-            {stats.map((stat, index) => (
-              <motion.div 
-                key={index}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-              >
-                <Card className="bg-gray-900 p-4 sm:p-6 rounded-2xl relative overflow-hidden shadow-lg">
-                  <div className="absolute inset-0 opacity-10 bg-gradient-to-r from-black-700 to-black-900" />
-                  <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black-800 to-transparent" />
-                  <CardContent className="relative flex flex-col items-center justify-center p-0 sm:p-2">
-                    <motion.h2 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5 }}
-                      className="text-3xl sm:text-4xl md:text-5xl font-bold"
-                    >
-                      {stat.value}
-                    </motion.h2>
-                    <p className="text-gray-400 text-xs sm:text-sm mt-2">{stat.label}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-          
-          {/* See How Button */}
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
-            className="mt-8 sm:mt-10 relative z-10"
+
+          <motion.div
+            initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.22, ease: EASE }}
+            className="mt-9 flex flex-wrap items-center justify-center gap-3"
           >
-            <Button className="bg-white text-black px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold shadow-md hover:bg-gray-200 transition" onClick={() => window.location.href='/docs/quickstart'}>
-              See How
-            </Button>
+            <PrimaryCTA href="/audit">Start an audit <ArrowRight className="h-4 w-4" /></PrimaryCTA>
+            <SecondaryCTA href="/ai-act">EU AI Act</SecondaryCTA>
+            <Link href="/docs" className="font-plex inline-flex items-center gap-1.5 px-3 py-2.5 text-sm text-white/55 transition-colors hover:text-white">
+              Read the docs <ArrowUpRight className="h-4 w-4" />
+            </Link>
           </motion.div>
         </div>
+      </section>
 
-        {/* Pain Points Section */}
-        <section className="relative bg-black text-white py-16 sm:py-24">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
-            {/* Section Title */}
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-center mb-12 sm:mb-20 tracking-tight text-purple-400">
-              Does this sound familiar?
-            </h2>
-            
-            {/* Pain Points Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-12 sm:mb-16">
-              {painPoints.map((point, index) => {
-                // Split the text to highlight specific words in orange
-                const parts = point.split(/\b(actions|questions|semantic|decisions)\b/);
-                
-                return (
-                  <motion.div
-                    key={index}
-                    className="transform transition duration-300"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: index * 0.15 }}
-                  >
-                    <div className="h-full relative">
-                      {/* Top curved border */}
-                      <div className="absolute top-0 left-0 w-full h-16 border-t border-l border-r border-gray-700 rounded-t-2xl" />
-                      
-                      {/* Content area */}
-                      <div className="pt-16 px-4 sm:px-6 pb-6">
-                        <p className="text-center text-base sm:text-lg font-medium">
-                          {parts.map((part, i) => {
-                            if (part === "actions" || part === "questions" || 
-                                part === "semantic" || part === "decisions") {
-                              return <span key={i} className="text-orange-400">{part}</span>;
-                            }
-                            return part;
-                          })}
-                        </p>
-                        
-                        {/* Solved indicator */}
-                        <div className="text-center mt-6">
-                          <span className="text-green-400 text-sm">Solved </span>
-                          <span className="text-green-400">✓</span>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div> 
-          </div>        
-        </section>
-
-        {/* Ensure Readiness Section */}
-        <section className="bg-black text-white py-12 sm:py-16">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-12 flex flex-col lg:flex-row items-center lg:items-start">
-            
-            {/* Left Section: CTA Text & Button */}
-            <div className="lg:w-1/2 text-left mb-8 lg:mb-0">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
-                Ensure Your FDA Inspection Readiness
-              </h2>
-              <p className="text-gray-300 mb-6">
-                Stay ahead of regulatory requirements and avoid delays. Make sure your clinical trial meets FDA compliance standards.
-              </p>
-              <Link href="/audit">
-                <Button className="bg-white text-black px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-semibold hover:bg-gray-300 w-full sm:w-auto">
-                  Check FDA Compliance
-                </Button>
-              </Link>
+      {/* ====================================================== Frameworks strip */}
+      <section className="border-t border-white/5 py-12">
+        <div className="mx-auto max-w-5xl px-6">
+          <Reveal className="flex flex-col items-center gap-6">
+            <Eyebrow>Coverage across the frameworks that matter</Eyebrow>
+            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+              {FRAMEWORKS.map((f) => (
+                <span key={f} className="font-plex text-sm text-white/40 transition-colors hover:text-white/70">{f}</span>
+              ))}
             </div>
+          </Reveal>
+        </div>
+      </section>
 
-            {/* Right Section: Study Quote */}
-            <div className="lg:w-1/2 lg:pl-12 border-t lg:border-t-0 lg:border-l border-gray-700 pt-8 lg:pt-0">
-              <blockquote className="italic text-gray-400">
-                "Out of 8,863 clinical trials required to report results, only 
-                <span className="text-white font-semibold"> 39.5% </span> 
-                met the 1-year deadline, while 
-                <span className="text-white font-semibold"> 68.8% </span> 
-                reported at any time. Compliance ranged from 
-                <span className="text-white font-semibold"> 66.0% </span> 
-                for on-time delayed reporting requests to 
-                <span className="text-white font-semibold"> 99.1% </span> 
-                for document submission with results."
-              </blockquote>
-              <div className="text-gray-500 text-sm mt-2">— JAMA Intern Med, 2021</div>
-            </div>
-            
-          </div>
-        </section>
-
-        {/* Identify Gaps Section */}
-        <section className="bg-black text-white py-12 sm:py-16">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-12 flex flex-col-reverse lg:flex-row items-center lg:items-start">
-            
-            {/* Right Section: Study Quote */}
-            <div className="lg:w-1/2 mb-8 lg:mb-0 lg:pr-12 border-t lg:border-t-0 lg:border-r border-gray-700 pt-8 lg:pt-0">
-              <blockquote className="italic text-gray-400">
-                "Clinical data inconsistencies and compliance blind spots can delay trials and regulatory approvals. Analyzing similar FDA warning letters helps uncover adjacent violations, mitigating risks before they become costly roadblocks."
-              </blockquote>
-              <div className="text-gray-500 text-sm mt-2">— Oracle Health Sciences Survey, 2018</div>
-            </div>
-            
-            {/* Left Section: CTA Text & Button */}
-            <div className="lg:w-1/2 text-left lg:pl-12">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
-                Proactively Identify Compliance Gaps
-              </h2>
-              <p className="text-gray-300 mb-6">
-                Discover regulatory blind spots before they become violations. Leverage insights from past FDA warning letters to strengthen your compliance strategy.
-              </p>
-              <Link href="/analytics">
-                <Button className="bg-white text-black px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-semibold hover:bg-gray-300 w-full sm:w-auto">
-                  Analyze FDA Violations
-                </Button>
-              </Link>
-            </div>
-            
-          </div>
-        </section>
-
-        {/* Logical Precision Section */}
-        <section className="bg-gradient-to-r from-black via-gray-800 to-black py-16 sm:py-20">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-12">
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="flex flex-col lg:flex-row items-center gap-8 sm:gap-12"
-            >
-              {/* Left Column: Engaging Content */}
-              <div className="lg:w-1/2">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
-                  Unleash Logical Precision in Compliance
-                </h2>
-                <p className="text-gray-300 mt-4 text-base sm:text-lg">
-                  Our platform harnesses the power of Prolog—a cutting-edge logic programming language—to transform your regulatory compliance. We augment your existing workflows by offering exhaustive verification, intelligent analysis, and actionable insights.
-                </p>
-                <ul className="list-disc ml-6 mt-6 text-gray-300 space-y-2 text-sm sm:text-base">
-                  <li>
-                    <strong>Prolog-Powered Verification:</strong> Leverage declarative logic for comprehensive, automated validation that empowers your team to focus on strategic decisions.
-                  </li>
-                  <li>
-                    <strong>Find Similar Warning Letters:</strong> Detect patterns and trends in FDA warning letters before they become issues.
-                  </li>
-                  <li>
-                    <strong>Deep CFR Code Analysis:</strong> Dissect complex regulatory texts to ensure every code is accounted for.
-                  </li>
-                </ul>
-                <Link href="/audit">
-                  <Button className="mt-6 bg-white text-black px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-semibold hover:bg-gray-200 w-full sm:w-auto">
-                    Discover How
-                  </Button>
+      {/* ====================================================== Regulation hub */}
+      <section className="border-t border-white/5 py-20">
+        <div className="mx-auto max-w-5xl px-6">
+          <Reveal className="mb-10"><SectionHeading eyebrow="Choose your regulation" title="One engine, every framework" /></Reveal>
+          <div className="grid gap-5 sm:grid-cols-2">
+            {REGS.map((r, i) => (
+              <Reveal key={r.href} delay={i * 0.08}>
+                <Link href={r.href} className="group block h-full rounded-2xl border border-white/10 bg-white/[0.025] p-7 transition-all hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.05]">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/[0.06] ring-1 ring-white/10 transition-colors group-hover:bg-white/[0.12]">
+                    <r.icon className="h-5 w-5 text-zinc-200" />
+                  </div>
+                  <h3 className="font-plex mt-5 text-lg font-semibold">{r.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/50">{r.desc}</p>
+                  <span className="font-plex mt-5 inline-flex items-center gap-1.5 text-sm text-white/80 transition-all group-hover:gap-2.5">{r.cta} <ArrowRight className="h-4 w-4" /></span>
                 </Link>
-              </div>
-              
-              {/* Right Column: Visual Illustration */}
-              <div className="lg:w-1/2 mt-8 lg:mt-0 hide-on-mobile">
-                <Lattice/>
-              </div>
-            </motion.div>
+              </Reveal>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Help Shape Section */}
-        <section
-          className="relative bg-cover bg-center text-white py-12 sm:py-16"
-          style={{ backgroundImage: "url('/DHeader.jpg')" }}
-        >
-          <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-          <div className="container mx-auto px-4 sm:px-6 lg:px-12 relative z-10 text-center">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
-              Help Shape the Future of Clinical Compliance
-            </h2>
-            <p className="text-gray-300 mb-6 max-w-2xl mx-auto text-sm sm:text-base">
-              We're rolling out new features in beta and collaborating with trial managers 
-              and manufacturers to develop comprehensive tools that address real-world challenges.
+      {/* =============================================== Feature 1 — verification */}
+      <section className="border-t border-white/5 py-20">
+        <div className="mx-auto grid max-w-5xl items-center gap-12 px-6 lg:grid-cols-2">
+          <Reveal>
+            <Eyebrow>Formal verification</Eyebrow>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">The law, as a program</h2>
+            <p className="mt-4 text-[0.97rem] leading-relaxed text-white/55">
+              Every requirement is compiled into Prolog. Your answers become facts, and the engine <em>derives</em> the verdict — deterministic, repeatable, and impossible to fudge.
             </p>
-            <Link href="/contact">
-              <Button className="hidden bg-white text-black px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-semibold hover:bg-black hover:text-white w-full sm:w-auto">
-                Contact Us
-              </Button>
-            </Link>
-          </div>
-        </section>
-      </div>
-    </>
-  );
-};
+            <ul className="mt-6 space-y-2.5">
+              {['Deterministic pass/fail, not a confidence score', 'Every verdict cites the rules that fired', 'Re-run any time and get the same answer'].map((t) => (
+                <li key={t} className="flex items-start gap-2.5 text-sm text-white/65"><Check className="mt-0.5 h-4 w-4 shrink-0 text-zinc-300" /> {t}</li>
+              ))}
+            </ul>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <Panel className="overflow-hidden">
+              <div className="flex items-center gap-1.5 border-b border-white/10 px-4 py-3">
+                <span className="h-2.5 w-2.5 rounded-full bg-white/15" /><span className="h-2.5 w-2.5 rounded-full bg-white/15" /><span className="h-2.5 w-2.5 rounded-full bg-white/15" />
+                <span className="font-plex ml-2 text-xs text-white/35">classification.pl</span>
+              </div>
+              <pre className="font-plex overflow-x-auto p-5 text-[12.5px] leading-relaxed text-white/70">
+<span className="text-white/35">% high-risk if a listed Annex III use</span>{'\n'}
+<span className="text-zinc-200">high_risk</span>(System) :-{'\n'}
+{'    '}annex_iii_use(System),{'\n'}
+{'    '}\+ article_6_3_exempt(System).{'\n\n'}
+<span className="text-white/35">?- </span>classify(acme_hiring_ai, Risk).{'\n'}
+Risk = <span className="text-emerald-300">high</span>.  <span className="text-emerald-300/80">✓ proven</span>
+              </pre>
+            </Panel>
+          </Reveal>
+        </div>
+      </section>
 
-export default HomePage;
+      {/* =============================================== Feature 2 — evidence */}
+      <section className="border-t border-white/5 py-20">
+        <div className="mx-auto grid max-w-5xl items-center gap-12 px-6 lg:grid-cols-2">
+          <Reveal className="lg:order-2">
+            <Eyebrow>Evidence-ready</Eyebrow>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">Hand an auditor proof, not a promise</h2>
+            <p className="mt-4 text-[0.97rem] leading-relaxed text-white/55">
+              Each audit and classification produces a report: the verdict, its basis, the underlying logic, and timestamps. Export it and move on.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-2">
+              {['Classification basis', 'Validation results', 'Annex IV sections', 'The Prolog itself'].map((t) => (
+                <span key={t} className="font-plex rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/55">{t}</span>
+              ))}
+            </div>
+          </Reveal>
+          <Reveal delay={0.1} className="lg:order-1">
+            <Panel className="p-6">
+              <div className="flex items-center justify-between">
+                <span className="font-plex text-xs uppercase tracking-wide text-white/40">Evidence report</span>
+                <span className="font-plex rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-300 ring-1 ring-inset ring-emerald-400/20">Passed</span>
+              </div>
+              <div className="mt-4 space-y-2.5">
+                {['Article 5 — no prohibited practice', 'Annex III(4) — employment use identified', 'Annex IV — 9/9 sections complete', 'Article 50 — transparency disclosed'].map((t, i) => (
+                  <div key={t} className="flex items-center gap-2.5 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-white/65">
+                    <Check className="h-4 w-4 shrink-0 text-emerald-300" /> {t}
+                  </div>
+                ))}
+              </div>
+            </Panel>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* =============================================================== Stats */}
+      <section className="border-t border-white/5 py-20">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="grid gap-8 sm:grid-cols-3">
+            {[
+              { to: 3000, suffix: '+', label: 'FDA warning letters analyzed' },
+              { to: 50, suffix: '+', label: 'Regulatory citations per letter' },
+              { to: 100, suffix: '%', label: 'Title 21 CFR section coverage' },
+            ].map((s, i) => (
+              <Reveal key={s.label} delay={i * 0.08} className="text-center">
+                <p className="font-plex text-4xl font-semibold tracking-tight sm:text-5xl"><Counter to={s.to} suffix={s.suffix} /></p>
+                <p className="mt-2 text-sm text-white/45">{s.label}</p>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================= How it works */}
+      <section className="border-t border-white/5 py-20">
+        <div className="mx-auto max-w-5xl px-6">
+          <Reveal className="mb-12"><SectionHeading eyebrow="How it works" title="The law, compiled and proven" /></Reveal>
+          <div className="grid gap-5 md:grid-cols-3">
+            {STEPS.map((s, i) => (
+              <Reveal key={s.title} delay={i * 0.08}>
+                <Panel className="h-full p-6">
+                  <div className="flex items-center gap-3">
+                    <span className="font-plex flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.06] text-sm text-white/70 ring-1 ring-white/10">{i + 1}</span>
+                    <s.icon className="h-5 w-5 text-white/35" />
+                  </div>
+                  <h3 className="font-plex mt-4 text-base font-semibold">{s.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/50">{s.body}</p>
+                </Panel>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* =============================================================== Quote */}
+      <section className="border-t border-white/5 py-20">
+        <Reveal className="mx-auto max-w-3xl px-6 text-center">
+          <ScrollText className="mx-auto h-6 w-6 text-white/30" />
+          <p className="mt-6 text-xl font-medium leading-relaxed tracking-tight text-white/85 sm:text-2xl">
+            “Sampling tells you what you checked. Formal verification tells you what&apos;s true — across every requirement, every time.”
+          </p>
+          <p className="font-plex mt-5 text-xs uppercase tracking-[0.14em] text-white/40">The Grimoire One thesis</p>
+        </Reveal>
+      </section>
+
+      {/* ================================================================= FAQ */}
+      <section className="border-t border-white/5 py-20">
+        <div className="mx-auto max-w-3xl px-6">
+          <Reveal className="mb-10"><SectionHeading eyebrow="FAQ" title="Questions, answered" /></Reveal>
+          <div className="divide-y divide-white/10 border-y border-white/10">
+            {FAQ.map((f, i) => (
+              <Reveal key={f.q} delay={i * 0.04}>
+                <details className="group py-5">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+                    <span className="font-plex text-[0.97rem] font-medium text-white/90">{f.q}</span>
+                    <ChevronDown className="h-4 w-4 shrink-0 text-white/40 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <p className="mt-3 text-[1.02rem] leading-relaxed text-white/65">{f.a}</p>
+                </details>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================= Final CTA */}
+      <section className="relative overflow-hidden border-t border-white/5 py-24">
+        <Glow className="left-1/2 top-1/2 h-[32rem] w-[32rem] -translate-x-1/2 -translate-y-1/2" />
+        <Reveal className="relative mx-auto max-w-2xl px-6 text-center">
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Make your next inspection a formality.</h2>
+          <p className="mx-auto mt-4 max-w-xl text-white/55">Start with a single CFR audit or classify an AI system against the EU AI Act — and walk away with proof.</p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <PrimaryCTA href="/audit">Build an audit <ArrowRight className="h-4 w-4" /></PrimaryCTA>
+            <SecondaryCTA href="/pricing">See pricing</SecondaryCTA>
+          </div>
+        </Reveal>
+      </section>
+    </MarketingPage>
+  );
+}

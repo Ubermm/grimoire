@@ -162,18 +162,19 @@ const AutoFill = memo(({ formFields, onAutofill, className }: AutoFillProps) => 
       <div className="relative group">
         {/* Button with darker purple background and larger icon */}
         <Button
-          className="rounded-full p-3 bg-purple-700 hover:bg-purple-800 transition-colors"
+          className="rounded-full p-3 bg-purple-700 hover:bg-purple-800 transition-colors text-white hover:text-white"
           variant="outline"
           onClick={() => setIsOpen(true)}
         >
-          AutoFill 
-          <Brush className="h-8 w-8 text-white" />
+          <span className="text-white">AutoFill</span>
+          <Brush className="h-5 w-5 text-white" />
+          <span className="hidden text-xs font-normal text-white/80 sm:inline">Fill from text or files</span>
         </Button>
-    
+
         {/* Tooltip positioned ABOVE the button */}
-        <span className="absolute left-1/2 bottom-full mb-2 transform -translate-x-1/2 w-max bg-gray-900 text-white text-xs rounded-md px-3 py-2 
+        <span className="absolute left-1/2 bottom-full mb-2 transform -translate-x-1/2 w-max bg-gray-900 text-white text-xs rounded-md px-3 py-2
           opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
-          Autofill: Fill form values based on text or documents
+          Autofill form values from your text or uploaded documents
         </span>
       </div>
     );            

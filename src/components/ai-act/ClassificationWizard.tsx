@@ -19,7 +19,7 @@ const GROUPS: { title: string; ids: string[] }[] = [
 
 function Segmented({ options, value, onChange }: { options: string[]; value?: string; onChange: (v: string) => void }) {
   return (
-    <div className="inline-flex gap-0.5 rounded-full border border-[var(--line-strong)] bg-black/[0.03] p-1">
+    <div className="inline-flex w-fit gap-0.5 rounded-full border border-[var(--line-strong)] bg-black/[0.03] p-1">
       {options.map((opt) => (
         <button
           key={opt}

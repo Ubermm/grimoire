@@ -691,26 +691,12 @@ const renderCompareResults = (audit) => {
                 New Letter Analysis
               </Button>
             </DialogTrigger>
-            <Button 
-              onClick={() => router.push('/ind-creation')}
-              className="border border-white bg-black text-white hover:bg-white hover:text-black transition-colors duration-300 gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              New IND Submission
-            </Button>
-            <Button 
+            <Button
               onClick={() => router.push('/audit')}
               className="border border-white bg-black text-white hover:bg-white hover:text-black transition-colors duration-300 gap-2"
             >
               <Plus className="w-4 h-4" />
               New Audit Flow
-            </Button>
-            <Button 
-              onClick={() => router.push('/chat')}
-              className="border border-white bg-black text-white hover:bg-white hover:text-black transition-colors duration-300 gap-2"
-            >
-              <MessageSquare className="w-4 h-4" />
-              CFR Consultation
             </Button>
             </div>
             <DialogContent className="bg-black border border-white/10 min-w-[750px]">
@@ -864,14 +850,7 @@ const renderCompareResults = (audit) => {
             >
               <Plus className="w-4 h-4" />
               New Audit Flow
-            </Button> 
-                <Button 
-                  onClick={() => router.push('/chat')}
-                  className="border border-white bg-black text-white hover:bg-white hover:text-black transition-colors duration-300 gap-2 mt-4 ml-2"
-                >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  CFR Consultation Chat
-                </Button>
+            </Button>
                 </div>
               </div>
             </div>
