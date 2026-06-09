@@ -180,8 +180,9 @@ export async function POST(request: Request) {
         }
 
         const { content } = await request.json();
-        const { text } = await generateText({
+        const textPromise = generateText({
             model: customModel(DEFAULT_MODEL_NAME),
+            maxTokens: 400,
             messages: [{
                 role: 'user',
                 content: `You are a specialized FDA regulatory analyst. Your task is to analyze FDA warning letters
@@ -240,11 +241,14 @@ export async function POST(request: Request) {
             }]
         });
 
-        const { cfrCodes, fdcCodes } = extractCodes(text);
+        // The blob loads don't depend on the model call — run all three concurrently.
+        const [{ text }, cfrFrequencyMap, fdcFrequencyMap] = await Promise.all([
+            textPromise,
+            loadFrequencyData('CFR.jsonl'),
+            loadFrequencyData('FDC.jsonl'),
+        ]);
 
-        // Load frequency data
-        const cfrFrequencyMap = await loadFrequencyData('CFR.jsonl');
-        const fdcFrequencyMap = await loadFrequencyData('FDC.jsonl');
+        const { cfrCodes, fdcCodes } = extractCodes(text);
 
         // Generate visualizations
         const cfrVisualization = generateMermaidDiagram(cfrCodes, cfrFrequencyMap);
@@ -348,7 +352,8 @@ export async function POST(request: Request) {
         }, { status: 200 });
     } catch (error) {
         console.error('Search error:', error);
-        return new Response('Internal server error', { status: 500 });
+        // JSON error body — the client calls res.json() and surfaces this message.
+        return Response.json({ error: error?.message || 'Internal server error' }, { status: 500 });
     }
 }
 

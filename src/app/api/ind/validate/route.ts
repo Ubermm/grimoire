@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Validation logic using claude-3-haiku-20240307
+// Validation logic using claude-sonnet-4-6
 async function validateDocument(document: any): Promise<ValidationReport> {
   const errors: Array<{ field: string; message: string }> = [];
   const warnings: Array<{ field: string; message: string }> = [];
@@ -139,13 +139,13 @@ async function validateDocument(document: any): Promise<ValidationReport> {
   };
 }
 
-// AI validation using claude-3-haiku-20240307
+// AI validation using claude-sonnet-4-6
 async function performAIValidation(document: any): Promise<{
   errors: Array<{ field: string; message: string }>;
   warnings: Array<{ field: string; message: string }>;
   regulatoryCompliant: boolean;
 }> {
-  const model = customModel('claude-3-haiku-20240307');
+  const model = customModel('claude-sonnet-4-6');
 
   const prompt = `
   Validate the following FDA ${document.documentType} form data for regulatory compliance and content quality:

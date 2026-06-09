@@ -388,13 +388,16 @@ const CompareSchema = new Schema<SchemaTypes.Compare>({
       type: String,
       required: true
   },
+  // URLs are optional — letters can be pasted directly without a source URL.
   firstUrl: {
       type: String,
-      required: true
+      required: false,
+      default: ''
   },
   secondUrl: {
       type: String,
-      required: true
+      required: false,
+      default: ''
   },
   cfrVisualization: {
       type: String,

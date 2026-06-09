@@ -130,9 +130,11 @@ export async function POST(request: Request) {
 
         const { firstLetter, secondLetter, firstUrl, secondUrl } = await request.json();
         
-        // Extract codes from both letters
-        const { text: firstLetterCodes } = await generateText({
+        // Extract codes from both letters — kicked off concurrently with the
+        // long-form analysis below; awaited together via Promise.all.
+        const firstCodesPromise = generateText({
             model: customModel(DEFAULT_MODEL_NAME),
+            maxTokens: 400,
             messages: [{
                 role: 'user',
                 content: `You are a specialized FDA regulatory analyst. Your task is to analyze FDA warning letters
@@ -191,8 +193,9 @@ export async function POST(request: Request) {
             }]
         });
 
-        const { text: secondLetterCodes } = await generateText({
+        const secondCodesPromise = generateText({
             model: customModel(DEFAULT_MODEL_NAME),
+            maxTokens: 400,
             messages: [{
                 role: 'user',
                 content: `You are a specialized FDA regulatory analyst. Your task is to analyze FDA warning letters
@@ -251,23 +254,11 @@ export async function POST(request: Request) {
             }]
         });
 
-        const letterACodes = extractCodes(firstLetterCodes);
-        const letterBCodes = extractCodes(secondLetterCodes);
-
-        // Generate comparison visualizations
-        const cfrVisualization = generateMermaidDiagram(
-            letterACodes.cfrCodes,
-            letterBCodes.cfrCodes,
-            'cfr'
-        );
-        const fdcVisualization = generateMermaidDiagram(
-            letterACodes.fdcCodes,
-            letterBCodes.fdcCodes,
-            'fdc'
-        );
-
-        const { text: analysisContent } = await generateText({
+        // The long-form analysis depends only on the letters, not the extracted
+        // codes — run it concurrently with both extractions.
+        const analysisPromise = generateText({
             model: customModel(DEFAULT_MODEL_NAME),
+            maxTokens: 900,
             messages: [{
                 role: 'user',
                 content: `You are an experienced FDA compliance expert from Grimoire.corp assisting a compliance officer. You will analyze two FDA warning letters to identify relevant insights for compliance improvements.
@@ -299,10 +290,25 @@ export async function POST(request: Request) {
                 [Evaluate implications for compliance program improvements]
                 Recommended Actiosn:
                 [Specific steps to enhance compliance based on both letters' insights]
-                Note: Format your report in Markdown format, Focus on systemic and procedural relationships between violations, not just superficial similarities. Consider how addressing one type of violation might prevent or reveal others.
+                Note: Format your report in Markdown format, Focus on systemic and procedural relationships between violations, not just superficial similarities. Consider how addressing one type of violation might prevent or reveal others. Be terse and information-dense: short bullet points, no preamble, no repetition of the letters' text. The full report MUST be under 350 words.
                 LETTER A:${firstLetter}\nLETTER B${secondLetter}`
             }]
         });
+
+        // All three model calls run concurrently — total latency ≈ the slowest
+        // (the long-form analysis), not the sum.
+        const [{ text: firstLetterCodes }, { text: secondLetterCodes }, { text: analysisContent }] = await Promise.all([
+            firstCodesPromise,
+            secondCodesPromise,
+            analysisPromise,
+        ]);
+
+        const letterACodes = extractCodes(firstLetterCodes);
+        const letterBCodes = extractCodes(secondLetterCodes);
+
+        // Generate comparison visualizations
+        const cfrVisualization = generateMermaidDiagram(letterACodes.cfrCodes, letterBCodes.cfrCodes, 'cfr');
+        const fdcVisualization = generateMermaidDiagram(letterACodes.fdcCodes, letterBCodes.fdcCodes, 'fdc');
 
         const compare = await CCompare.create({
             userId: session.user.id,
@@ -339,7 +345,8 @@ export async function POST(request: Request) {
 
     } catch (error) {
         console.error('Search error:', error);
-        return new Response('Internal server error', { status: 500 });
+        // JSON error body — the client calls res.json() and surfaces this message.
+        return Response.json({ error: error?.message || 'Internal server error' }, { status: 500 });
     }
 }
 

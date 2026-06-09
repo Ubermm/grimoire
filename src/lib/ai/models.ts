@@ -22,9 +22,9 @@ export const DEFAULT_MODEL_NAME: string = 'gpt-4o';*/
 
 export const models: Array<Model> = [
   {
-    id: 'claude-3-haiku-20240307',
+    id: 'claude-sonnet-4-6',
     label: 'Anthropic',
-    apiIdentifier: 'claude-3-haiku-20240307',
+    apiIdentifier: 'claude-sonnet-4-6',
     description: 'Compliance assistant model',
   },
   {
@@ -35,4 +35,4 @@ export const models: Array<Model> = [
   }
 ] as const;
   
-export const DEFAULT_MODEL_NAME: string = 'claude-3-haiku-20240307';
+export const DEFAULT_MODEL_NAME: string = 'claude-sonnet-4-6';

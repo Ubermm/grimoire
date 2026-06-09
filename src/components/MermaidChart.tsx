@@ -82,7 +82,9 @@ const MermaidChart = ({ chart }) => {
 
       {/* Modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="w-auto h-auto min-w-[85vw] max-w-[90vw] min-h-[85vh] max-h-[90vh] p-8 bg-white border border-[var(--line)]">
+        {/* Portals to <body> (outside .module-theme), so colors must be
+            self-contained: explicit ink text makes the close X visible on white. */}
+        <DialogContent className="w-auto h-auto min-w-[85vw] max-w-[90vw] min-h-[85vh] max-h-[90vh] p-8 bg-white text-neutral-900 border border-neutral-200">
           <DialogTitle className="sr-only">
             Enlarged Diagram View
           </DialogTitle>

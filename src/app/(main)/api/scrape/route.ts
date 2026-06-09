@@ -18,23 +18,31 @@ export async function POST(request: Request) {
     const { url }: ScrapeQuery = await request.json();
 
     if (!url) {
-      return new Response('Missing URL', { status: 400 });
+      return Response.json({ error: 'Missing URL' }, { status: 400 });
     }
 
     // Validate URL format
     try {
       new URL(url);
     } catch (e) {
-      return new Response('Invalid URL format', { status: 400 });
+      return Response.json({ error: 'Invalid URL format' }, { status: 400 });
     }
 
     // Check if it's an FDA warning letter URL
     if (!url.includes('fda.gov')) {
-      return new Response('URL must be from fda.gov domain', { status: 400 });
+      return Response.json({ error: 'URL must be from fda.gov domain' }, { status: 400 });
     }
 
-    // Fetch the content
-    const response = await axios.get(url);
+    // Fetch the content — browser-like headers, since fda.gov's CDN rejects
+    // default library user-agents with 403/404.
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+      timeout: 20000,
+    });
     const html = response.data;
     const $ = cheerio.load(html);
 
@@ -92,7 +100,7 @@ export async function POST(request: Request) {
       .trim();
 
     if (!content) {
-      return new Response('Failed to extract content from URL', { status: 400 });
+      return Response.json({ error: 'Failed to extract content from URL' }, { status: 400 });
     }
 
     // Return JSON response with the content
@@ -104,15 +112,18 @@ export async function POST(request: Request) {
     console.error('Warning letter scraping error:', error);
     
     if (axios.isAxiosError(error)) {
-      if (error.response?.status === 404) {
-        return new Response('Warning letter not found', { status: 404 });
+      // Akamai bot protection redirects to an "abuse-detection-apology" page
+      // that 404s — distinguish it from a genuinely wrong URL.
+      const finalUrl = error.response?.request?.res?.responseUrl || '';
+      if (finalUrl.includes('abuse-detection') || error.response?.status === 403) {
+        return Response.json({ error: "fda.gov's bot protection blocked the server-side fetch — open the letter in your browser and paste its text into the field instead" }, { status: 502 });
       }
-      if (error.response?.status === 403) {
-        return new Response('Access to warning letter forbidden', { status: 403 });
+      if (error.response?.status === 404) {
+        return Response.json({ error: 'Warning letter not found at that URL (fda.gov returned 404)' }, { status: 404 });
       }
     }
     
-    return new Response('Internal server error', { status: 500 });
+    return Response.json({ error: error?.message || 'Internal server error' }, { status: 500 });
   }
 }
 

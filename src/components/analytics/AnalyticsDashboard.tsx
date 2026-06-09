@@ -4,17 +4,16 @@
 // endpoints as before (/api/find, /api/compare, /api/scrape) — only the
 // presentation changes: KPI strip, Recharts frequency bars, light Mermaid graphs,
 // and an inline new-analysis panel. The old dark ComplianceDashboard is retired.
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import {
-  Search, ArrowRightLeft, Plus, Loader2, Trash2, ChevronDown, ChevronUp,
-  FileText, BarChart3, Layers, Hash, Library,
+  Search, ArrowRightLeft, Plus, Trash2, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { generateUUID } from '@/lib/utils';
 import { Markdown } from '@/components/markdown';
 import MermaidChart from '@/components/MermaidChart';
 import {
-  PageHeader, Surface, SectionCard, AccentButton, GhostButton, Spinner, EmptyState, Badge, IconChip,
+  PageHeader, Surface, SectionCard, AccentButton, GhostButton, Spinner, EmptyState, Badge,
 } from '@/components/module/ui';
 import { cn } from '@/lib/utils';
 
@@ -24,14 +23,14 @@ const FrequencyBars = dynamic(() => import('@/components/analytics/FrequencyBars
 });
 
 /* --------------------------------------------------------------- KPI card */
-function Kpi({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
+function Kpi({ index, label, value }: { index: string; label: string; value: React.ReactNode }) {
   return (
-    <Surface className="flex items-center gap-4 p-5">
-      <IconChip>{icon}</IconChip>
-      <div className="min-w-0">
+    <Surface className="p-5">
+      <div className="flex items-baseline justify-between gap-3">
         <p className="font-accent text-xs uppercase tracking-wide text-[var(--ink-faint)]">{label}</p>
-        <p className="font-accent mt-0.5 truncate text-2xl font-semibold text-[var(--ink)]">{value}</p>
+        <span className="font-accent text-[0.68rem] text-[var(--ink-faint)]" aria-hidden>{index}</span>
       </div>
+      <p className="font-serif-display serif-oldstyle-nums mt-2 truncate text-3xl font-medium tracking-tight text-[var(--ink)]">{value}</p>
     </Surface>
   );
 }
@@ -42,7 +41,7 @@ function CodeChips({ codes }: { codes?: string[] }) {
   return (
     <div className="flex flex-wrap gap-1.5">
       {codes.map((c, i) => (
-        <span key={`${c}-${i}`} className="font-accent rounded-md bg-[var(--acc-soft)] px-2 py-0.5 text-xs text-[var(--ink-muted)] ring-1 ring-inset ring-[var(--line)]">{c}</span>
+        <span key={`${c}-${i}`} className="font-accent rounded-[2px] bg-[var(--acc-soft)] px-2 py-0.5 text-xs text-[var(--ink-muted)] ring-1 ring-inset ring-[var(--line)]">{c}</span>
       ))}
     </div>
   );
@@ -131,10 +130,10 @@ function CompareResults({ audit }: { audit: any }) {
 function Segmented({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const opts = [{ k: 'find', label: 'Find similar' }, { k: 'compare', label: 'Compare letters' }];
   return (
-    <div className="inline-flex w-fit gap-0.5 rounded-full border border-[var(--line-strong)] bg-black/[0.03] p-1">
+    <div className="inline-flex w-fit border border-[var(--line-strong)]">
       {opts.map((o) => (
         <button key={o.k} type="button" onClick={() => onChange(o.k)}
-          className={cn('font-accent rounded-full px-4 py-1.5 text-sm font-medium transition-colors', value === o.k ? 'bg-[var(--surface)] text-[var(--ink)] shadow-sm' : 'text-[var(--ink-faint)] hover:text-[var(--ink-muted)]')}>
+          className={cn('font-accent px-4 py-1.5 text-[0.78rem] font-medium uppercase tracking-[0.08em] transition-colors', value === o.k ? 'bg-[var(--acc)] text-[var(--acc-contrast)]' : 'text-[var(--ink-faint)] hover:text-[var(--ink)]')}>
           {o.label}
         </button>
       ))}
@@ -148,6 +147,12 @@ export default function AnalyticsDashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [showNew, setShowNew] = useState(false);
+  // Scroll the freshly-opened analysis form into view (it renders below the
+  // KPI strip, off-screen on smaller viewports). scroll-mt offsets the navbar.
+  const newPanelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (showNew) newPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [showNew]);
   const [analysisType, setAnalysisType] = useState('find');
   const [warningLetter, setWarningLetter] = useState('');
   const [warningLetterUrl, setWarningLetterUrl] = useState('');
@@ -187,22 +192,33 @@ export default function AnalyticsDashboard() {
   }, [audits]);
 
   const fetchOne = async (url: string, set: (s: string) => void) => {
-    setIsFetching(true);
-    try { const d = await (await fetch('/api/scrape', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) })).json(); set(d.content); }
-    catch (e) { console.error(e); } finally { setIsFetching(false); }
+    setIsFetching(true); setError('');
+    try { const d = await parseOrThrow(await fetch('/api/scrape', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) })); set(d.content); }
+    catch (e) { console.error(e); setError(e?.message || 'Failed to fetch the letter.'); } finally { setIsFetching(false); }
   };
   const fetchBoth = async () => {
-    setIsFetching(true);
+    setIsFetching(true); setError('');
     try {
       const [a, b] = await Promise.all([
         fetch('/api/scrape', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: warningLetterUrl }) }),
         fetch('/api/scrape', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: secondLetterUrl }) }),
       ]);
-      setWarningLetter((await a.json()).content); setSecondLetter((await b.json()).content);
-    } catch (e) { console.error(e); } finally { setIsFetching(false); }
+      setWarningLetter((await parseOrThrow(a)).content); setSecondLetter((await parseOrThrow(b)).content);
+    } catch (e) { console.error(e); setError(e?.message || 'Failed to fetch the letters.'); } finally { setIsFetching(false); }
   };
 
   const reset = () => { setWarningLetter(''); setWarningLetterUrl(''); setSecondLetter(''); setSecondLetterUrl(''); setError(''); };
+
+  // Parse a response defensively: surface the server's JSON error (or status
+  // text) instead of crashing on a non-JSON 500 body.
+  const parseOrThrow = async (res: Response) => {
+    const body = await res.text();
+    let d: any = null;
+    try { d = JSON.parse(body); } catch { /* non-JSON body */ }
+    if (!res.ok) throw new Error(d?.error || body?.slice(0, 200) || `Request failed (${res.status})`);
+    if (!d) throw new Error('The server returned an unexpected response.');
+    return d;
+  };
 
   const submit = async () => {
     setIsLoading(true); setError('');
@@ -210,16 +226,16 @@ export default function AnalyticsDashboard() {
       const id = generateUUID();
       let newAudit: any;
       if (analysisType === 'find') {
-        const d = await (await fetch('/api/find', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: warningLetter }) })).json();
+        const d = await parseOrThrow(await fetch('/api/find', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: warningLetter }) }));
         newAudit = { _id: d._id, id, url: warningLetterUrl, results: d.results, summary: d.summary, cfrVisualization: d.cfrVisualization, fdcVisualization: d.fdcVisualization, analysisType: 'find', timestamp: new Date().toLocaleString() };
       } else {
-        const d = await (await fetch('/api/compare', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ firstLetter: warningLetter, secondLetter, firstUrl: warningLetterUrl, secondUrl: secondLetterUrl }) })).json();
+        const d = await parseOrThrow(await fetch('/api/compare', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ firstLetter: warningLetter, secondLetter, firstUrl: warningLetterUrl, secondUrl: secondLetterUrl }) }));
         newAudit = { _id: d._id, id, firstUrl: warningLetterUrl, secondUrl: secondLetterUrl, content: d.content, cfrVisualization: d.cfrVisualization, fdcVisualization: d.fdcVisualization, letterACodes: d.letterACodes, letterBCodes: d.letterBCodes, analysisType: 'compare', timestamp: new Date().toLocaleString() };
       }
       setAudits((p) => [newAudit, ...p]);
       setExpanded((p) => new Set(p).add(id));
       setShowNew(false); reset();
-    } catch (e) { console.error(e); setError('An unexpected error occurred. Please try again.'); }
+    } catch (e) { console.error(e); setError(e?.message || 'An unexpected error occurred. Please try again.'); }
     finally { setIsLoading(false); }
   };
 
@@ -240,14 +256,15 @@ export default function AnalyticsDashboard() {
 
       {/* KPI strip */}
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Kpi icon={<FileText className="h-5 w-5" />} label="Analyses" value={stats.analyses} />
-        <Kpi icon={<Library className="h-5 w-5" />} label="Letters matched" value={stats.letters} />
-        <Kpi icon={<Hash className="h-5 w-5" />} label="Distinct CFR codes" value={stats.distinctCfr} />
-        <Kpi icon={<Layers className="h-5 w-5" />} label="Top-cited code" value={<span className="text-xl">{stats.topCode}</span>} />
+        <Kpi index="01" label="Analyses" value={stats.analyses} />
+        <Kpi index="02" label="Letters matched" value={stats.letters} />
+        <Kpi index="03" label="Distinct CFR codes" value={stats.distinctCfr} />
+        <Kpi index="04" label="Top-cited code" value={<span className="text-xl">{stats.topCode}</span>} />
       </div>
 
       {/* new analysis panel */}
       {showNew && (
+        <div ref={newPanelRef} className="scroll-mt-20">
         <Surface className="mb-8 p-6">
           <div className="mb-5 flex items-center justify-between">
             <Segmented value={analysisType} onChange={(v) => { setAnalysisType(v); reset(); }} />
@@ -263,7 +280,7 @@ export default function AnalyticsDashboard() {
               </div>
               <label className="font-accent block text-xs font-medium uppercase tracking-wide text-[var(--ink-muted)]">Or paste content</label>
               <textarea value={warningLetter} onChange={(e) => setWarningLetter(e.target.value)} placeholder="Paste warning-letter text here…" className="ai-field min-h-[180px] resize-y" />
-              <AccentButton onClick={submit} disabled={isLoading || !warningLetter.trim()} className="w-full">{isLoading ? <Spinner /> : <Search className="h-4 w-4" />} Find similar letters</AccentButton>
+              <AccentButton onClick={submit} disabled={isLoading || !warningLetter.trim()} className="w-full">{isLoading ? <><Spinner /> Analyzing — ~10s</> : <><Search className="h-4 w-4" /> Find similar letters</>}</AccentButton>
             </div>
           ) : (
             <div className="space-y-3">
@@ -276,11 +293,12 @@ export default function AnalyticsDashboard() {
                 <textarea value={warningLetter} onChange={(e) => setWarningLetter(e.target.value)} placeholder="First letter content…" className="ai-field min-h-[150px] resize-y" />
                 <textarea value={secondLetter} onChange={(e) => setSecondLetter(e.target.value)} placeholder="Second letter content…" className="ai-field min-h-[150px] resize-y" />
               </div>
-              <AccentButton onClick={submit} disabled={isLoading || !warningLetter.trim() || !secondLetter.trim()} className="w-full">{isLoading ? <Spinner /> : <ArrowRightLeft className="h-4 w-4" />} Compare letters</AccentButton>
+              <AccentButton onClick={submit} disabled={isLoading || !warningLetter.trim() || !secondLetter.trim()} className="w-full">{isLoading ? <><Spinner /> Writing the comparison — ~20s</> : <><ArrowRightLeft className="h-4 w-4" /> Compare letters</>}</AccentButton>
             </div>
           )}
           {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
         </Surface>
+        </div>
       )}
 
       {/* frequency charts */}
@@ -299,19 +317,19 @@ export default function AnalyticsDashboard() {
         <EmptyState title="No analyses yet" hint="Run a find-similar or compare analysis to populate the dashboard." action={<AccentButton onClick={() => setShowNew(true)}><Plus className="h-4 w-4" /> New analysis</AccentButton>} />
       ) : (
         <div className="space-y-3">
-          {audits.map((a) => (
+          {audits.map((a, i) => (
             <Surface key={a.id} className="p-5">
               <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <IconChip className="h-9 w-9">{a.analysisType === 'find' ? <Search className="h-4 w-4" /> : <ArrowRightLeft className="h-4 w-4" />}</IconChip>
+                <div className="flex items-baseline gap-3">
+                  <span className="font-accent text-[0.78rem] text-[var(--ink-faint)]" aria-hidden>{String(i + 1).padStart(2, '0')}</span>
                   <div>
                     <p className="font-accent text-sm font-medium capitalize text-[var(--ink)]">{a.analysisType === 'find' ? 'Find similar' : 'Compare'} analysis</p>
                     <p className="text-xs text-[var(--ink-faint)]">{a.timestamp}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <button onClick={() => remove(a)} className="rounded-md p-2 text-[var(--ink-faint)] hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
-                  <button onClick={() => toggle(a.id)} className="rounded-md p-2 text-[var(--ink-faint)] hover:bg-black/5 hover:text-[var(--ink)]">{expanded.has(a.id) ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}</button>
+                  <button onClick={() => remove(a)} className="p-2 text-[var(--ink-faint)] hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
+                  <button onClick={() => toggle(a.id)} className="p-2 text-[var(--ink-faint)] hover:bg-black/5 hover:text-[var(--ink)]">{expanded.has(a.id) ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}</button>
                 </div>
               </div>
               {expanded.has(a.id) && <div className="mt-5 border-t border-[var(--line)] pt-5">{a.analysisType === 'find' ? <FindResults audit={a} /> : <CompareResults audit={a} />}</div>}
