@@ -9,6 +9,8 @@ export const config = {
     '/analytics/:path*',
     '/audit/:path*',
     '/ai-act/:path*',
+    '/ind-creation/:path*',
+    '/ind-forms/:path*',
     '/api/:path*',
     '/login',
     '/register',
