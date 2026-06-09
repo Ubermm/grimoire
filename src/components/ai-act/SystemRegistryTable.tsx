@@ -19,7 +19,7 @@ export function SystemRegistryTable({ systems, onDelete }: { systems: SystemRow[
     <Surface className="overflow-hidden">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-neutral-200 text-left text-xs uppercase tracking-wide text-neutral-400">
+          <tr className="font-accent border-b border-[var(--line-strong)] text-left text-[0.68rem] uppercase tracking-[0.12em] text-[var(--ink-faint)]">
             <th className="px-5 py-3 font-medium">System</th>
             <th className="px-5 py-3 font-medium">Provider</th>
             <th className="px-5 py-3 font-medium">Risk level</th>
@@ -29,28 +29,28 @@ export function SystemRegistryTable({ systems, onDelete }: { systems: SystemRow[
         </thead>
         <tbody>
           {systems.map((s) => (
-            <tr key={s._id} className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50/60">
+            <tr key={s._id} className="border-b border-[var(--line)] last:border-0 hover:bg-black/[0.015]">
               <td className="px-5 py-3.5">
-                <Link href={`/ai-act/registry/${s._id}`} className="font-medium text-neutral-900 hover:text-[var(--acc)]">
+                <Link href={`/ai-act/registry/${s._id}`} className="font-medium text-[var(--ink)] hover:text-[var(--acc-hover)]">
                   {s.name}
                 </Link>
-                {s.isGPAI && <span className="ml-2 rounded bg-violet-50 px-1.5 py-0.5 text-[10px] font-medium text-violet-600">GPAI</span>}
+                {s.isGPAI && <span className="font-accent ml-2 rounded-[2px] bg-violet-50 px-1.5 py-0.5 text-[10px] font-medium text-violet-600">GPAI</span>}
               </td>
-              <td className="px-5 py-3.5 text-neutral-500">{s.provider || '—'}</td>
+              <td className="px-5 py-3.5 text-[var(--ink-muted)]">{s.provider || '—'}</td>
               <td className="px-5 py-3.5"><RiskBadge level={s.riskLevel} /></td>
-              <td className="px-5 py-3.5 capitalize text-neutral-500">{s.status || 'draft'}</td>
+              <td className="px-5 py-3.5 capitalize text-[var(--ink-muted)]">{s.status || 'draft'}</td>
               <td className="px-5 py-3.5 text-right">
                 <div className="flex items-center justify-end gap-1.5">
                   {onDelete && (
                     <button
                       onClick={() => onDelete(s._id)}
-                      className="rounded p-1.5 text-neutral-300 transition-colors hover:bg-red-50 hover:text-red-500"
+                      className="p-1.5 text-[var(--ink-faint)] transition-colors hover:bg-red-50 hover:text-red-500"
                       aria-label="Delete system"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   )}
-                  <Link href={`/ai-act/registry/${s._id}`} className="rounded p-1.5 text-neutral-300 hover:text-neutral-600">
+                  <Link href={`/ai-act/registry/${s._id}`} className="p-1.5 text-[var(--ink-faint)] hover:text-[var(--ink)]">
                     <ChevronRight className="h-4 w-4" />
                   </Link>
                 </div>

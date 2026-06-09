@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Save, CheckCircle2, Circle } from 'lucide-react';
+import { CheckCircle2, Circle } from 'lucide-react';
 import { ANNEX_IV_SECTIONS, completionPercentage } from '@/lib/ai-act/annex-iv-sections';
 import { Surface, AccentButton, Spinner } from './ui';
 import { cn } from '@/lib/utils';
@@ -32,13 +32,13 @@ export function AnnexIVBuilder({ system }: { system: any }) {
       <Surface className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-neutral-900">Technical documentation completeness</p>
-            <p className="text-xs text-neutral-400">Annex IV (Article 11) · {system.name}</p>
+            <p className="font-accent text-[0.72rem] font-medium uppercase tracking-[0.16em] text-[var(--ink)]">Technical documentation completeness</p>
+            <p className="font-accent mt-1 text-xs text-[var(--ink-faint)]">Annex IV (Article 11) · {system.name}</p>
           </div>
-          <span className="text-2xl font-semibold tabular-nums text-neutral-900">{pct}%</span>
+          <span className="font-accent text-2xl font-medium tabular-nums text-[var(--ink)]">{pct}%</span>
         </div>
-        <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-neutral-100">
-          <div className="h-full rounded-full bg-[var(--acc)] transition-all" style={{ width: `${pct}%` }} />
+        <div className="mt-4 h-1.5 w-full overflow-hidden bg-black/[0.06]">
+          <div className="h-full bg-[var(--acc)] transition-all" style={{ width: `${pct}%` }} />
         </div>
       </Surface>
 
@@ -49,13 +49,13 @@ export function AnnexIVBuilder({ system }: { system: any }) {
           <Surface key={s.key} className="p-6">
             <div className="mb-3 flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold text-neutral-900">{s.title}</p>
-                <p className="mt-1 text-xs text-neutral-400">{s.prompt}</p>
+                <p className="font-accent text-[0.72rem] font-medium uppercase tracking-[0.16em] text-[var(--ink)]">{s.title}</p>
+                <p className="mt-1 text-xs text-[var(--ink-faint)]">{s.prompt}</p>
               </div>
               <button
                 onClick={() => update(s.key, { status: complete ? 'in_progress' : 'completed' })}
-                className={cn('flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors',
-                  complete ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-neutral-200 bg-white text-neutral-400 hover:text-neutral-600')}
+                className={cn('font-accent flex shrink-0 items-center gap-1.5 border px-2.5 py-1 text-[0.68rem] font-medium uppercase tracking-[0.1em] transition-colors',
+                  complete ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-[var(--line-strong)] bg-[var(--surface)] text-[var(--ink-faint)] hover:text-[var(--ink)]')}
               >
                 {complete ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Circle className="h-3.5 w-3.5" />}
                 {complete ? 'Complete' : 'Mark complete'}
@@ -66,15 +66,15 @@ export function AnnexIVBuilder({ system }: { system: any }) {
               onChange={(e) => update(s.key, { content: e.target.value, status: doc.status === 'pending' && e.target.value ? 'in_progress' : doc.status })}
               rows={4}
               placeholder="Document this section…"
-              className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-800 placeholder:text-neutral-400 focus:border-[var(--acc)] focus:outline-none focus:ring-1 focus:ring-[var(--acc)]"
+              className="ai-field resize-y"
             />
           </Surface>
         );
       })}
 
-      <div className="sticky bottom-4 flex items-center justify-end gap-3 rounded-xl border border-neutral-200 bg-white/90 px-5 py-3 shadow-sm backdrop-blur">
-        {saved && <span className="text-sm text-emerald-600">Saved ✓</span>}
-        <AccentButton onClick={save} disabled={saving}>{saving ? <Spinner /> : <Save className="h-4 w-4" />} Save documentation</AccentButton>
+      <div className="sticky bottom-4 flex items-center justify-end gap-3 border border-[var(--line)] bg-[var(--surface)]/90 px-5 py-3 backdrop-blur">
+        {saved && <span className="font-accent text-sm text-emerald-600">Saved ✓</span>}
+        <AccentButton onClick={save} disabled={saving}>{saving ? <Spinner /> : null} Save documentation</AccentButton>
       </div>
     </div>
   );

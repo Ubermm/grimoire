@@ -3,7 +3,7 @@
 // shared /api/validate, and shows a light OpenAI-style results panel. Optionally
 // persists the result onto an AISystem (merged by FormCode).
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, XCircle, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { Surface, AccentButton, Spinner, EmptyState } from './ui';
 import { RuleAuthoringPanel } from '@/components/rules/RuleAuthoringPanel';
 import { cn } from '@/lib/utils';
@@ -12,10 +12,10 @@ const statusOf = (r: any, i: number) => r.status?.[i] || (r.passed[i] ? 'pass' :
 
 function Segmented({ options, value, onChange }: { options: string[]; value?: string; onChange: (v: string) => void }) {
   return (
-    <div className="inline-flex w-fit flex-wrap gap-0.5 rounded-full border border-[var(--line-strong)] bg-black/[0.03] p-1">
+    <div className="inline-flex w-fit flex-wrap divide-x divide-[var(--line-strong)] border border-[var(--line-strong)] bg-[var(--surface)]">
       {options.map((o) => (
         <button key={o} type="button" onClick={() => onChange(o)}
-          className={cn('rounded-full px-3.5 py-1 text-sm font-medium transition-colors', value === o ? 'bg-[var(--surface)] text-[var(--ink)] shadow-sm' : 'text-[var(--ink-faint)] hover:text-[var(--ink-muted)]')}>
+          className={cn('px-3.5 py-1 text-sm font-medium transition-colors', value === o ? 'bg-[var(--acc)] text-[var(--acc-contrast)]' : 'text-[var(--ink-faint)] hover:text-[var(--ink-muted)]')}>
           {o}
         </button>
       ))}
@@ -31,7 +31,7 @@ function Field({ q, value, onChange }: { q: any; value: any; onChange: (v: any) 
       <div className="flex flex-wrap gap-2">
         {(q.options || []).map((o: string) => (
           <button key={o} type="button" onClick={() => toggle(o)}
-            className={cn('rounded-full border px-3 py-1 text-xs font-medium transition-colors', arr.includes(o) ? 'border-[var(--acc)] bg-[var(--acc)]/10 text-[var(--acc)]' : 'border-neutral-200 bg-white text-neutral-500 hover:border-neutral-300')}>
+            className={cn('font-accent border px-3 py-1 text-xs font-medium transition-colors', arr.includes(o) ? 'border-[var(--acc)] bg-[var(--acc)] text-[var(--acc-contrast)]' : 'border-[var(--line-strong)] bg-[var(--surface)] text-[var(--ink-muted)] hover:border-[var(--ink)]')}>
             {o}
           </button>
         ))}
@@ -40,11 +40,11 @@ function Field({ q, value, onChange }: { q: any; value: any; onChange: (v: any) 
   }
   if (q.type === 'NUMERIC') {
     return <input type="number" value={value ?? ''} onChange={(e) => onChange(e.target.value)}
-      className="w-40 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm focus:border-[var(--acc)] focus:outline-none focus:ring-1 focus:ring-[var(--acc)]" />;
+      className="ai-field w-40 py-1.5" />;
   }
   if (q.type === 'TEXT') {
     return <input value={value ?? ''} onChange={(e) => onChange(e.target.value)}
-      className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm focus:border-[var(--acc)] focus:outline-none focus:ring-1 focus:ring-[var(--acc)]" />;
+      className="ai-field py-1.5" />;
   }
   return <Segmented options={q.options || ['yes', 'no']} value={value} onChange={onChange} />;
 }
@@ -104,19 +104,19 @@ export function LeanValidateFlow({ formCode, initialForm, regText, systemId, ini
     <div className="space-y-5">
       <Surface className="p-6">
         <div className="mb-5">
-          <span className="text-sm text-neutral-500">{answered}/{form.questions.length} answered</span>
+          <span className="font-accent text-sm text-[var(--ink-muted)]">{answered}/{form.questions.length} answered</span>
         </div>
         <div className="space-y-5">
           {form.questions.map((q: any) => (
-            <div key={q.id} className="flex flex-col gap-2.5 border-b border-neutral-100 pb-5 last:border-0 last:pb-0">
+            <div key={q.id} className="flex flex-col gap-2.5 border-b border-[var(--line)] pb-5 last:border-0 last:pb-0">
               <div>
-                <p className="text-sm text-neutral-700">{q.text}</p>
-                {q.reference && <p className="mt-0.5 text-xs text-neutral-400">{q.reference}</p>}
+                <p className="text-sm text-[var(--ink)]">{q.text}</p>
+                {q.reference && <p className="font-accent mt-0.5 text-xs text-[var(--ink-faint)]">{q.reference}</p>}
               </div>
               <Field q={q} value={responses[q.id]} onChange={(v) => setResponses({ ...responses, [q.id]: v })} />
               {autofillMeta?.[q.id] && (
-                <p className="flex flex-wrap items-center gap-1.5 text-xs text-neutral-400">
-                  <span className={cn('rounded-full px-1.5 py-0.5 ring-1 ring-inset',
+                <p className="flex flex-wrap items-center gap-1.5 text-xs text-[var(--ink-faint)]">
+                  <span className={cn('font-accent rounded-[2px] px-1.5 py-0.5 ring-1 ring-inset',
                     autofillMeta[q.id].confidence === 'high' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
                       : autofillMeta[q.id].confidence === 'medium' ? 'bg-amber-50 text-amber-700 ring-amber-200'
                       : 'bg-neutral-100 text-neutral-500 ring-neutral-200')}>
@@ -129,7 +129,7 @@ export function LeanValidateFlow({ formCode, initialForm, regText, systemId, ini
           ))}
         </div>
         <div className="mt-6">
-          <AccentButton onClick={validate} disabled={loading || answered === 0}>{loading ? <Spinner /> : <ShieldCheck className="h-4 w-4" />} Validate</AccentButton>
+          <AccentButton onClick={validate} disabled={loading || answered === 0}>{loading ? <Spinner /> : null} Validate</AccentButton>
         </div>
       </Surface>
 
@@ -149,8 +149,8 @@ export function LeanValidateFlow({ formCode, initialForm, regText, systemId, ini
                   {st === 'pass' ? <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
                     : st === 'escalate' ? <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
                     : <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />}
-                  <span className={st === 'pass' ? 'text-neutral-600' : 'text-neutral-800'}>
-                    {d}{results.reason?.[i] ? <span className="text-neutral-400"> — {results.reason[i]}</span> : null}
+                  <span className={st === 'pass' ? 'text-[var(--ink-muted)]' : 'text-[var(--ink)]'}>
+                    {d}{results.reason?.[i] ? <span className="text-[var(--ink-faint)]"> — {results.reason[i]}</span> : null}
                   </span>
                 </li>
               );

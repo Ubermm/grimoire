@@ -1,22 +1,28 @@
 //@ts-nocheck
 'use client';
+// Pricing, set like a rate card in a working paper: a ruled three-column
+// comparison (no card chrome), serif old-style prices, ⊢ feature lists, and
+// a hairline-ruled closer. Same engine on every line.
 import React from 'react';
-import { Check, ArrowRight } from 'lucide-react';
-import { MarketingPage, Reveal, Eyebrow, SectionHeading, Panel, Glow, PrimaryCTA, SecondaryCTA } from '@/components/landing/ui';
+import { motion } from 'framer-motion';
+import {
+  MarketingPage, Reveal, SectionRule, SerifTitle, ProvesItem, QED,
+  PrimaryCTA, SecondaryCTA, EASE,
+} from '@/components/landing/ui';
 
 const TIERS = [
   {
-    name: 'Starter', price: 'Free', blurb: 'Explore the engine on a single regulation.',
+    n: '01', name: 'Starter', price: 'Free', blurb: 'Explore the engine on a single regulation.',
     features: ['1 active audit', 'Risk classification', 'Warning-letter analysis', 'Community support'],
     cta: 'Start free', href: '/register', highlight: false,
   },
   {
-    name: 'Team', price: '$490', unit: '/mo', blurb: 'For compliance teams shipping regulated products.',
+    n: '02', name: 'Team', price: '$490', unit: '/mo', blurb: 'For compliance teams shipping regulated products.',
     features: ['Unlimited audits', 'FDA 21 CFR + EU AI Act', 'Annex IV builder & evidence export', 'Autofill from documents', 'Priority support'],
     cta: 'Start a trial', href: '/contact', highlight: true,
   },
   {
-    name: 'Enterprise', price: 'Custom', blurb: 'SSO, custom regulations and deployment.',
+    n: '03', name: 'Enterprise', price: 'Custom', blurb: 'SSO, custom regulations and deployment.',
     features: ['Everything in Team', 'Custom rule authoring', 'SSO & audit logs', 'On-prem / VPC options', 'Dedicated solutions engineer'],
     cta: 'Talk to us', href: '/contact', highlight: false,
   },
@@ -25,48 +31,98 @@ const TIERS = [
 export default function PricingPage() {
   return (
     <MarketingPage>
+      {/* ============================================================== Hero */}
       <section className="relative overflow-hidden">
-        <Glow className="left-1/2 top-[-30%] h-[44rem] w-[44rem] -translate-x-1/2" />
-        <div className="relative mx-auto max-w-3xl px-6 pb-12 pt-28 text-center sm:pt-32">
-          <Reveal><SectionHeading eyebrow="Pricing" title="Simple, transparent pricing" lead="Start free, scale when you ship. Every plan runs the same formally-verified engine." /></Reveal>
+        <div className="relative mx-auto max-w-6xl px-6 pb-16 pt-20 sm:pt-28">
+          {/* running head */}
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, ease: EASE }}
+            className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b rule pb-4"
+          >
+            <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/45">Grimoire One — pricing</p>
+            <p className="font-plex hidden text-[0.7rem] tracking-[0.08em] text-white/30 sm:block" aria-hidden>three tiers · one engine</p>
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.05, ease: EASE }}
+            className="font-serif-display mt-14 max-w-3xl text-[2.6rem] font-medium leading-[1.06] tracking-[-0.015em] text-white sm:text-[3.8rem]"
+          >
+            Simple, <em className="font-normal text-white/85">transparent</em> pricing.
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.16, ease: EASE }}
+            className="mt-6 max-w-xl text-[0.97rem] leading-relaxed text-white/55"
+          >
+            Start free, scale when you ship. Every plan runs the same
+            formally-verified engine. <QED />
+          </motion.p>
         </div>
       </section>
 
-      <section className="pb-20">
-        <div className="mx-auto grid max-w-5xl gap-5 px-6 lg:grid-cols-3">
-          {TIERS.map((t, i) => (
-            <Reveal key={t.name} delay={i * 0.08}>
-              <Panel className={`flex h-full flex-col p-7 ${t.highlight ? 'border-white/25 bg-white/[0.05] ring-1 ring-white/10' : ''}`}>
-                <div className="flex items-center justify-between">
-                  <h3 className="font-plex text-base font-semibold">{t.name}</h3>
-                  {t.highlight && <span className="font-plex rounded-full bg-white/10 px-2.5 py-0.5 text-xs text-white/70">Popular</span>}
+      {/* ================================================== § 01 — The tiers */}
+      <section className="pb-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <Reveal><SectionRule n="01" title="The tiers" aside="same derivation at every price" /></Reveal>
+
+          <div className="mt-10 grid divide-y divide-white/[0.09] border-t rule lg:grid-cols-3 lg:divide-x lg:divide-y-0">
+            {TIERS.map((t, i) => (
+              <Reveal key={t.name} delay={i * 0.08} className="relative flex h-full flex-col py-9 lg:px-8 lg:first:pl-0 lg:last:pr-0">
+                {/* the recommended tier carries a thin top rule + a mono tag, not a pill */}
+                {t.highlight && (
+                  <span className="absolute inset-x-0 top-0 hidden h-px bg-white/60 lg:block" aria-hidden />
+                )}
+                <div className="flex items-baseline justify-between gap-4">
+                  <span className="font-plex text-[0.78rem] text-white/30">{t.n}</span>
+                  {t.highlight && (
+                    <span className="font-plex text-[0.65rem] uppercase tracking-[0.22em] text-white/55">Recommended</span>
+                  )}
                 </div>
-                <p className="mt-4 flex items-baseline gap-1">
-                  <span className="font-plex text-3xl font-semibold tracking-tight">{t.price}</span>
-                  {t.unit && <span className="text-sm text-white/40">{t.unit}</span>}
+
+                <h3 className="font-serif-display mt-4 text-[1.7rem] font-medium leading-tight text-white sm:text-[2rem]">{t.name}</h3>
+
+                <p className="mt-5 flex items-baseline gap-1.5 border-b rule pb-6">
+                  <span className="font-serif-display serif-oldstyle-nums text-4xl font-medium tracking-tight text-white sm:text-5xl">{t.price}</span>
+                  {t.unit && <span className="font-plex text-[0.78rem] text-white/40">{t.unit}</span>}
                 </p>
-                <p className="mt-2 text-sm text-white/50">{t.blurb}</p>
-                <ul className="mt-6 space-y-2.5">
+
+                <p className="mt-5 text-sm leading-relaxed text-white/55">{t.blurb}</p>
+
+                <ul className="mt-6 flex-1 space-y-3">
                   {t.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2.5 text-sm text-white/65"><Check className="mt-0.5 h-4 w-4 shrink-0 text-zinc-300" /> {f}</li>
+                    <ProvesItem key={f}>{f}</ProvesItem>
                   ))}
                 </ul>
-                <div className="mt-7 pt-2">
+
+                <div className="mt-9">
                   {t.highlight
-                    ? <PrimaryCTA href={t.href} className="w-full">{t.cta} <ArrowRight className="h-4 w-4" /></PrimaryCTA>
-                    : <SecondaryCTA href={t.href} className="w-full">{t.cta}</SecondaryCTA>}
+                    ? <PrimaryCTA href={t.href} className="w-full">{t.cta} →</PrimaryCTA>
+                    : <SecondaryCTA href={t.href} className="w-full">{t.cta} →</SecondaryCTA>}
                 </div>
-              </Panel>
-            </Reveal>
-          ))}
+              </Reveal>
+            ))}
+          </div>
+
+          <Reveal delay={0.2}>
+            <p className="font-plex mt-10 text-[0.78rem] text-white/35">
+              <span className="text-white/55" aria-hidden>∴</span>&ensp;the engine — and the proof it produces — is identical on every plan.
+            </p>
+          </Reveal>
         </div>
       </section>
 
-      <section className="border-t border-white/5 py-16">
-        <Reveal className="mx-auto max-w-2xl px-6 text-center">
-          <Eyebrow>Not sure which plan?</Eyebrow>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight">We&apos;ll help you scope it.</h2>
-          <div className="mt-7 flex justify-center"><SecondaryCTA href="/contact">Book a walkthrough</SecondaryCTA></div>
+      {/* ============================================================ Closer */}
+      <section className="pb-28">
+        <Reveal className="mx-auto max-w-6xl px-6">
+          <div className="border-t rule pt-14 text-center">
+            <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/40">Not sure which plan?</p>
+            <SerifTitle className="mx-auto mt-4 max-w-xl">
+              We&apos;ll help you <em className="font-normal">scope it.</em>
+            </SerifTitle>
+            <div className="mt-8 flex justify-center">
+              <SecondaryCTA href="/contact">Book a walkthrough →</SecondaryCTA>
+            </div>
+          </div>
         </Reveal>
       </section>
     </MarketingPage>

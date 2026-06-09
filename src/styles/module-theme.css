@@ -1,30 +1,31 @@
 /* Shared design system for the Grimoire One product modules (FDA Audit + EU AI Act).
-   A neutral, near-monochrome "platform" aesthetic (lyzr / architect.new): clean
-   light surfaces, hairline borders, generous whitespace, and IBM Plex Mono as an
-   accent typeface (headings, labels, badges, nav, code) over the sans body.
+   The scholarly-press language of the landing, set in daylight: warm paper
+   surfaces, hairline rules, square corners, Newsreader serif for titles (the
+   law) and IBM Plex Mono for apparatus (labels, badges, code, numbers).
    All tokens are scoped to .module-theme so nothing here leaks into the dark
    marketing landing or the global navbar. */
 
 .module-theme {
-  /* Accent = near-black primary action. */
-  --acc: #0d0d0d;
-  --acc-hover: #2a2a2a;
-  --acc-soft: #f4f4f5;
-  --acc-contrast: #ffffff;
+  /* Accent = ink primary action. */
+  --acc: #141310;
+  --acc-hover: #2e2c27;
+  --acc-soft: #f2f0ec;
+  --acc-contrast: #fbfaf7;
 
-  /* Surfaces & lines. */
-  --canvas: #fafaf9;
-  --surface: #ffffff;
-  --line: #ececec;
-  --line-strong: #e0e0e0;
+  /* Surfaces & lines — warm paper, warm hairlines. */
+  --canvas: #faf9f6;
+  --surface: #fffefc;
+  --line: #e8e5df;
+  --line-strong: #d9d5cd;
 
   /* Text. */
-  --ink: #0d0d0d;
-  --ink-muted: #6b6b76;
-  --ink-faint: #9b9ba6;
+  --ink: #141310;
+  --ink-muted: #6f6b62;
+  --ink-faint: #a09c92;
 
-  /* Accent typeface (IBM Plex Mono, loaded via next/font in the root layout). */
+  /* Typefaces (loaded via next/font in the root layout). */
   --font-accent: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-serif: var(--font-newsreader), 'Iowan Old Style', Georgia, 'Times New Roman', serif;
 
   color-scheme: light;
   -webkit-font-smoothing: antialiased;
@@ -32,9 +33,13 @@
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
-/* Mono accents — headings + opt-in .font-accent utility, scoped to the modules. */
+/* Two voices: serif page/section titles (the law), mono apparatus (the engine). */
 .module-theme h1,
-.module-theme h2,
+.module-theme h2 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
 .module-theme h3 {
   font-family: var(--font-accent);
   letter-spacing: -0.01em;
@@ -42,10 +47,13 @@
 .module-theme .font-accent {
   font-family: var(--font-accent);
 }
+.module-theme .font-serif-display {
+  font-family: var(--font-serif);
+}
 
 /* Soft text selection. */
 .module-theme ::selection {
-  background: rgba(13, 13, 13, 0.1);
+  background: rgba(20, 19, 16, 0.12);
 }
 
 /* Thin, unobtrusive scrollbars inside the module. */
@@ -54,21 +62,21 @@
   height: 10px;
 }
 .module-theme *::-webkit-scrollbar-thumb {
-  background: #d9d9d9;
+  background: #d8d4cc;
   border: 3px solid transparent;
   background-clip: content-box;
   border-radius: 9999px;
 }
 .module-theme *::-webkit-scrollbar-thumb:hover {
-  background: #c2c2c2;
+  background: #c4bfb5;
   background-clip: content-box;
 }
 
-/* Faded grid backdrop for the canvas — subtle depth without colour. */
+/* Paper canvas — faint ruled columns, like the landing hero set in daylight. */
 .module-canvas {
   background-color: var(--canvas);
-  background-image:
-    radial-gradient(60rem 40rem at 50% -10%, rgba(13, 13, 13, 0.035), transparent 70%);
+  background-image: linear-gradient(to right, rgba(20, 19, 16, 0.028) 1px, transparent 1px);
+  background-size: 110px 100%;
 }
 
 /* Consistent focus ring across native + custom controls. */
@@ -82,10 +90,10 @@
   accent-color: var(--acc);
 }
 
-/* Reusable field used by inputs/selects/textareas. */
+/* Reusable field used by inputs/selects/textareas — flat, square, ruled. */
 .ai-field {
   width: 100%;
-  border-radius: 0.75rem;
+  border-radius: 2px;
   border: 1px solid var(--line-strong);
   background: var(--surface);
   padding: 0.5rem 0.75rem;
@@ -99,8 +107,8 @@
 }
 .ai-field:focus {
   outline: none;
-  border-color: var(--acc);
-  box-shadow: 0 0 0 3px rgba(13, 13, 13, 0.08);
+  border-color: var(--ink);
+  box-shadow: 0 1px 0 0 var(--ink);
 }
 
 /* Quiet entrance for content panels. */

@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Sparkles, FolderOpen } from 'lucide-react';
 import { PageHeader, Surface, AccentButton, GhostButton, Spinner, EmptyState } from '@/components/ai-act/ui';
 import { FormAuthoringEditor } from '@/components/ai-act/FormAuthoringEditor';
 
@@ -45,17 +44,17 @@ export default function AuthoringPage() {
     <>
       <PageHeader title="Rule authoring" subtitle="Generate a validation form for any provision with AI, then refine the questions, Prolog facts, rules and queries by hand." />
       <Surface className="mb-6 p-5">
-        <label className="mb-1.5 block text-xs font-medium text-neutral-600">Provision</label>
+        <label className="font-accent mb-1.5 block text-xs font-medium uppercase tracking-wide text-[var(--ink-muted)]">Provision</label>
         <select value={regCode} onChange={(e) => { setRegCode(e.target.value); setForm(null); setError(''); }}
-          className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:border-[var(--acc)] focus:outline-none">
+          className="ai-field cursor-pointer">
           {regs.map((r) => <option key={r.RegCode} value={r.RegCode}>{r.RegCode} — {r.category}</option>)}
         </select>
         <div className="mt-4 flex flex-wrap gap-2">
-          <AccentButton onClick={generate} disabled={loading !== '' || !selected}>{loading === 'gen' ? <Spinner /> : <Sparkles className="h-4 w-4" />} Generate with AI</AccentButton>
-          <GhostButton onClick={loadExisting} disabled={loading !== '' || !selected}>{loading === 'load' ? <Spinner /> : <FolderOpen className="h-4 w-4" />} Load existing form</GhostButton>
+          <AccentButton onClick={generate} disabled={loading !== '' || !selected}>{loading === 'gen' ? <Spinner /> : null} Generate with AI</AccentButton>
+          <GhostButton onClick={loadExisting} disabled={loading !== '' || !selected}>{loading === 'load' ? <Spinner /> : null} Load existing form</GhostButton>
         </div>
         {error && <p className="mt-3 text-sm text-amber-600">{error}</p>}
-        {selected && <p className="mt-3 text-xs text-neutral-400">Form code: <span className="font-mono">{selected.FormCode}</span></p>}
+        {selected && <p className="mt-3 text-xs text-[var(--ink-faint)]">Form code: <span className="font-accent">{selected.FormCode}</span></p>}
       </Surface>
 
       {form ? (

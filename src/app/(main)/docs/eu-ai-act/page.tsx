@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { Workflow, ShieldAlert, Eye, Cpu, FileText, ScrollText, Boxes, GitCompare, ArrowRight } from 'lucide-react';
 import { AccentButton } from '@/components/module/ui';
 import { DocHero, DocSection, DocCallout, DocGrid, DocCard, DocFeature, DocList } from '@/components/docs/DocKit';
 
@@ -28,24 +27,24 @@ export default function EuAiActDocs() {
 
       <DocSection title="Assess">
         <DocGrid cols={2}>
-          <DocFeature icon={<Boxes className="h-5 w-5" />} title="System registry" desc="Inventory your AI systems and track each one's classification, obligations and validation status." />
-          <DocFeature icon={<Workflow className="h-5 w-5" />} title="Risk classification" desc="A Prolog-backed wizard that decides the risk tier in priority order." items={['Article 3 scope check', 'Article 5 prohibited practices (terminal)', 'GPAI / systemic-risk models', 'Article 6 & Annex III high-risk uses', 'Article 50 limited / minimal']} />
+          <DocFeature title="System registry" desc="Inventory your AI systems and track each one's classification, obligations and validation status." />
+          <DocFeature title="Risk classification" desc="A Prolog-backed wizard that decides the risk tier in priority order." items={['Article 3 scope check', 'Article 5 prohibited practices (terminal)', 'GPAI / systemic-risk models', 'Article 6 & Annex III high-risk uses', 'Article 50 limited / minimal']} />
         </DocGrid>
       </DocSection>
 
       <DocSection title="Screen &amp; document">
         <DocGrid cols={2}>
-          <DocFeature icon={<ShieldAlert className="h-5 w-5" />} title="Article 5 screening" desc="Check a system against the eight prohibited AI practices — a prohibited verdict is terminal." />
-          <DocFeature icon={<Eye className="h-5 w-5" />} title="Article 50 transparency" desc="Disclosure and synthetic-content labelling obligations for limited-risk systems." />
-          <DocFeature icon={<Cpu className="h-5 w-5" />} title="GPAI obligations" desc="General-purpose AI: transparency, copyright policy and training-data summary (Art. 53), plus systemic-risk duties." />
-          <DocFeature icon={<FileText className="h-5 w-5" />} title="Annex IV technical file" desc="Build the nine-section technical documentation required for high-risk systems." />
+          <DocFeature title="Article 5 screening" desc="Check a system against the eight prohibited AI practices — a prohibited verdict is terminal." />
+          <DocFeature title="Article 50 transparency" desc="Disclosure and synthetic-content labelling obligations for limited-risk systems." />
+          <DocFeature title="GPAI obligations" desc="General-purpose AI: transparency, copyright policy and training-data summary (Art. 53), plus systemic-risk duties." />
+          <DocFeature title="Annex IV technical file" desc="Build the nine-section technical documentation required for high-risk systems." />
         </DocGrid>
       </DocSection>
 
       <DocSection title="Operate">
         <DocGrid cols={2}>
-          <DocFeature icon={<ScrollText className="h-5 w-5" />} title="Full AI Act audit" desc="An article-by-article audit that validates each provision and produces an evidence report." />
-          <DocFeature icon={<GitCompare className="h-5 w-5" />} title="Cross-regulation" desc="See where FDA 21 CFR and the EU AI Act overlap (e.g. SaMD ↔ high-risk, Part 11 ↔ data governance)." />
+          <DocFeature title="Full AI Act audit" desc="An article-by-article audit that validates each provision and produces an evidence report." />
+          <DocFeature title="Cross-regulation" desc="See where FDA 21 CFR and the EU AI Act overlap (e.g. SaMD ↔ high-risk, Part 11 ↔ data governance)." />
         </DocGrid>
       </DocSection>
 
@@ -65,7 +64,7 @@ export default function EuAiActDocs() {
 
       <DocSection title="Start now">
         <div className="flex flex-wrap items-center gap-3">
-          <Link href="/ai-act/classify"><AccentButton>Classify a system <ArrowRight className="h-4 w-4" /></AccentButton></Link>
+          <Link href="/ai-act/classify"><AccentButton>Classify a system <span aria-hidden>→</span></AccentButton></Link>
           <Link href="/ai-act" className="font-accent text-sm text-[var(--ink-muted)] hover:text-[var(--ink)]">or open the AI Act hub →</Link>
         </div>
       </DocSection>

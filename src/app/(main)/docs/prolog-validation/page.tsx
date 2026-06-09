@@ -1,4 +1,3 @@
-import { FileCheck, Binary, CheckCircle2 } from 'lucide-react';
 import { DocHero, DocSection, DocCallout, DocGrid, DocCard, DocFeature, DocList } from '@/components/docs/DocKit';
 
 export default function PrologValidationPage() {
@@ -19,16 +18,16 @@ export default function PrologValidationPage() {
 
       <DocSection title="Validation process">
         <DocGrid>
-          <DocCard icon={<FileCheck className="h-4 w-4" />} title="1. CFR selection">Choose relevant Title 21 CFR codes for validation.</DocCard>
-          <DocCard icon={<Binary className="h-4 w-4" />} title="2. Rule generation">Automatic creation of Prolog rules from requirements.</DocCard>
-          <DocCard icon={<CheckCircle2 className="h-4 w-4" />} title="3. Validation">Comprehensive verification against generated rules.</DocCard>
+          <DocCard title="1. CFR selection">Choose relevant Title 21 CFR codes for validation.</DocCard>
+          <DocCard title="2. Rule generation">Automatic creation of Prolog rules from requirements.</DocCard>
+          <DocCard title="3. Validation">Comprehensive verification against generated rules.</DocCard>
         </DocGrid>
       </DocSection>
 
       <DocSection title="Key features">
         <DocGrid cols={2}>
-          <DocFeature icon={<Binary className="h-5 w-5" />} title="Automated rule generation" items={['Direct integration with the eCFR API', 'Intelligent requirement parsing', 'Context-aware rule creation']} />
-          <DocFeature icon={<CheckCircle2 className="h-5 w-5" />} title="Validation framework" items={['Complete requirement coverage', 'Real-time validation feedback', 'Gap analysis and reporting']} />
+          <DocFeature title="Automated rule generation" items={['Direct integration with the eCFR API', 'Intelligent requirement parsing', 'Context-aware rule creation']} />
+          <DocFeature title="Validation framework" items={['Complete requirement coverage', 'Real-time validation feedback', 'Gap analysis and reporting']} />
         </DocGrid>
       </DocSection>
 

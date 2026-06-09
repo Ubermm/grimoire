@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { Shield, Search, FileText, LineChart, ArrowRight } from 'lucide-react';
 import { AccentButton } from '@/components/module/ui';
 import { DocHero, DocSection, DocCallout, DocGrid, DocCard, DocFeature } from '@/components/docs/DocKit';
 
@@ -39,12 +38,10 @@ export default function QuickStartPage() {
       <DocSection title="Key platform features">
         <DocGrid cols={2}>
           <DocFeature
-            icon={<FileText className="h-5 w-5" />}
             title="Validation features"
             items={['Exhaustive verification of each CFR requirement', 'Automated logical analysis of compliance data', 'Real-time validation feedback', 'Complete audit-trail generation']}
           />
           <DocFeature
-            icon={<LineChart className="h-5 w-5" />}
             title="Analysis features"
             items={['Pattern detection across warning letters', 'Risk prediction and violation relationships', 'Historical trend analysis', 'Automated compliance recommendations']}
           />
@@ -53,7 +50,7 @@ export default function QuickStartPage() {
 
       <DocSection title="Start now">
         <div className="flex flex-wrap items-center gap-3">
-          <Link href="/audit"><AccentButton>Start your first audit <ArrowRight className="h-4 w-4" /></AccentButton></Link>
+          <Link href="/audit"><AccentButton>Start your first audit <span aria-hidden>→</span></AccentButton></Link>
           <Link href="/analytics" className="font-accent text-sm text-[var(--ink-muted)] hover:text-[var(--ink)]">or analyze a warning letter →</Link>
         </div>
       </DocSection>

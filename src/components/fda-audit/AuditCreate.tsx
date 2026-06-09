@@ -5,7 +5,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, Plus, X, Search } from 'lucide-react';
+import { Plus, X, Search } from 'lucide-react';
 import { PageHeader, AccentButton, GhostButton, Surface, Spinner, Field, Input } from '@/components/module/ui';
 import { generateUUID } from '@/lib/utils';
 
@@ -60,7 +60,7 @@ export function AuditCreate() {
 
   return (
     <>
-      <Link href="/audit" className="mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--ink-muted)] hover:text-[var(--ink)]"><ArrowLeft className="h-4 w-4" /> Audits</Link>
+      <Link href="/audit" className="font-accent mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--ink-muted)] hover:text-[var(--ink)]"><span aria-hidden>←</span> Audits</Link>
       <PageHeader eyebrow={`Step ${step} of 2`} title="New audit" subtitle={step === 1 ? 'Name the audit and pick the CFR codes to validate against.' : 'Add a little context for the record.'} />
 
       {step === 1 ? (
@@ -81,7 +81,7 @@ export function AuditCreate() {
             </div>
 
             {matches.length > 0 && (
-              <div className="mt-2 overflow-hidden rounded-xl border border-[var(--line)]">
+              <div className="mt-2 overflow-hidden border border-[var(--line)]">
                 {matches.map((c) => (
                   <button key={c} onClick={() => add(c)} className="flex w-full items-center justify-between px-3 py-2 text-left text-sm text-[var(--ink)] transition-colors hover:bg-black/[0.03]">
                     <span className="font-accent">{c}</span>
@@ -94,7 +94,7 @@ export function AuditCreate() {
             {selected.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-2">
                 {selected.map((c) => (
-                  <span key={c} className="font-accent inline-flex items-center gap-1.5 rounded-full bg-[var(--acc)] px-3 py-1 text-xs font-medium text-[var(--acc-contrast)]">
+                  <span key={c} className="font-accent inline-flex items-center gap-1.5 rounded-[2px] bg-[var(--acc)] px-3 py-1 text-xs font-medium uppercase tracking-[0.08em] text-[var(--acc-contrast)]">
                     {c}
                     <button onClick={() => remove(c)} className="opacity-70 hover:opacity-100"><X className="h-3 w-3" /></button>
                   </span>
@@ -105,7 +105,7 @@ export function AuditCreate() {
           </Surface>
 
           <div className="flex justify-end">
-            <AccentButton onClick={() => setStep(2)} disabled={!step1Valid}>Next <ArrowRight className="h-4 w-4" /></AccentButton>
+            <AccentButton onClick={() => setStep(2)} disabled={!step1Valid}>Next <span aria-hidden>→</span></AccentButton>
           </div>
         </div>
       ) : (
@@ -121,7 +121,7 @@ export function AuditCreate() {
           </Surface>
 
           <div className="flex justify-between">
-            <GhostButton onClick={() => setStep(1)}><ArrowLeft className="h-4 w-4" /> Back</GhostButton>
+            <GhostButton onClick={() => setStep(1)}><span aria-hidden>←</span> Back</GhostButton>
             <AccentButton onClick={create} disabled={!step2Valid || creating}>{creating ? <Spinner /> : null} Create audit</AccentButton>
           </div>
         </div>

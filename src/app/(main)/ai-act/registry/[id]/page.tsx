@@ -1,7 +1,6 @@
 'use client';
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
 import { SystemDossier } from '@/components/ai-act/SystemDossier';
 import { Spinner } from '@/components/ai-act/ui';
 
@@ -19,11 +18,11 @@ export default function SystemPage({ params }: { params: Promise<{ id: string }>
 
   return (
     <>
-      <Link href="/ai-act/registry" className="mb-6 inline-flex items-center gap-1.5 text-sm text-neutral-500 transition-colors hover:text-neutral-800">
-        <ArrowLeft className="h-4 w-4" /> Registry
+      <Link href="/ai-act/registry" className="font-accent mb-6 inline-flex items-center gap-1.5 text-[0.72rem] uppercase tracking-[0.1em] text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]">
+        <span aria-hidden>←</span> Registry
       </Link>
       {missing ? (
-        <p className="text-sm text-neutral-500">System not found.</p>
+        <p className="text-sm text-[var(--ink-muted)]">System not found.</p>
       ) : !system ? (
         <div className="flex justify-center py-16"><Spinner className="h-6 w-6 text-neutral-400" /></div>
       ) : (

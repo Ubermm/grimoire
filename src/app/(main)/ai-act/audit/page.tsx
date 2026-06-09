@@ -2,7 +2,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Plus, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { PageHeader, AccentButton, GhostButton, Surface, Spinner, EmptyState } from '@/components/ai-act/ui';
 import { cn } from '@/lib/utils';
 
@@ -43,30 +43,30 @@ function Inner() {
   return (
     <>
       <PageHeader title="AI Act audits" subtitle="Article-by-article audits with formal Prolog validation per requirement."
-        action={<AccentButton onClick={() => setShowNew((s) => !s)}><Plus className="h-4 w-4" /> New audit</AccentButton>} />
+        action={<AccentButton onClick={() => setShowNew((s) => !s)}><span aria-hidden>+</span> New audit</AccentButton>} />
 
       {showNew && (
         <Surface className="mb-6 p-5">
-          <label className="mb-1.5 block text-xs font-medium text-neutral-600">Audit name</label>
+          <label className="font-accent mb-1.5 block text-xs font-medium uppercase tracking-wide text-[var(--ink-muted)]">Audit name</label>
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Q3 EU AI Act review"
-            className="mb-4 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:border-[var(--acc)] focus:outline-none focus:ring-1 focus:ring-[var(--acc)]" />
+            className="ai-field mb-4" />
 
           {systems.length > 0 && (
             <div className="mb-4">
-              <label className="mb-1.5 block text-xs font-medium text-neutral-600">Linked system (optional)</label>
-              <select value={systemId} onChange={(e) => setSystemId(e.target.value)} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:border-[var(--acc)] focus:outline-none">
+              <label className="font-accent mb-1.5 block text-xs font-medium uppercase tracking-wide text-[var(--ink-muted)]">Linked system (optional)</label>
+              <select value={systemId} onChange={(e) => setSystemId(e.target.value)} className="ai-field cursor-pointer">
                 <option value="">— none —</option>
                 {systems.map((s) => <option key={s._id} value={s._id}>{s.name}</option>)}
               </select>
             </div>
           )}
 
-          <label className="mb-2 block text-xs font-medium text-neutral-600">Provisions to audit</label>
+          <label className="font-accent mb-2 block text-xs font-medium uppercase tracking-wide text-[var(--ink-muted)]">Provisions to audit</label>
           <div className="flex flex-wrap gap-2">
             {PROVISIONS.map((p) => (
               <button key={p.code} type="button" onClick={() => toggle(p.code)}
-                className={cn('rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-                  selected.includes(p.code) ? 'border-[var(--acc)] bg-[var(--acc)]/10 text-[var(--acc)]' : 'border-neutral-200 bg-white text-neutral-500 hover:border-neutral-300')}>
+                className={cn('font-accent border px-3 py-1.5 text-xs font-medium transition-colors',
+                  selected.includes(p.code) ? 'border-[var(--acc)] bg-[var(--acc)] text-[var(--acc-contrast)]' : 'border-[var(--line-strong)] bg-[var(--surface)] text-[var(--ink-muted)] hover:border-[var(--ink)]')}>
                 {p.label}
               </button>
             ))}
@@ -81,19 +81,19 @@ function Inner() {
       {audits === null ? (
         <div className="flex justify-center py-16"><Spinner className="h-6 w-6 text-neutral-400" /></div>
       ) : audits.length === 0 ? (
-        <EmptyState title="No audits yet" hint="Start an article-by-article AI Act audit." action={<AccentButton onClick={() => setShowNew(true)}><Plus className="h-4 w-4" /> New audit</AccentButton>} />
+        <EmptyState title="No audits yet" hint="Start an article-by-article AI Act audit." action={<AccentButton onClick={() => setShowNew(true)}><span aria-hidden>+</span> New audit</AccentButton>} />
       ) : (
         <div className="space-y-3">
           {audits.map((a) => {
             const done = a.subsections.filter((s: any) => s.status === 'completed' || s.status === 'flagged').length;
             return (
               <Link key={a._id} href={`/ai-act/audit/${a._id}`}>
-                <Surface className="flex items-center justify-between p-5 transition-colors hover:border-neutral-300">
+                <Surface className="flex items-center justify-between p-5 transition-colors hover:border-[var(--ink)]">
                   <div>
-                    <p className="font-medium text-neutral-900">{a.name}</p>
-                    <p className="mt-0.5 text-xs text-neutral-400 capitalize">{a.status.replace('_', ' ')} · {done}/{a.subsections.length} provisions</p>
+                    <p className="font-medium text-[var(--ink)]">{a.name}</p>
+                    <p className="font-accent mt-0.5 text-xs capitalize text-[var(--ink-faint)]">{a.status.replace('_', ' ')} · {done}/{a.subsections.length} provisions</p>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-neutral-300" />
+                  <ChevronRight className="h-4 w-4 text-[var(--ink-faint)]" />
                 </Surface>
               </Link>
             );

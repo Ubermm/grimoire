@@ -6,7 +6,7 @@
 // generates hindsight questions (/api/generate), then validates those too.
 // Mirrors the AI Act LeanValidateFlow; the engine APIs are untouched.
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, XCircle, ShieldCheck, Sparkles, RotateCcw, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { Surface, AccentButton, GhostButton, Spinner, EmptyState } from '@/components/module/ui';
 import { RuleAuthoringPanel } from '@/components/rules/RuleAuthoringPanel';
 import { cn } from '@/lib/utils';
@@ -18,10 +18,10 @@ const statusOf = (r: Result, i: number) => r.status?.[i] || (r.passed[i] ? 'pass
 
 function Segmented({ options, value, onChange }: { options: string[]; value?: string; onChange: (v: string) => void }) {
   return (
-    <div className="inline-flex w-fit flex-wrap gap-0.5 rounded-full border border-[var(--line-strong)] bg-black/[0.03] p-1">
+    <div className="inline-flex w-fit flex-wrap divide-x divide-[var(--line-strong)] border border-[var(--line-strong)] bg-[var(--surface)]">
       {options.map((o) => (
         <button key={o} type="button" onClick={() => onChange(o)}
-          className={cn('rounded-full px-3.5 py-1 text-sm font-medium transition-colors', value === o ? 'bg-[var(--surface)] text-[var(--ink)] shadow-sm' : 'text-[var(--ink-faint)] hover:text-[var(--ink-muted)]')}>
+          className={cn('font-accent px-3.5 py-1 text-sm font-medium transition-colors', value === o ? 'bg-[var(--acc)] text-[var(--acc-contrast)]' : 'text-[var(--ink-faint)] hover:text-[var(--ink-muted)]')}>
           {o}
         </button>
       ))}
@@ -37,7 +37,7 @@ function QuestionField({ q, value, onChange }: { q: any; value: any; onChange: (
       <div className="flex flex-wrap gap-2">
         {(q.options || []).map((o: string) => (
           <button key={o} type="button" onClick={() => toggle(o)}
-            className={cn('rounded-full border px-3 py-1 text-xs font-medium transition-colors', arr.includes(o) ? 'border-[var(--acc)] bg-[var(--acc)]/10 text-[var(--acc)]' : 'border-[var(--line-strong)] bg-[var(--surface)] text-[var(--ink-muted)] hover:border-neutral-300')}>
+            className={cn('font-accent rounded-[2px] border px-3 py-1 text-xs font-medium transition-colors', arr.includes(o) ? 'border-[var(--ink)] bg-[var(--acc-soft)] text-[var(--ink)]' : 'border-[var(--line-strong)] bg-[var(--surface)] text-[var(--ink-muted)] hover:border-[var(--ink)]')}>
             {o}
           </button>
         ))}
@@ -66,7 +66,7 @@ function ResultsPanel({ results }: { results: Result }) {
   const anyEscalate = states.some((s) => s === 'escalate');
   return (
     <Surface className={cn('p-6', overall ? 'border-emerald-200' : 'border-amber-200')}>
-      <p className={cn('mb-4 flex items-center gap-2 text-sm font-semibold', overall ? 'text-emerald-700' : 'text-amber-700')}>
+      <p className={cn('font-accent mb-4 flex items-center gap-2 text-sm font-semibold', overall ? 'text-emerald-700' : 'text-amber-700')}>
         {overall ? <CheckCircle2 className="h-5 w-5" /> : anyFail ? <XCircle className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
         {overall ? 'All requirements satisfied' : anyFail ? 'Issues found — see below' : 'Some items need review — see below'}
       </p>
@@ -143,7 +143,7 @@ function QuestionSet({
     <div className="space-y-5">
       <Surface className="p-6">
         <div className="mb-5">
-          <span className="text-sm text-[var(--ink-faint)]">{answered}/{form.questions.length} answered</span>
+          <span className="font-accent text-[0.78rem] uppercase tracking-[0.08em] text-[var(--ink-faint)]">{answered}/{form.questions.length} answered</span>
         </div>
         <div className="space-y-5">
           {form.questions.map((q: any) => (
@@ -155,7 +155,7 @@ function QuestionSet({
               <QuestionField q={q} value={responses[q.id]} onChange={(v) => setResponses({ ...responses, [q.id]: v })} />
               {meta?.[q.id] && (
                 <p className="flex flex-wrap items-center gap-1.5 text-xs text-[var(--ink-faint)]">
-                  <span className={cn('font-accent rounded-full px-1.5 py-0.5 ring-1 ring-inset',
+                  <span className={cn('font-accent rounded-[2px] px-1.5 py-0.5 uppercase tracking-[0.08em] ring-1 ring-inset',
                     meta[q.id].confidence === 'high' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
                       : meta[q.id].confidence === 'medium' ? 'bg-amber-50 text-amber-700 ring-amber-200'
                       : 'bg-neutral-100 text-neutral-500 ring-neutral-200')}>
@@ -168,8 +168,8 @@ function QuestionSet({
           ))}
         </div>
         <div className="mt-6 flex items-center gap-2">
-          <AccentButton onClick={validate} disabled={loading || answered === 0}>{loading ? <Spinner /> : <ShieldCheck className="h-4 w-4" />} {ctaLabel}</AccentButton>
-          <GhostButton onClick={reset} disabled={loading}><RotateCcw className="h-4 w-4" /> Reset</GhostButton>
+          <AccentButton onClick={validate} disabled={loading || answered === 0}>{loading ? <Spinner /> : <span aria-hidden>⊢</span>} {ctaLabel}</AccentButton>
+          <GhostButton onClick={reset} disabled={loading}>Reset</GhostButton>
         </div>
       </Surface>
       {results && <ResultsPanel results={results} />}
@@ -274,13 +274,13 @@ export function AuditValidateFlow({
       {onFormChange && <RuleAuthoringPanel form={form} regText={regText} onChange={(f) => { setForm(f); onFormChange(f); }} />}
 
       {/* Deep validation — hindsight questions derived from real FDA warning letters. */}
-      <div className="rounded-2xl border border-dashed border-[var(--line-strong)] bg-black/[0.015] p-6">
+      <div className="border border-dashed border-[var(--line-strong)] bg-black/[0.015] p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="font-accent flex items-center gap-2 text-sm font-semibold text-[var(--ink)]"><Sparkles className="h-4 w-4" /> Deep validation <span className="font-normal text-[var(--ink-faint)]">· optional</span></p>
+            <p className="font-accent flex items-center gap-2 text-[0.78rem] font-semibold uppercase tracking-[0.12em] text-[var(--ink)]"><span aria-hidden>§</span> Deep validation <span className="font-normal normal-case tracking-normal text-[var(--ink-faint)]">· optional</span></p>
             <p className="mt-1 max-w-xl text-sm text-[var(--ink-muted)]">Generate extra checks from real FDA warning letters that cite this CFR code, to catch issues the base form might miss. Only available for codes with enough cited letters.</p>
           </div>
-          {!deepForm && <GhostButton onClick={runDeep} disabled={deepLoading}>{deepLoading ? <Spinner /> : <Sparkles className="h-4 w-4" />} Generate checks</GhostButton>}
+          {!deepForm && <GhostButton onClick={runDeep} disabled={deepLoading}>{deepLoading ? <Spinner /> : null} Generate checks</GhostButton>}
         </div>
         {deepError && <p className="mt-4 text-sm text-[var(--ink-muted)]">{deepError}</p>}
         {deepForm && (

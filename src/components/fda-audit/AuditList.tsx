@@ -3,7 +3,7 @@
 // links into the run flow. Talks to the existing /api/audit (GET/PATCH/DELETE).
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Plus, ChevronRight, Pencil, Trash2, Check, X } from 'lucide-react';
+import { Pencil, Trash2, Check, X } from 'lucide-react';
 import { PageHeader, AccentButton, Surface, Spinner, EmptyState, Badge } from '@/components/module/ui';
 import { cn } from '@/lib/utils';
 
@@ -48,13 +48,13 @@ export function AuditList() {
         eyebrow="FDA 21 CFR"
         title="Compliance audits"
         subtitle="Build a CFR audit, answer the screening questions, and prove compliance with a deterministic Prolog engine — auditable verdicts, not checklists."
-        action={<Link href="/audit/new"><AccentButton><Plus className="h-4 w-4" /> New audit</AccentButton></Link>}
+        action={<Link href="/audit/new"><AccentButton>New audit <span aria-hidden>→</span></AccentButton></Link>}
       />
 
       {audits === null ? (
         <div className="flex justify-center py-16"><Spinner className="h-6 w-6 text-[var(--ink-faint)]" /></div>
       ) : audits.length === 0 ? (
-        <EmptyState title="No audits yet" hint="Create your first CFR audit to get started." action={<Link href="/audit/new"><AccentButton><Plus className="h-4 w-4" /> New audit</AccentButton></Link>} />
+        <EmptyState title="No audits yet" hint="Create your first CFR audit to get started." action={<Link href="/audit/new"><AccentButton>New audit <span aria-hidden>→</span></AccentButton></Link>} />
       ) : (
         <div className="space-y-3">
           {audits.map((a) => {
@@ -69,8 +69,8 @@ export function AuditList() {
                       <input autoFocus value={draftName} onChange={(e) => setDraftName(e.target.value)}
                         onKeyDown={(e) => { if (e.key === 'Enter') rename(a._id); if (e.key === 'Escape') setEditingId(null); }}
                         className="ai-field max-w-sm" />
-                      <button onClick={() => rename(a._id)} className="rounded-md p-1.5 text-emerald-600 hover:bg-emerald-50"><Check className="h-4 w-4" /></button>
-                      <button onClick={() => setEditingId(null)} className="rounded-md p-1.5 text-[var(--ink-faint)] hover:bg-black/5"><X className="h-4 w-4" /></button>
+                      <button onClick={() => rename(a._id)} className="p-1.5 text-emerald-600 hover:bg-emerald-50"><Check className="h-4 w-4" /></button>
+                      <button onClick={() => setEditingId(null)} className="p-1.5 text-[var(--ink-faint)] hover:bg-black/5"><X className="h-4 w-4" /></button>
                     </div>
                   ) : (
                     <Link href={`/audit/${a._id}`} className="group block">
@@ -88,14 +88,14 @@ export function AuditList() {
                   <div className="flex shrink-0 items-center gap-1">
                     {confirming ? (
                       <div className="flex items-center gap-1">
-                        <button onClick={() => remove(a._id)} className="rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50">Delete</button>
-                        <button onClick={() => setPendingDelete(null)} className="rounded-md px-2 py-1 text-xs text-[var(--ink-faint)] hover:bg-black/5">Cancel</button>
+                        <button onClick={() => remove(a._id)} className="font-accent px-2 py-1 text-xs font-medium uppercase tracking-[0.08em] text-red-600 hover:bg-red-50">Delete</button>
+                        <button onClick={() => setPendingDelete(null)} className="font-accent px-2 py-1 text-xs uppercase tracking-[0.08em] text-[var(--ink-faint)] hover:bg-black/5">Cancel</button>
                       </div>
                     ) : (
                       <>
-                        <button onClick={() => { setEditingId(a._id); setDraftName(a.name); }} className="rounded-md p-2 text-[var(--ink-faint)] hover:bg-black/5 hover:text-[var(--ink)]" aria-label="Rename"><Pencil className="h-4 w-4" /></button>
-                        <button onClick={() => setPendingDelete(a._id)} className="rounded-md p-2 text-[var(--ink-faint)] hover:bg-red-50 hover:text-red-600" aria-label="Delete"><Trash2 className="h-4 w-4" /></button>
-                        <Link href={`/audit/${a._id}`} className={cn('rounded-md p-2 text-[var(--ink-faint)] hover:bg-black/5 hover:text-[var(--ink)]')} aria-label="Open"><ChevronRight className="h-4 w-4" /></Link>
+                        <button onClick={() => { setEditingId(a._id); setDraftName(a.name); }} className="p-2 text-[var(--ink-faint)] hover:bg-black/5 hover:text-[var(--ink)]" aria-label="Rename"><Pencil className="h-4 w-4" /></button>
+                        <button onClick={() => setPendingDelete(a._id)} className="p-2 text-[var(--ink-faint)] hover:bg-red-50 hover:text-red-600" aria-label="Delete"><Trash2 className="h-4 w-4" /></button>
+                        <Link href={`/audit/${a._id}`} className={cn('font-accent p-2 text-sm text-[var(--ink-faint)] hover:bg-black/5 hover:text-[var(--ink)]')} aria-label="Open"><span aria-hidden>→</span></Link>
                       </>
                     )}
                   </div>

@@ -2,18 +2,18 @@
 // Human-editable view of an LLM-generated validation form. Every part is editable:
 // questions, Prolog facts, validation rules, and queries.
 import { useState } from 'react';
-import { Plus, Trash2, Save } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { Surface, AccentButton, Spinner } from './ui';
 
-const inp = 'w-full rounded-lg border border-neutral-200 px-2.5 py-1.5 text-sm focus:border-[var(--acc)] focus:outline-none focus:ring-1 focus:ring-[var(--acc)]';
-const mono = inp + ' font-mono';
+const inp = 'ai-field px-2.5 py-1.5';
+const mono = inp + ' font-accent';
 
 function Section({ title, children, onAdd }: { title: string; children: React.ReactNode; onAdd: () => void }) {
   return (
     <Surface className="p-5">
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm font-semibold text-neutral-900">{title}</p>
-        <button onClick={onAdd} className="inline-flex items-center gap-1 rounded-md border border-neutral-200 px-2 py-1 text-xs text-neutral-500 hover:bg-neutral-50"><Plus className="h-3.5 w-3.5" /> Add</button>
+        <p className="font-accent text-[0.72rem] font-medium uppercase tracking-[0.16em] text-[var(--ink)]">{title}</p>
+        <button onClick={onAdd} className="font-accent inline-flex items-center gap-1 border border-[var(--line-strong)] px-2 py-1 text-[0.68rem] uppercase tracking-[0.1em] text-[var(--ink-muted)] transition-colors hover:border-[var(--ink)] hover:text-[var(--ink)]"><span aria-hidden>+</span> Add</button>
       </div>
       <div className="space-y-3">{children}</div>
     </Surface>
@@ -22,10 +22,10 @@ function Section({ title, children, onAdd }: { title: string; children: React.Re
 
 function Row({ onDelete, children }: { onDelete: () => void; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-neutral-100 bg-neutral-50/40 p-3">
+    <div className="border border-[var(--line)] bg-black/[0.015] p-3">
       <div className="space-y-2">{children}</div>
       <div className="mt-2 flex justify-end">
-        <button onClick={onDelete} className="rounded p-1 text-neutral-300 hover:bg-red-50 hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></button>
+        <button onClick={onDelete} className="p-1 text-[var(--ink-faint)] transition-colors hover:bg-red-50 hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></button>
       </div>
     </div>
   );
@@ -100,9 +100,9 @@ export function FormAuthoringEditor({ initialForm, formCode, regCode, onSaved }:
         ))}
       </Section>
 
-      <div className="sticky bottom-4 flex items-center justify-end gap-3 rounded-xl border border-neutral-200 bg-white/90 px-5 py-3 shadow-sm backdrop-blur">
-        {saved && <span className="text-sm text-emerald-600">Saved ✓</span>}
-        <AccentButton onClick={save} disabled={saving}>{saving ? <Spinner /> : <Save className="h-4 w-4" />} Save form</AccentButton>
+      <div className="sticky bottom-4 flex items-center justify-end gap-3 border border-[var(--line)] bg-[var(--surface)]/90 px-5 py-3 backdrop-blur">
+        {saved && <span className="font-accent text-sm text-emerald-600">Saved ✓</span>}
+        <AccentButton onClick={save} disabled={saving}>{saving ? <Spinner /> : null} Save form</AccentButton>
       </div>
     </div>
   );

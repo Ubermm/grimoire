@@ -1,4 +1,3 @@
-import { Database, Cpu, FileOutput } from 'lucide-react';
 import MermaidChart from '@/components/MermaidChart';
 import { SectionCard } from '@/components/module/ui';
 import { DocHero, DocSection, DocCallout, DocGrid, DocCard, DocFeature, DocList } from '@/components/docs/DocKit';
@@ -49,13 +48,11 @@ export default function OverviewPage() {
       <DocSection title="Core features">
         <DocGrid cols={2}>
           <DocFeature
-            icon={<Database className="h-5 w-5" />}
             title="Warning letter analysis"
             desc="AI-powered analysis of FDA warning letters to identify patterns and risks."
             items={['Pattern detection across similar violations', 'Statistical analysis of violation types', 'Industry-wide trend identification', 'Risk prediction from historical data']}
           />
           <DocFeature
-            icon={<Cpu className="h-5 w-5" />}
             title="Prolog validation"
             desc="Formal verification for comprehensive compliance validation."
             items={['Automated validation against CFR requirements', 'Logical flowchart generation', 'Structured validation reporting', 'Complete coverage verification']}
@@ -65,13 +62,13 @@ export default function OverviewPage() {
 
       <DocSection title="Platform capabilities">
         <DocGrid>
-          <DocCard icon={<Database className="h-4 w-4" />} title="Data sources">
+          <DocCard step={1} title="Data sources">
             <DocList items={['FDA Warning Letter database', 'Title 21 CFR documentation', 'FDA guidance documents', 'Historical compliance data']} />
           </DocCard>
-          <DocCard icon={<Cpu className="h-4 w-4" />} title="Processing">
+          <DocCard step={2} title="Processing">
             <DocList items={['AI-powered analysis', 'Prolog logic engine', 'Pattern recognition', 'Risk assessment']} />
           </DocCard>
-          <DocCard icon={<FileOutput className="h-4 w-4" />} title="Outputs">
+          <DocCard step={3} title="Outputs">
             <DocList items={['Compliance reports', 'Validation results', 'Risk predictions', 'Actionable insights']} />
           </DocCard>
         </DocGrid>

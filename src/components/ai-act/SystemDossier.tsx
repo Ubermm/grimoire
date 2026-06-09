@@ -1,6 +1,5 @@
 'use client';
 import Link from 'next/link';
-import { ShieldCheck, FileText, ListChecks, ScrollText, Workflow } from 'lucide-react';
 import { RiskBadge } from './RiskBadge';
 import { Surface } from './ui';
 import { EvidenceExport } from './EvidenceExport';
@@ -19,12 +18,12 @@ export function SystemDossier({ system }: { system: any }) {
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold text-neutral-900">{system.name}</h2>
+              <h2 className="text-xl text-[var(--ink)]">{system.name}</h2>
               <RiskBadge level={system.riskLevel} />
-              {system.isGPAI && <span className="rounded bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-600">GPAI</span>}
+              {system.isGPAI && <span className="font-accent rounded-[2px] bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-600">GPAI</span>}
             </div>
-            {system.description && <p className="mt-2 max-w-2xl text-sm text-neutral-500">{system.description}</p>}
-            <p className="mt-3 text-xs text-neutral-400">
+            {system.description && <p className="mt-2 max-w-2xl text-sm text-[var(--ink-muted)]">{system.description}</p>}
+            <p className="font-accent mt-3 text-xs text-[var(--ink-faint)]">
               {system.provider ? `Provider: ${system.provider} · ` : ''}Role: <span className="capitalize">{system.role || 'provider'}</span>
             </p>
           </div>
@@ -32,11 +31,11 @@ export function SystemDossier({ system }: { system: any }) {
         </div>
 
         {basis.length > 0 && (
-          <div className="mt-5 rounded-lg border border-neutral-100 bg-neutral-50/60 p-4">
-            <p className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-neutral-400">
-              <ShieldCheck className="h-3.5 w-3.5" /> Classification basis
+          <div className="mt-5 border border-[var(--line)] bg-[var(--acc-soft)]/60 p-4">
+            <p className="font-accent mb-2 flex items-center gap-1.5 text-[0.68rem] font-medium uppercase tracking-[0.16em] text-[var(--ink-faint)]">
+              <span aria-hidden>⊢</span> Classification basis
             </p>
-            <ul className="space-y-1.5 text-sm text-neutral-600">
+            <ul className="space-y-1.5 text-sm text-[var(--ink-muted)]">
               {basis.map((b, i) => <li key={i} className="flex gap-2"><span className="text-[var(--acc)]">•</span>{b}</li>)}
             </ul>
           </div>
@@ -45,17 +44,17 @@ export function SystemDossier({ system }: { system: any }) {
 
       {/* Quick actions */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <DossierAction href={`/ai-act/classify?system=${system._id}`} icon={<Workflow className="h-4 w-4" />} label="Re-classify risk" />
-        <DossierAction href={`/ai-act/screen/article-5?system=${system._id}`} icon={<ListChecks className="h-4 w-4" />} label="Article 5 screening" />
-        <DossierAction href={`/ai-act/annex-iv/${system._id}`} icon={<FileText className="h-4 w-4" />} label={`Annex IV · ${techPct}%`} />
-        <DossierAction href={`/ai-act/audit?system=${system._id}`} icon={<ScrollText className="h-4 w-4" />} label="Run full audit" />
+        <DossierAction href={`/ai-act/classify?system=${system._id}`} index="01" label="Re-classify risk" />
+        <DossierAction href={`/ai-act/screen/article-5?system=${system._id}`} index="02" label="Article 5 screening" />
+        <DossierAction href={`/ai-act/annex-iv/${system._id}`} index="03" label={`Annex IV · ${techPct}%`} />
+        <DossierAction href={`/ai-act/audit?system=${system._id}`} index="04" label="Run full audit" />
       </div>
 
       {/* Article 50 obligations */}
       {obligations.length > 0 && (
         <Surface className="p-6">
-          <p className="mb-3 text-sm font-medium text-neutral-900">Article 50 transparency obligations</p>
-          <ul className="space-y-1.5 text-sm text-neutral-600">
+          <p className="font-accent mb-3 text-[0.72rem] font-medium uppercase tracking-[0.16em] text-[var(--ink)]">Article 50 transparency obligations</p>
+          <ul className="space-y-1.5 text-sm text-[var(--ink-muted)]">
             {obligations.map((o, i) => <li key={i} className="flex gap-2"><span className="text-blue-500">•</span>{o}</li>)}
           </ul>
         </Surface>
@@ -63,17 +62,17 @@ export function SystemDossier({ system }: { system: any }) {
 
       {/* Validation history */}
       <Surface className="p-6">
-        <p className="mb-3 text-sm font-medium text-neutral-900">Validation results</p>
+        <p className="font-accent mb-3 text-[0.72rem] font-medium uppercase tracking-[0.16em] text-[var(--ink)]">Validation results</p>
         {validations.length === 0 ? (
-          <p className="text-sm text-neutral-400">No validations recorded yet. Run a screening or audit to populate this.</p>
+          <p className="text-sm text-[var(--ink-faint)]">No validations recorded yet. Run a screening or audit to populate this.</p>
         ) : (
           <div className="space-y-3">
             {validations.map((v, i) => {
               const passedCount = (v.passed || []).filter(Boolean).length;
               const total = (v.passed || []).length;
               return (
-                <div key={i} className="flex items-center justify-between rounded-lg border border-neutral-100 px-4 py-2.5">
-                  <span className="font-mono text-xs text-neutral-500">{v.formCode}</span>
+                <div key={i} className="flex items-center justify-between border border-[var(--line)] px-4 py-2.5">
+                  <span className="font-accent text-xs text-[var(--ink-muted)]">{v.formCode}</span>
                   <span className={passedCount === total ? 'text-sm font-medium text-emerald-600' : 'text-sm font-medium text-amber-600'}>
                     {passedCount}/{total} passed
                   </span>
@@ -87,11 +86,12 @@ export function SystemDossier({ system }: { system: any }) {
   );
 }
 
-function DossierAction({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) {
+function DossierAction({ href, index, label }: { href: string; index: string; label: string }) {
   return (
-    <Link href={href} className="flex items-center gap-2.5 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm font-medium text-neutral-700 shadow-sm transition-colors hover:border-neutral-300 hover:bg-neutral-50">
-      <span className="text-[var(--acc)]">{icon}</span>
+    <Link href={href} className="group flex items-center gap-2.5 border border-[var(--line)] bg-[var(--surface)] px-4 py-3 text-sm font-medium text-[var(--ink)] transition-colors hover:border-[var(--ink)]">
+      <span className="font-accent text-[0.72rem] text-[var(--ink-faint)]">{index}</span>
       {label}
+      <span className="font-accent ml-auto text-[var(--ink-faint)] opacity-0 transition-opacity group-hover:opacity-100" aria-hidden>→</span>
     </Link>
   );
 }

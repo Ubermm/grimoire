@@ -3,7 +3,7 @@
 // documents once; "Auto-fill audit" deduces answers across EVERY subsection with
 // confidence + source citations, which the auditor then reviews and confirms.
 import { useState } from 'react';
-import { Sparkles, Paperclip, FileText, X, Wand2 } from 'lucide-react';
+import { Paperclip, FileText, X } from 'lucide-react';
 import { Surface, AccentButton, GhostButton, Spinner } from '@/components/module/ui';
 import { generateUUID } from '@/lib/utils';
 
@@ -75,8 +75,8 @@ export function AuditContextPanel({
   return (
     <Surface className="p-5">
       <button onClick={() => setOpen((o) => !o)} className="flex w-full items-center justify-between">
-        <span className="font-accent flex items-center gap-2 text-sm font-semibold text-[var(--ink)]"><Wand2 className="h-4 w-4" /> Context &amp; autofill {hasContext && <span className="font-normal text-[var(--ink-faint)]">· ready</span>}</span>
-        <span className="text-xs text-[var(--ink-faint)]">{open ? 'Hide' : 'Add documents'}</span>
+        <span className="font-accent flex items-center gap-2 text-[0.78rem] font-semibold uppercase tracking-[0.12em] text-[var(--ink)]"><span aria-hidden>§</span> Context &amp; autofill {hasContext && <span className="font-normal tracking-normal text-[var(--ink-faint)]">· ready</span>}</span>
+        <span className="font-accent text-xs uppercase tracking-[0.08em] text-[var(--ink-faint)]">{open ? 'Hide' : 'Add documents'}</span>
       </button>
 
       {open && (
@@ -87,7 +87,7 @@ export function AuditContextPanel({
           {files.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {files.map((f) => (
-                <span key={f.url} className="inline-flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--acc-soft)] px-2.5 py-1 text-xs text-[var(--ink-muted)]">
+                <span key={f.url} className="font-accent inline-flex items-center gap-1.5 rounded-[2px] border border-[var(--line)] bg-[var(--acc-soft)] px-2.5 py-1 text-xs text-[var(--ink-muted)]">
                   <FileText className="h-3.5 w-3.5" /> {f.name}
                   <button onClick={() => removeFile(f.url)} className="opacity-60 hover:opacity-100"><X className="h-3 w-3" /></button>
                 </span>
@@ -96,11 +96,11 @@ export function AuditContextPanel({
           )}
 
           <div className="flex flex-wrap items-center gap-2">
-            <label className="font-accent inline-flex cursor-pointer items-center gap-2 rounded-full border border-[var(--line-strong)] bg-[var(--surface)] px-4 py-2 text-sm font-medium text-[var(--ink-muted)] transition-colors hover:bg-black/[0.03] hover:text-[var(--ink)]">
+            <label className="font-accent inline-flex cursor-pointer items-center gap-2 border border-[var(--line-strong)] bg-transparent px-4 py-2 text-[0.78rem] font-medium uppercase tracking-[0.1em] text-[var(--ink-muted)] transition-colors hover:border-[var(--ink)] hover:text-[var(--ink)]">
               {uploading ? <Spinner /> : <Paperclip className="h-4 w-4" />} Attach files
               <input type="file" multiple className="hidden" onChange={upload} />
             </label>
-            <AccentButton onClick={autofill} disabled={filling || !hasContext}>{filling ? <Spinner /> : <Sparkles className="h-4 w-4" />} Auto-fill audit</AccentButton>
+            <AccentButton onClick={autofill} disabled={filling || !hasContext}>{filling ? <Spinner /> : <span aria-hidden>⊢</span>} Auto-fill audit</AccentButton>
             {filledCount != null && <span className="text-sm text-[var(--ink-muted)]">Deduced {filledCount} answer{filledCount === 1 ? '' : 's'} — review &amp; confirm in each section.</span>}
           </div>
         </div>

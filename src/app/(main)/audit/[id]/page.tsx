@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, Circle, AlertCircle, FileDown, X } from 'lucide-react';
+import { CheckCircle2, Circle, AlertCircle, FileDown, X } from 'lucide-react';
 import { Surface, Spinner, PageHeader, AccentButton, GhostButton } from '@/components/module/ui';
 import { AuditValidateFlow } from '@/components/fda-audit/AuditValidateFlow';
 import { AuditContextPanel } from '@/components/audit-shared/AuditContextPanel';
@@ -104,7 +104,7 @@ export default function AuditRunPage({ params }: { params: Promise<{ id: string 
 
   return (
     <>
-      <Link href="/audit" className="mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--ink-muted)] hover:text-[var(--ink)]"><ArrowLeft className="h-4 w-4" /> Audits</Link>
+      <Link href="/audit" className="font-accent mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--ink-muted)] hover:text-[var(--ink)]"><span aria-hidden>←</span> Audits</Link>
       <PageHeader
         eyebrow={audit.metadata?.facility || 'FDA 21 CFR'}
         title={audit.name}
@@ -119,12 +119,12 @@ export default function AuditRunPage({ params }: { params: Promise<{ id: string 
       <div className="grid gap-6 lg:grid-cols-[260px_1fr] lg:items-start">
         {/* subsection nav — sticky so it follows the form as you scroll */}
         <div className="lg:sticky lg:top-24">
-          <p className="mb-4 text-lg font-semibold text-[var(--ink)]">Sections</p>
+          <p className="font-accent mb-4 text-[0.72rem] font-medium uppercase tracking-[0.16em] text-[var(--ink)]">Sections</p>
           <Surface className="overflow-hidden p-1.5">
             {audit.subsections.map((s: any, i: number) => (
               <button key={s.id} onClick={() => setActive(i)}
-                className={cn('font-accent flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
-                  i === active ? 'bg-[var(--acc)]/10 font-medium text-[var(--acc)]' : 'text-[var(--ink-muted)] hover:bg-black/[0.03]')}>
+                className={cn('font-accent flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-colors',
+                  i === active ? 'bg-[var(--acc-soft)] font-medium text-[var(--ink)]' : 'text-[var(--ink-muted)] hover:bg-black/[0.03]')}>
                 {statusIcon(s.status)}
                 <span className="truncate">{s.code}</span>
               </button>
@@ -134,7 +134,7 @@ export default function AuditRunPage({ params }: { params: Promise<{ id: string 
 
         {/* active CFR section */}
         <div className="min-w-0">
-          <h2 className="mb-4 text-lg font-semibold text-[var(--ink)]">{sub.code}</h2>
+          <h2 className="mb-4 text-xl text-[var(--ink)]">{sub.code}</h2>
           <AuditValidateFlow
             key={`${sub.id}:${fillNonce}`}
             cfrCode={sub.code}
@@ -153,10 +153,10 @@ export default function AuditRunPage({ params }: { params: Promise<{ id: string 
           .ai-rise transform's containing block and truly covers the viewport. */}
       {report && typeof document !== 'undefined' && createPortal(
         <div className="module-theme fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm" onClick={() => setReport(false)}>
-          <div className="flex h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-[var(--surface)] shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="flex h-[85vh] w-full max-w-4xl flex-col overflow-hidden border border-[var(--line)] bg-[var(--surface)]" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-3">
-              <p className="font-accent text-sm font-semibold text-[var(--ink)]">Audit report — {audit.name}</p>
-              <button onClick={() => setReport(false)} className="rounded-md p-1.5 text-[var(--ink-faint)] hover:bg-black/5 hover:text-[var(--ink)]"><X className="h-4 w-4" /></button>
+              <p className="font-accent text-[0.78rem] font-semibold uppercase tracking-[0.12em] text-[var(--ink)]">Audit report — {audit.name}</p>
+              <button onClick={() => setReport(false)} className="p-1.5 text-[var(--ink-faint)] hover:bg-black/5 hover:text-[var(--ink)]"><X className="h-4 w-4" /></button>
             </div>
             <div className="flex-1 overflow-auto p-4">
               <AuditReport audit={audit} />

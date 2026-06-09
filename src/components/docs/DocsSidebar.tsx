@@ -1,5 +1,6 @@
 'use client';
-// Sticky docs sidebar with grouped sections + active highlighting.
+// Sticky docs sidebar — a ruled index: mono two-digit entries on a hairline,
+// the active page marked by an ink left rule instead of a filled pill.
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -31,24 +32,29 @@ export const DOC_GROUPS = [
 
 export function DocsSidebar() {
   const pathname = usePathname() || '';
+  const flat = DOC_GROUPS.flatMap((g) => g.links);
   return (
     <aside className="lg:sticky lg:top-24">
       <nav className="space-y-6">
         {DOC_GROUPS.map((g) => (
           <div key={g.heading}>
             <p className="font-accent mb-2 text-[0.7rem] font-medium uppercase tracking-[0.12em] text-[var(--ink-faint)]">{g.heading}</p>
-            <ul className="space-y-0.5">
+            <ul className="border-l border-[var(--line)]">
               {g.links.map((l) => {
                 const active = pathname === l.href;
+                const n = String(flat.findIndex((x) => x.href === l.href) + 1).padStart(2, '0');
                 return (
                   <li key={l.href}>
                     <Link
                       href={l.href}
                       className={cn(
-                        'block rounded-lg px-3 py-1.5 text-sm transition-colors',
-                        active ? 'bg-[var(--acc)]/10 font-medium text-[var(--acc)]' : 'text-[var(--ink-muted)] hover:bg-black/[0.03] hover:text-[var(--ink)]'
+                        '-ml-px flex items-baseline gap-2.5 border-l py-1.5 pl-3 pr-2 text-sm transition-colors',
+                        active
+                          ? 'border-[var(--ink)] font-medium text-[var(--ink)]'
+                          : 'border-transparent text-[var(--ink-muted)] hover:border-[var(--line-strong)] hover:text-[var(--ink)]'
                       )}
                     >
+                      <span className="font-accent text-[0.68rem] text-[var(--ink-faint)]" aria-hidden>{n}</span>
                       {l.label}
                     </Link>
                   </li>

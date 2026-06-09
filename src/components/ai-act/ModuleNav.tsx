@@ -1,6 +1,5 @@
 'use client';
 // EU AI Act instance of the shared ModuleNav (wordmark + section tabs).
-import { Sparkles } from 'lucide-react';
 import { ModuleNav as BaseModuleNav } from '@/components/module/ModuleNav';
 
 const TABS = [
@@ -15,7 +14,7 @@ const TABS = [
 export function ModuleNav() {
   return (
     <BaseModuleNav
-      wordmark={{ href: '/ai-act', icon: <Sparkles className="h-3.5 w-3.5" />, label: 'AI Act', suffix: 'Grimoire One' }}
+      wordmark={{ href: '/ai-act', icon: <span className="font-accent text-[0.8rem] leading-none" aria-hidden>§</span>, label: 'AI Act', suffix: 'Grimoire One' }}
       tabs={TABS}
     />
   );

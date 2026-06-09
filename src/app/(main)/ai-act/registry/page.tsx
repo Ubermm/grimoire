@@ -1,11 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Plus } from 'lucide-react';
 import { PageHeader, AccentButton, GhostButton, Surface, Spinner, EmptyState } from '@/components/ai-act/ui';
 import { SystemRegistryTable } from '@/components/ai-act/SystemRegistryTable';
 
-const inputCls =
-  'w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-[var(--acc)] focus:outline-none focus:ring-1 focus:ring-[var(--acc)]';
+const inputCls = 'ai-field';
+const labelCls = 'font-accent mb-1.5 block text-xs font-medium uppercase tracking-wide text-[var(--ink-muted)]';
 
 const empty = { name: '', description: '', provider: '', role: 'provider', isGPAI: false };
 
@@ -41,26 +40,26 @@ export default function RegistryPage() {
       <PageHeader
         title="AI system registry"
         subtitle="Your inventory of AI systems and their EU AI Act compliance status."
-        action={<AccentButton onClick={() => setShowNew((s) => !s)}><Plus className="h-4 w-4" /> New system</AccentButton>}
+        action={<AccentButton onClick={() => setShowNew((s) => !s)}><span aria-hidden>+</span> New system</AccentButton>}
       />
 
       {showNew && (
         <Surface className="mb-6 p-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-neutral-600">Name</label>
+              <label className={labelCls}>Name</label>
               <input className={inputCls} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. TalentRank CV screening" />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-neutral-600">Provider</label>
+              <label className={labelCls}>Provider</label>
               <input className={inputCls} value={form.provider} onChange={(e) => setForm({ ...form, provider: e.target.value })} placeholder="Organisation name" />
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1.5 block text-xs font-medium text-neutral-600">Description</label>
+              <label className={labelCls}>Description</label>
               <textarea className={inputCls} rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="What does the system do?" />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-neutral-600">Your role</label>
+              <label className={labelCls}>Your role</label>
               <select className={inputCls} value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
                 <option value="provider">Provider</option>
                 <option value="deployer">Deployer</option>
@@ -68,8 +67,8 @@ export default function RegistryPage() {
                 <option value="distributor">Distributor</option>
               </select>
             </div>
-            <label className="flex items-center gap-2 self-end pb-2 text-sm text-neutral-600">
-              <input type="checkbox" checked={form.isGPAI} onChange={(e) => setForm({ ...form, isGPAI: e.target.checked })} className="h-4 w-4 rounded border-neutral-300 text-[var(--acc)] focus:ring-[var(--acc)]" />
+            <label className="flex items-center gap-2 self-end pb-2 text-sm text-[var(--ink-muted)]">
+              <input type="checkbox" checked={form.isGPAI} onChange={(e) => setForm({ ...form, isGPAI: e.target.checked })} className="h-4 w-4 border-[var(--line-strong)] text-[var(--acc)] focus:ring-[var(--acc)]" />
               General-purpose AI model (GPAI)
             </label>
           </div>
@@ -86,7 +85,7 @@ export default function RegistryPage() {
         <EmptyState
           title="No AI systems yet"
           hint="Register your first AI system to start classifying and documenting it."
-          action={<AccentButton onClick={() => setShowNew(true)}><Plus className="h-4 w-4" /> New system</AccentButton>}
+          action={<AccentButton onClick={() => setShowNew(true)}><span aria-hidden>+</span> New system</AccentButton>}
         />
       ) : (
         <SystemRegistryTable systems={systems} onDelete={remove} />

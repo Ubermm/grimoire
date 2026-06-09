@@ -1,7 +1,7 @@
 'use client';
 // Slim in-module navigation shared across product modules. Sits just beneath the
 // global (dark) NavBar and gives each module a cohesive, platform feel: a
-// wordmark, primary section tabs with an active pill, IBM Plex Mono accents.
+// wordmark, square mono section tabs (active = ink fill), IBM Plex Mono accents.
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -24,7 +24,7 @@ export function ModuleNav({ wordmark, tabs }: { wordmark: ModuleWordmark; tabs: 
     <div className="border-b border-[var(--line)]">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-6 md:px-8">
         <Link href={wordmark.href} className="group flex shrink-0 items-center gap-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--acc)] text-[var(--acc-contrast)]">
+          <span className="flex h-6 w-6 items-center justify-center rounded-[2px] bg-[var(--acc)] text-[var(--acc-contrast)]">
             {wordmark.icon}
           </span>
           <span className="font-accent text-sm font-semibold tracking-tight text-[var(--ink)]">{wordmark.label}</span>
@@ -41,10 +41,10 @@ export function ModuleNav({ wordmark, tabs }: { wordmark: ModuleWordmark; tabs: 
                 key={t.href}
                 href={t.href}
                 className={cn(
-                  'font-accent whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
+                  'font-accent whitespace-nowrap border px-3 py-1.5 text-[0.78rem] font-medium uppercase tracking-[0.08em] transition-colors',
                   active
-                    ? 'bg-[var(--acc)] text-[var(--acc-contrast)]'
-                    : 'text-[var(--ink-muted)] hover:bg-black/[0.04] hover:text-[var(--ink)]'
+                    ? 'border-[var(--acc)] bg-[var(--acc)] text-[var(--acc-contrast)]'
+                    : 'border-transparent text-[var(--ink-muted)] hover:border-[var(--line-strong)] hover:text-[var(--ink)]'
                 )}
               >
                 {t.label}

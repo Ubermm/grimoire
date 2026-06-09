@@ -176,6 +176,31 @@ img[alt=md-image] {
   font-family: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
+/* ---- Editorial marketing surface ----------------------------------------- */
+/* Display serif (Newsreader) — the voice of the law, set against Plex Mono. */
+.font-serif-display {
+  font-family: var(--font-newsreader), 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  font-feature-settings: 'liga', 'kern';
+}
+/* Old-style proportional numerals look hand-set in serif stat blocks. */
+.serif-oldstyle-nums { font-variant-numeric: oldstyle-nums; }
+/* Hairline rule — the single structural device of the editorial pages. */
+.rule { border-color: rgba(255, 255, 255, 0.14); }
+/* Faint ruled-paper columns for the hero, quieter than the old grid. */
+.paper-rules {
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 110px 100%;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 88%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 88%);
+}
+/* Footnote superscripts — links that behave like citations, not buttons. */
+.fn-ref {
+  font-feature-settings: 'sups';
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.55);
+}
+.fn-ref:hover { color: #fff; }
+
 /* ---- Landing (dark, premium) animated backdrop --------------------------- */
 .hero-grid {
   background-image:

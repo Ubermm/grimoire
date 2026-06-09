@@ -14,16 +14,16 @@ export default function FrequencyBars({ data }: { data: { label: string; value: 
           type="category"
           dataKey="label"
           width={132}
-          tick={{ fontSize: 12, fill: '#6b6b76' }}
+          tick={{ fontSize: 12, fill: '#6f6b62', fontFamily: 'var(--font-accent)' }}
           axisLine={false}
           tickLine={false}
         />
         <Tooltip
-          cursor={{ fill: 'rgba(0,0,0,0.04)' }}
-          contentStyle={{ borderRadius: 12, border: '1px solid #ececec', fontSize: 12, boxShadow: '0 8px 24px -12px rgba(0,0,0,0.18)' }}
-          labelStyle={{ color: '#0d0d0d', fontWeight: 600 }}
+          cursor={{ fill: 'rgba(20,19,16,0.04)' }}
+          contentStyle={{ borderRadius: 0, border: '1px solid #e8e5df', background: '#fffefc', fontSize: 12, fontFamily: 'var(--font-accent)' }}
+          labelStyle={{ color: '#141310', fontWeight: 600 }}
         />
-        <Bar dataKey="value" radius={[4, 4, 4, 4]} fill="#0d0d0d" maxBarSize={18} />
+        <Bar dataKey="value" fill="#141310" maxBarSize={18} />
       </BarChart>
     </ResponsiveContainer>
   );

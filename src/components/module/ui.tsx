@@ -1,32 +1,28 @@
 'use client';
-// Platform-style presentational primitives, shared across the Grimoire One product
-// modules (FDA Audit + EU AI Act). Near-monochrome palette, generous spacing,
-// near-black primary action, IBM Plex Mono accents (.font-accent / headings).
-// Colour + font tokens (--acc, --ink, --line, --font-accent, …) live in
+// Presentational primitives shared across the Grimoire One product modules
+// (FDA Audit + EU AI Act) — the landing's scholarly-press language set in
+// daylight: square corners, hairline rules, serif titles (Newsreader), mono
+// apparatus (Plex), typographic markers over icon chrome. Colour + font tokens
+// (--acc, --ink, --line, --font-accent, --font-serif, …) live in
 // src/styles/module-theme.css under .module-theme.
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Loader2, ArrowUpRight } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
-export const ACCENT = '#0d0d0d';
+export const ACCENT = '#141310';
 
 /* ----------------------------------------------------------------- surfaces */
 
 export function Surface({ className, children }: { className?: string; children: React.ReactNode }) {
   return (
-    <div
-      className={cn(
-        'rounded-2xl border border-[var(--line)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(0,0,0,0.04)]',
-        className
-      )}
-    >
+    <div className={cn('border border-[var(--line)] bg-[var(--surface)]', className)}>
       {children}
     </div>
   );
 }
 
-// Titled surface — a card with an optional header row + subtitle.
+// Titled surface — a ruled panel with an optional header row + subtitle.
 export function SectionCard({
   title,
   subtitle,
@@ -47,8 +43,8 @@ export function SectionCard({
       {(title || action) && (
         <div className="flex items-start justify-between gap-4 border-b border-[var(--line)] px-6 py-4">
           <div>
-            {title && <p className="font-accent text-sm font-semibold tracking-tight text-[var(--ink)]">{title}</p>}
-            {subtitle && <p className="mt-0.5 text-sm text-[var(--ink-muted)]">{subtitle}</p>}
+            {title && <p className="font-accent text-[0.72rem] font-medium uppercase tracking-[0.16em] text-[var(--ink)]">{title}</p>}
+            {subtitle && <p className="mt-1 text-sm text-[var(--ink-muted)]">{subtitle}</p>}
           </div>
           {action}
         </div>
@@ -64,8 +60,8 @@ export function AccentButton({ className, ...props }: React.ButtonHTMLAttributes
   return (
     <button
       className={cn(
-        'font-accent inline-flex items-center justify-center gap-2 rounded-full bg-[var(--acc)] px-4 py-2 text-sm font-medium text-[var(--acc-contrast)]',
-        'transition-[background-color,transform] hover:bg-[var(--acc-hover)] active:scale-[0.98]',
+        'font-accent inline-flex items-center justify-center gap-2 border border-[var(--acc)] bg-[var(--acc)] px-4 py-2 text-[0.78rem] font-medium uppercase tracking-[0.1em] text-[var(--acc-contrast)]',
+        'transition-colors hover:bg-[var(--acc-hover)] active:translate-y-px',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-black/15 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--canvas)]',
         'disabled:cursor-not-allowed disabled:opacity-40',
         className
@@ -79,8 +75,8 @@ export function GhostButton({ className, ...props }: React.ButtonHTMLAttributes<
   return (
     <button
       className={cn(
-        'font-accent inline-flex items-center justify-center gap-2 rounded-full border border-[var(--line-strong)] bg-[var(--surface)] px-4 py-2 text-sm font-medium text-[var(--ink-muted)]',
-        'transition-colors hover:bg-black/[0.03] hover:text-[var(--ink)]',
+        'font-accent inline-flex items-center justify-center gap-2 border border-[var(--line-strong)] bg-transparent px-4 py-2 text-[0.78rem] font-medium uppercase tracking-[0.1em] text-[var(--ink-muted)]',
+        'transition-colors hover:border-[var(--ink)] hover:text-[var(--ink)]',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-black/10',
         'disabled:cursor-not-allowed disabled:opacity-40',
         className
@@ -104,17 +100,19 @@ export function PageHeader({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        {eyebrow && (
-          <p className="font-accent mb-2 text-xs font-medium uppercase tracking-[0.14em] text-[var(--ink-faint)]">{eyebrow}</p>
-        )}
-        <h1 className="text-2xl font-semibold tracking-tight text-[var(--ink)] md:text-[2rem] md:leading-[1.1]">
-          {title}
-        </h1>
-        {subtitle && <p className="mt-2 max-w-2xl text-[0.95rem] leading-relaxed text-[var(--ink-muted)]">{subtitle}</p>}
+    <div className="mb-8 border-b border-[var(--line)] pb-6">
+      {eyebrow && (
+        <p className="font-accent mb-3 text-[0.7rem] font-medium uppercase tracking-[0.22em] text-[var(--ink-faint)]">{eyebrow}</p>
+      )}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-[1.9rem] tracking-tight text-[var(--ink)] md:text-[2.4rem] md:leading-[1.08]">
+            {title}
+          </h1>
+          {subtitle && <p className="mt-2.5 max-w-2xl text-[0.95rem] leading-relaxed text-[var(--ink-muted)]">{subtitle}</p>}
+        </div>
+        {action && <div className="shrink-0">{action}</div>}
       </div>
-      {action && <div className="shrink-0">{action}</div>}
     </div>
   );
 }
@@ -160,7 +158,7 @@ export function Badge({ className, children }: { className?: string; children: R
   return (
     <span
       className={cn(
-        'font-accent inline-flex items-center rounded-full border border-[var(--line-strong)] bg-[var(--acc-soft)] px-2.5 py-0.5 text-xs font-medium text-[var(--ink-muted)]',
+        'font-accent inline-flex items-center rounded-[2px] border border-[var(--line-strong)] bg-[var(--acc-soft)] px-2 py-0.5 text-[0.68rem] font-medium uppercase tracking-[0.08em] text-[var(--ink-muted)]',
         className
       )}
     >
@@ -171,8 +169,8 @@ export function Badge({ className, children }: { className?: string; children: R
 
 export function EmptyState({ title, hint, action }: { title: string; hint?: string; action?: React.ReactNode }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--line-strong)] bg-black/[0.015] px-6 py-16 text-center">
-      <p className="text-sm font-medium text-[var(--ink)]">{title}</p>
+    <div className="flex flex-col items-center justify-center border border-dashed border-[var(--line-strong)] bg-black/[0.012] px-6 py-16 text-center">
+      <p className="font-serif-display text-base text-[var(--ink)]">{title}</p>
       {hint && <p className="mt-1.5 max-w-sm text-sm text-[var(--ink-faint)]">{hint}</p>}
       {action && <div className="mt-6">{action}</div>}
     </div>
@@ -181,13 +179,14 @@ export function EmptyState({ title, hint, action }: { title: string; hint?: stri
 
 /* ------------------------------------------------------------------- icons */
 
-// Cohesive icon container — a soft accent square with a hairline ring. Used for
-// decorative iconography across docs / analytics / hub cards.
+// Cohesive icon container — a flat accent square with a hairline ring. Kept for
+// functional iconography; prefer typographic markers (§ ⊢ → two-digit indices)
+// for anything decorative.
 export function IconChip({ className, children }: { className?: string; children: React.ReactNode }) {
   return (
     <span
       className={cn(
-        'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--acc-soft)] text-[var(--ink)] ring-1 ring-inset ring-[var(--line)]',
+        'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[2px] bg-[var(--acc-soft)] text-[var(--ink)] ring-1 ring-inset ring-[var(--line)]',
         className
       )}
     >
@@ -198,28 +197,33 @@ export function IconChip({ className, children }: { className?: string; children
 
 /* --------------------------------------------------------------- nav cards */
 
-// Clickable entry card used on the hub and dashboards.
+// Clickable entry used on the hub and dashboards — a ruled index entry, not a
+// floating card. `icon` is optional; an `index` ("01") reads more editorial.
 export function EntryCard({
   href,
   icon,
+  index,
   title,
   desc,
 }: {
   href: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
+  index?: string;
   title: string;
   desc: string;
 }) {
   return (
     <Link
       href={href}
-      className="group relative flex flex-col gap-4 overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all hover:-translate-y-0.5 hover:border-[var(--line-strong)] hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.18)]"
+      className="group relative flex flex-col gap-4 border border-[var(--line)] bg-[var(--surface)] p-5 transition-colors hover:border-[var(--ink)]"
     >
       <div className="flex items-center justify-between">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--acc-soft)] text-[var(--ink)] ring-1 ring-inset ring-[var(--line)] transition-colors group-hover:bg-[var(--acc)] group-hover:text-[var(--acc-contrast)]">
-          {icon}
-        </div>
-        <ArrowUpRight className="h-4 w-4 text-[var(--ink-faint)] opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
+        {index ? (
+          <span className="font-accent text-[0.78rem] text-[var(--ink-faint)]">{index}</span>
+        ) : icon ? (
+          <IconChip>{icon}</IconChip>
+        ) : <span />}
+        <span className="font-accent text-sm text-[var(--ink-faint)] opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" aria-hidden>→</span>
       </div>
       <div>
         <p className="font-accent font-medium tracking-tight text-[var(--ink)]">{title}</p>
