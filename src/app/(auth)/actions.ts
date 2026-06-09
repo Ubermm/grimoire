@@ -9,7 +9,9 @@ import fs from 'fs';
 import path from 'path';
 
 const authFormSchema = z.object({
-  email: z.string().email(),
+  // Normalize: mobile keyboards auto-capitalize and autofill appends spaces,
+  // which used to break the exact-match user lookup (CredentialsSignin).
+  email: z.string().trim().toLowerCase().email(),
   password: z.string().min(6),
   callbackUrl: z.string().default('/audit'),
 });
@@ -190,13 +192,22 @@ export const login = async (
   } catch (error) {
     console.error('Login error:', error);
     if (error instanceof z.ZodError) {
-      return { 
+      return {
         status: 'invalid_data',
         error: 'Invalid email or password format'
       };
     }
-    
-    return { 
+
+    // next-auth v5 throws CredentialsSignin (instead of returning {error})
+    // when authorize() returns null — i.e. wrong email or password.
+    if (error?.type === 'CredentialsSignin' || error?.code === 'credentials') {
+      return {
+        status: 'failed',
+        error: 'Invalid email or password'
+      };
+    }
+
+    return {
       status: 'failed',
       error: 'An unexpected error occurred'
     };

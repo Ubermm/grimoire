@@ -213,7 +213,12 @@ export async function deleteAttachmentsByMessageId({ messageId }: { messageId: s
 
 export async function getUser(email: string) {
   try {
-    return await CUser.find({ email });
+    // Case-insensitive lookup: legacy accounts were stored with whatever
+    // capitalization the user typed at registration, so an exact match
+    // locked those users out once their client sent a different casing.
+    const normalized = String(email).trim();
+    const escaped = normalized.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return await CUser.find({ email: { $regex: `^${escaped}$`, $options: 'i' } });
   } catch (error) {
     console.error('Failed to get user from database');
     throw error;
@@ -231,7 +236,8 @@ export async function createUser(email: string, password: string) {
   const hash = hashSync(password, salt);
 
   try {
-    return await CUser.create({ email, password: hash });
+    // Store normalized so future exact lookups are stable.
+    return await CUser.create({ email: String(email).trim().toLowerCase(), password: hash });
   } catch (error) {
     console.error('Failed to create user in database');
     throw error;

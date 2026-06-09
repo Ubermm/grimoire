@@ -38,13 +38,16 @@ export const {
             return null;
           }
           
-          const { email, password } = credentials as { email: string; password: string };
-          
-          if (!email || !password) {
+          const { email: rawEmail, password } = credentials as { email: string; password: string };
+
+          if (!rawEmail || !password) {
             console.log('Missing email or password');
             return null;
           }
-      
+
+          // Normalize — lookups must not depend on capitalization/whitespace.
+          const email = String(rawEmail).trim().toLowerCase();
+
           const users = await getUser(email);
           
           if (!users || users.length === 0) {
