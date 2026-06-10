@@ -311,8 +311,9 @@ function QuestionSet({
           />
         ) : (
         <div className="space-y-5">
-          {visibleQuestions.map((q: any) => (
-            <div key={q.id} className="flex flex-col gap-2.5 border-b border-[var(--line)] pb-5 last:border-0 last:pb-0">
+          {/* Generated deep forms can emit duplicate ids — key by position too. */}
+          {visibleQuestions.map((q: any, qi: number) => (
+            <div key={`${qi}-${q.id}`} className="flex flex-col gap-2.5 border-b border-[var(--line)] pb-5 last:border-0 last:pb-0">
               <div>
                 <p className="text-sm text-[var(--ink)]">{q.text}</p>
                 {(q.reference || q.cfr_reference) && <p className="mt-0.5 text-xs text-[var(--ink-faint)]">{q.reference || q.cfr_reference}</p>}
