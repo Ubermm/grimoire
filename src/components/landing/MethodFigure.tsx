@@ -117,7 +117,7 @@ export default function MethodFigure() {
             {i > 0 && <span className="text-white/45" aria-hidden>{i === 2 ? '⊢' : '→'}</span>}
             <span
               className={`border-b pb-1 transition-colors duration-300 ${
-                stage === key ? 'border-white/60 text-white' : 'border-transparent text-white/55'
+                stage === key ? 'border-emerald-300/80 text-white' : 'border-transparent text-white/55'
               }`}
             >
               {label}

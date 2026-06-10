@@ -72,14 +72,17 @@ export function DocReadingProgress({ eyebrow }: { eyebrow?: string }) {
         <span className="font-accent text-[0.65rem] uppercase tracking-[0.18em] text-[var(--ink-muted)]">
           {eyebrow}
         </span>
-        <span className="font-accent text-[0.65rem] uppercase tracking-[0.18em] tabular-nums text-[var(--ink-muted)]">
-          {pct} %
+        <span className="font-accent text-[0.65rem] uppercase tracking-[0.18em] tabular-nums text-[#047857]">
+          {pct} %{pct >= 100 && <span aria-hidden>&ensp;∎</span>}
         </span>
       </div>
       <div className="h-[2px] w-full bg-[var(--line)]">
         <motion.div
-          className="h-full w-full origin-left bg-[var(--ink)]"
-          style={{ scaleX: reduced ? scrollYProgress : smoothed }}
+          className="h-full w-full origin-left"
+          style={{
+            scaleX: reduced ? scrollYProgress : smoothed,
+            backgroundImage: 'linear-gradient(90deg, #047857, #0d9488)',
+          }}
         />
       </div>
     </div>

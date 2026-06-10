@@ -180,7 +180,9 @@ function PanelHeader({ label, index }) {
   return (
     <div className="flex items-center justify-between border-b rule px-5 py-3">
       <span className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/60">{label}</span>
-      <span className="font-plex text-[0.7rem] text-white/50">0{index + 1} / 04</span>
+      <span className="font-plex text-[0.7rem] text-white/50">
+        <span className="text-emerald-300/90">0{index + 1}</span> / 04
+      </span>
     </div>
   );
 }
@@ -235,8 +237,11 @@ export default function ScrollStory() {
               {/* progress hairline — fills the panel's left edge as the proof unfolds */}
               <div className="absolute bottom-0 left-0 top-0 w-px bg-white/15">
                 <motion.div
-                  style={{ scaleY: progressScale }}
-                  className="h-full w-full origin-top bg-[#e8e6e1]"
+                  style={{
+                    scaleY: progressScale,
+                    backgroundImage: 'linear-gradient(180deg, #34d399, #2dd4bf)',
+                  }}
+                  className="h-full w-full origin-top"
                 />
               </div>
 
