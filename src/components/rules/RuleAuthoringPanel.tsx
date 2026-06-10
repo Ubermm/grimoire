@@ -29,7 +29,31 @@ export function RuleAuthoringPanel({ form, regText, onChange }: { form: any; reg
   };
 
   const removeRule = (i: number) => {
-    onChange({ ...form, queries: form.queries.filter((_: any, idx: number) => idx !== i), validations: form.validations.filter((_: any, idx: number) => idx !== i) });
+    const queries = form.queries || [];
+    const removed = queries[i];
+    const remaining = queries.filter((_: any, idx: number) => idx !== i);
+
+    // Question positions {p} the removed rule consumed vs. those any remaining
+    // rule still consumes.
+    const refs = (s: string) => Array.from(String(s || '').matchAll(/\{(\d+)\}/g)).map((m) => parseInt(m[1], 10));
+    const removedRefs = new Set(refs(removed?.query));
+    const live = new Set(remaining.flatMap((q: any) => refs(q.query)));
+
+    // Questions only this rule consumed are DISABLED, not spliced — every {i}
+    // placeholder and qN id is positional, so removal would corrupt the
+    // references of every later fact and rule.
+    const questions = (form.questions || []).map((q: any, qi: number) =>
+      removedRefs.has(qi + 1) && !live.has(qi + 1) ? { ...q, disabled: true } : q);
+
+    // Drop the validation that defines the removed query's predicate; fall
+    // back to the parallel index for seeded forms.
+    const head = String(removed?.query || '').replace(/^\s*\?-\s*/, '').match(/^([a-z_][A-Za-z0-9_]*)/)?.[1];
+    const defines = (rule: string) => !!head && new RegExp(`(^|\\n)\\s*${head}\\s*\\(`).test(String(rule || ''));
+    const validations = (form.validations || []).some((v: any) => defines(v.rule))
+      ? form.validations.filter((v: any) => !defines(v.rule))
+      : (form.validations || []).filter((_: any, idx: number) => idx !== i);
+
+    onChange({ ...form, questions, queries: remaining, validations });
   };
 
   const analyze = async () => {

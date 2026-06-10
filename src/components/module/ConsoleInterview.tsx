@@ -108,7 +108,9 @@ export function ConsoleInterview({
   // Optional doc/image ingestion: returns {questionId: value} plus optional meta.
   uploadAutofill?: (file: File) => Promise<Record<string, string>>;
 }) {
-  const questions = form?.questions || [];
+  // Disabled questions (orphaned by a deleted rule) keep their slot in the
+  // form's positional arrays but are never asked.
+  const questions = (form?.questions || []).filter((q: any) => !q.disabled);
   const total = questions.length;
 
   const [responses, setResponses] = useState<Responses>(() => ({ ...(initialResponses || {}) }));

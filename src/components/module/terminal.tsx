@@ -106,6 +106,8 @@ export function buildProgramLines(form: any, responses: Record<string, any>): Pr
 
   lines.push({ kind: 'comment', text: '% facts — asserted from your answers' });
   (form.facts || []).forEach((fact: any) => {
+    const fq = (form.questions || []).find((q: any) => q.id === fact.question_id);
+    if (fq?.disabled) return; // orphaned by a deleted rule
     const sub = substitute(fact.template, form, responses);
     for (const part of sub.split('\n')) {
       lines.push({ kind: 'code', text: part, pending: /\{\d+\}/.test(part) });

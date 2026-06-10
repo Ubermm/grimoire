@@ -121,7 +121,7 @@ async function uploadAutofillFile(file: File, form: any): Promise<Responses> {
         content: 'Fill the form from the attached document.',
         experimental_attachments: [{ url: blob.url, name: blob.pathname, contentType: blob.contentType }],
       },
-      fields: form.questions.map((q: any) => ({ id: q.id, type: q.type, question: q.text })),
+      fields: form.questions.filter((q: any) => !q.disabled).map((q: any) => ({ id: q.id, type: q.type, question: q.text })),
     }),
   });
   if (!res.ok) throw new Error('autofill failed');
@@ -154,6 +154,7 @@ function QuestionSet({
   const buildDefaults = (): Responses => {
     const out: Responses = {};
     for (const q of form.questions) {
+      if (q.disabled) continue;
       if (['CHECKBOX', 'NUMERIC', 'DATE', 'TIME', 'TEXT'].includes(q.type)) continue;
       const opts = q.options && q.options.length ? q.options : ['true', 'false'];
       out[q.id] = opts.find((o: string) => o.toLowerCase() === 'yes') || opts[0];
@@ -199,7 +200,8 @@ function QuestionSet({
 
   const reset = () => { setResponses(buildDefaults()); setTouched(new Set()); setResults(null); };
 
-  const answered = form.questions.filter((q: any) => responses[q.id] != null && responses[q.id] !== '').length;
+  const visibleQuestions = form.questions.filter((q: any) => !q.disabled);
+  const answered = visibleQuestions.filter((q: any) => responses[q.id] != null && responses[q.id] !== '').length;
 
   const validate = async () => {
     setLoading(true);
@@ -220,7 +222,7 @@ function QuestionSet({
     <div className="space-y-5">
       <Surface className="p-6">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <span className="font-accent text-[0.78rem] uppercase tracking-[0.08em] text-[var(--ink-faint)]">{answered}/{form.questions.length} answered</span>
+          <span className="font-accent text-[0.78rem] uppercase tracking-[0.08em] text-[var(--ink-faint)]">{answered}/{visibleQuestions.length} answered</span>
           <div className="inline-flex divide-x divide-[var(--line-strong)] border border-[var(--line-strong)] bg-[var(--surface)]">
             {(['console', 'form'] as const).map((m) => (
               <button
@@ -251,7 +253,7 @@ function QuestionSet({
           />
         ) : (
         <div className="space-y-5">
-          {form.questions.map((q: any) => (
+          {visibleQuestions.map((q: any) => (
             <div key={q.id} className="flex flex-col gap-2.5 border-b border-[var(--line)] pb-5 last:border-0 last:pb-0">
               <div>
                 <p className="text-sm text-[var(--ink)]">{q.text}</p>

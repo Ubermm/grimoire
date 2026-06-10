@@ -91,7 +91,8 @@ export function LeanValidateFlow({ formCode, initialForm, regText, systemId, ini
     });
   }, [formCode, initialForm]);
 
-  const answered = form ? form.questions.filter((q: any) => responses[q.id] != null && responses[q.id] !== '').length : 0;
+  const visibleQuestions = form ? form.questions.filter((q: any) => !q.disabled) : [];
+  const answered = visibleQuestions.filter((q: any) => responses[q.id] != null && responses[q.id] !== '').length;
 
   const validate = async () => {
     setLoading(true);
@@ -132,7 +133,7 @@ export function LeanValidateFlow({ formCode, initialForm, regText, systemId, ini
           content: 'Fill the form from the attached document.',
           experimental_attachments: [{ url: blob.url, name: blob.pathname, contentType: blob.contentType }],
         },
-        fields: form.questions.map((q: any) => ({ id: q.id, type: q.type, question: q.text })),
+        fields: form.questions.filter((q: any) => !q.disabled).map((q: any) => ({ id: q.id, type: q.type, question: q.text })),
       }),
     });
     if (!res.ok) throw new Error('autofill failed');
@@ -155,7 +156,7 @@ export function LeanValidateFlow({ formCode, initialForm, regText, systemId, ini
     <div className="space-y-5">
       <Surface className="p-6">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <span className="font-accent text-sm text-[var(--ink-muted)]">{answered}/{form.questions.length} answered</span>
+          <span className="font-accent text-sm text-[var(--ink-muted)]">{answered}/{visibleQuestions.length} answered</span>
           <div className="inline-flex divide-x divide-[var(--line-strong)] border border-[var(--line-strong)]">
             {(['console', 'form'] as const).map((m) => (
               <button
@@ -182,7 +183,7 @@ export function LeanValidateFlow({ formCode, initialForm, regText, systemId, ini
         ) : (
         <>
         <div className="space-y-5">
-          {form.questions.map((q: any) => (
+          {visibleQuestions.map((q: any) => (
             <div key={q.id} className="flex flex-col gap-2.5 border-b border-[var(--line)] pb-5 last:border-0 last:pb-0">
               <div>
                 <p className="text-sm text-[var(--ink)]">{q.text}</p>
