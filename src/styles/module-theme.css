@@ -112,6 +112,24 @@
   box-shadow: 0 1px 0 0 var(--ink);
 }
 
+/* Terminal caret + line entrance for the expert-system console. */
+@keyframes term-blink {
+  50% { opacity: 0; }
+}
+.term-blink {
+  animation: term-blink 1.1s steps(1) infinite;
+}
+@keyframes term-in {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: none; }
+}
+.term-in {
+  animation: term-in 0.16s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .term-blink, .term-in { animation: none; }
+}
+
 /* Quiet entrance for content panels. */
 @keyframes ai-rise {
   from { opacity: 0; transform: translateY(6px); }

@@ -9,7 +9,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { Surface, AccentButton, GhostButton, Spinner, EmptyState } from '@/components/module/ui';
 import { RuleAuthoringPanel } from '@/components/rules/RuleAuthoringPanel';
-import { cn } from '@/lib/utils';
+import { ConsoleInterview } from '@/components/module/ConsoleInterview';
+import { TerminalPanel, PrologView, TERM } from '@/components/module/terminal';
+import { cn, generateUUID } from '@/lib/utils';
 
 type Responses = Record<string, string>;
 type Result = { passed: boolean[]; description: string[]; status?: string[]; reason?: string[] };
@@ -65,6 +67,7 @@ function ResultsPanel({ results }: { results: Result }) {
   const anyFail = states.some((s) => s === 'fail');
   const anyEscalate = states.some((s) => s === 'escalate');
   return (
+    <>
     <Surface className={cn('p-6', overall ? 'border-emerald-200' : 'border-amber-200')}>
       <p className={cn('font-accent mb-4 flex items-center gap-2 text-sm font-semibold', overall ? 'text-emerald-700' : 'text-amber-700')}>
         {overall ? <CheckCircle2 className="h-5 w-5" /> : anyFail ? <XCircle className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
@@ -87,7 +90,66 @@ function ResultsPanel({ results }: { results: Result }) {
         })}
       </ul>
     </Surface>
+    {/* The same verdicts, in the engine's voice. */}
+    <TerminalPanel title="derivation" status={overall ? 'Q.E.D.' : anyFail ? 'refuted' : 'escalated'}>
+      <div className="max-h-[24rem] overflow-y-auto p-4 text-[12.5px] leading-[1.85]">
+        {results.description.map((d, i) => {
+          const st = states[i];
+          return (
+            <div key={i} className="mb-2 last:mb-0">
+              <div className="whitespace-pre-wrap break-words">
+                <span style={{ color: TERM.faint }}>?- </span>
+                <span style={{ color: TERM.green }}>{d}</span>
+              </div>
+              <div className="whitespace-pre-wrap break-words pl-5">
+                <span style={{ color: st === 'pass' ? TERM.bright : st === 'fail' ? '#f87171' : TERM.warn }}>
+                  {st === 'pass' ? 'true.  ⊢ proven' : st === 'fail' ? 'false. ✗ refuted' : 'escalate. ! review'}
+                </span>
+                {results.reason?.[i] ? <span style={{ color: TERM.faint }}> — {results.reason[i]}</span> : null}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </TerminalPanel>
+    </>
   );
+}
+
+/* ------------------------------------------------------------- autofill */
+// Mirrors AutoFill.tsx: upload the file to blob storage, then ask /api/autofill
+// to map the document onto the form's questions. Throws on any failure — the
+// console prints its own error line.
+async function uploadAutofillFile(file: File, form: any): Promise<Responses> {
+  const ext = file.name.includes('.') ? file.name.split('.').pop() : '';
+  const base = file.name.replace(/\.[^/.]+$/, '');
+  const renamed = new File([file], `${base}-${generateUUID()}${ext ? `.${ext}` : ''}`, { type: file.type });
+  const fd = new FormData();
+  fd.append('file', renamed);
+
+  const up = await fetch('/api/files/upload', { method: 'POST', body: fd });
+  if (!up.ok) throw new Error('upload failed');
+  const blob = await up.json();
+
+  const res = await fetch('/api/autofill', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: {
+        id: generateUUID(),
+        role: 'user',
+        content: 'Fill the form from the attached document.',
+        experimental_attachments: [{ url: blob.url, name: blob.pathname, contentType: blob.contentType }],
+      },
+      fields: form.questions.map((q: any) => ({ id: q.id, type: q.type, question: q.text })),
+    }),
+  });
+  if (!res.ok) throw new Error('autofill failed');
+  const values = await res.json();
+  const out: Responses = {};
+  for (const [k, v] of Object.entries(values || {})) {
+    if (v != null && String(v) !== '') out[k] = String(v);
+  }
+  return out;
 }
 
 // A self-contained question set: renders fields, autofill, validate -> results.
@@ -121,7 +183,30 @@ function QuestionSet({
   const [results, setResults] = useState<Result | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const reset = () => { setResponses(buildDefaults()); setResults(null); };
+  // Console vs form. A fresh set opens as a console deposition; a set arriving
+  // with saved answers opens straight on the reviewable form.
+  const [mode, setMode] = useState<'console' | 'form'>(() => (initial && Object.keys(initial).length ? 'form' : 'console'));
+  const [showEngine, setShowEngine] = useState(false);
+
+  // Question ids the user has actually asserted (form edits, console answers,
+  // autofill) — as opposed to the seeded yes-defaults. The console is only ever
+  // fed asserted answers, so a fresh deposition asks everything.
+  const [touched, setTouched] = useState<Set<string>>(() => new Set(Object.keys(initial || {})));
+  const consoleSeed = useMemo(() => {
+    const out: Responses = {};
+    for (const id of Array.from(touched)) {
+      const v = responses[id];
+      if (v != null && v !== '') out[id] = v;
+    }
+    return out;
+  }, [touched, responses]);
+
+  const setAnswer = (id: string, v: string) => {
+    setResponses((prev) => ({ ...prev, [id]: v }));
+    setTouched((prev) => new Set(prev).add(id));
+  };
+
+  const reset = () => { setResponses(buildDefaults()); setTouched(new Set()); setResults(null); };
 
   const answered = form.questions.filter((q: any) => responses[q.id] != null && responses[q.id] !== '').length;
 
@@ -142,9 +227,37 @@ function QuestionSet({
   return (
     <div className="space-y-5">
       <Surface className="p-6">
-        <div className="mb-5">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <span className="font-accent text-[0.78rem] uppercase tracking-[0.08em] text-[var(--ink-faint)]">{answered}/{form.questions.length} answered</span>
+          <div className="inline-flex divide-x divide-[var(--line-strong)] border border-[var(--line-strong)] bg-[var(--surface)]">
+            {(['console', 'form'] as const).map((m) => (
+              <button
+                key={m} type="button" onClick={() => setMode(m)} aria-pressed={mode === m}
+                className={cn('font-accent px-3 py-1 text-[0.7rem] font-medium uppercase tracking-[0.1em] transition-colors',
+                  mode === m ? 'bg-[var(--acc)] text-[var(--acc-contrast)]' : 'text-[var(--ink-faint)] hover:text-[var(--ink-muted)]')}
+              >
+                {m === 'console' ? 'Console' : 'Form'}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {mode === 'console' ? (
+          /* The deposition writes into the same Responses map; on finish, the
+             console's answers merge over the yes-defaults and the form opens
+             fully populated for review. */
+          <ConsoleInterview
+            form={form}
+            contextLabel={cfrCode}
+            initialResponses={consoleSeed}
+            uploadAutofill={(file: File) => uploadAutofillFile(file, form)}
+            onFinish={(r: Responses) => {
+              setResponses({ ...buildDefaults(), ...r });
+              setTouched(new Set(Object.keys(r).filter((id) => r[id] != null && r[id] !== '')));
+              setMode('form');
+            }}
+          />
+        ) : (
         <div className="space-y-5">
           {form.questions.map((q: any) => (
             <div key={q.id} className="flex flex-col gap-2.5 border-b border-[var(--line)] pb-5 last:border-0 last:pb-0">
@@ -152,7 +265,7 @@ function QuestionSet({
                 <p className="text-sm text-[var(--ink)]">{q.text}</p>
                 {(q.reference || q.cfr_reference) && <p className="mt-0.5 text-xs text-[var(--ink-faint)]">{q.reference || q.cfr_reference}</p>}
               </div>
-              <QuestionField q={q} value={responses[q.id]} onChange={(v) => setResponses({ ...responses, [q.id]: v })} />
+              <QuestionField q={q} value={responses[q.id]} onChange={(v) => setAnswer(q.id, v)} />
               {meta?.[q.id] && (
                 <p className="flex flex-wrap items-center gap-1.5 text-xs text-[var(--ink-faint)]">
                   <span className={cn('font-accent rounded-[2px] px-1.5 py-0.5 uppercase tracking-[0.08em] ring-1 ring-inset',
@@ -167,10 +280,29 @@ function QuestionSet({
             </div>
           ))}
         </div>
-        <div className="mt-6 flex items-center gap-2">
-          <AccentButton onClick={validate} disabled={loading || answered === 0}>{loading ? <Spinner /> : <span aria-hidden>⊢</span>} {ctaLabel}</AccentButton>
-          <GhostButton onClick={reset} disabled={loading}>Reset</GhostButton>
-        </div>
+        )}
+
+        {mode === 'form' && (
+          <div className="mt-6 border-t border-[var(--line)] pt-4">
+            <GhostButton type="button" onClick={() => setShowEngine((v) => !v)} className="px-3 py-1.5 text-[0.7rem]">
+              <span aria-hidden>⊢</span> {showEngine ? 'Hide the engine' : 'Show the engine'}
+            </GhostButton>
+            {showEngine && (
+              <TerminalPanel className="mt-4" title={`the engine — ${cfrCode}`} status="live · tau-prolog">
+                <div className="max-h-[24rem] overflow-y-auto">
+                  <PrologView form={form} responses={responses} />
+                </div>
+              </TerminalPanel>
+            )}
+          </div>
+        )}
+
+        {mode === 'form' && (
+          <div className="mt-6 flex items-center gap-2">
+            <AccentButton onClick={validate} disabled={loading || answered === 0}>{loading ? <Spinner /> : <span aria-hidden>⊢</span>} {ctaLabel}</AccentButton>
+            <GhostButton onClick={reset} disabled={loading}>Reset</GhostButton>
+          </div>
+        )}
       </Surface>
       {results && <ResultsPanel results={results} />}
     </div>
