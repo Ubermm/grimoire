@@ -12,6 +12,7 @@ import {
 } from '@/components/landing/ui';
 import MethodFigure from '@/components/landing/MethodFigure';
 import ScrollStory from '@/components/landing/ScrollStory';
+import ZetaGraph from '@/components/landing/ZetaGraph';
 
 const FRAMEWORKS = ['FDA 21 CFR', 'EU AI Act 2024/1689', 'GxP', 'ISO/IEC 42001', '21 CFR Part 11'];
 
@@ -41,6 +42,18 @@ export default function HomePage() {
       {/* ============================================================== Hero */}
       <section className="relative overflow-hidden">
         <div className="paper-rules pointer-events-none absolute inset-0" aria-hidden />
+
+        {/* fig. 0 — the zeta spiral, set behind the argument */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 hidden overflow-hidden sm:block"
+          style={{
+            WebkitMaskImage: 'radial-gradient(85% 90% at 62% 45%, black 35%, transparent 80%)',
+            maskImage: 'radial-gradient(85% 90% at 62% 45%, black 35%, transparent 80%)',
+          }}
+        >
+          <ZetaGraph className="absolute -right-[6%] top-1/2 h-[135%] -translate-y-1/2" />
+        </div>
 
         <div className="relative mx-auto max-w-6xl px-6 pb-20 pt-20 sm:pt-28">
           {/* running head */}
