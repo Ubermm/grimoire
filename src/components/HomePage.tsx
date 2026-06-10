@@ -87,21 +87,23 @@ export default function HomePage() {
               </motion.div>
             </div>
 
-            {/* the abstract, set like a paper's front matter */}
-            <motion.aside
-              initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.26, ease: EASE }}
-              className="self-end lg:col-span-4"
-            >
-              <div className="border-l rule pl-5">
-                <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/60">Abstract</p>
-                <p className="mt-3 text-[0.92rem] leading-relaxed text-white/70">
-                  Grimoire One compiles regulations into executable logic and validates evidence
-                  against them — turning FDA 21 CFR and the EU AI Act into derivable, auditable
-                  verdicts. A pass is a theorem; the report is its proof. <QED />
-                </p>
-              </div>
-            </motion.aside>
           </div>
+
+          {/* the abstract, set like a paper's front matter — below the claim,
+              clear of the spiral on the right */}
+          <motion.aside
+            initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.26, ease: EASE }}
+            className="mt-14 max-w-xl"
+          >
+            <div className="border-l rule pl-5">
+              <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/60">Abstract</p>
+              <p className="mt-3 text-[0.92rem] leading-relaxed text-white/70">
+                Grimoire One compiles regulations into executable logic and validates evidence
+                against them — turning FDA 21 CFR and the EU AI Act into derivable, auditable
+                verdicts. A pass is a theorem; the report is its proof. <QED />
+              </p>
+            </div>
+          </motion.aside>
 
           {/* coverage index */}
           <motion.div
