@@ -94,6 +94,27 @@ export function LeanValidateFlow({ formCode, initialForm, regText, systemId, ini
     });
   }, [formCode, initialForm]);
 
+  // Self-heal: when the form mutates (rule edits, debug-bot patches), drop
+  // answers that no longer fit their question's shape.
+  useEffect(() => {
+    if (!form) return;
+    setResponses((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const q of form.questions || []) {
+        const v = next[q.id];
+        if (v == null || v === '') continue;
+        let ok = true;
+        if (q.type === 'NUMERIC') ok = /^-?\d+(\.\d+)?$/.test(String(v));
+        else if (q.options?.length) ok = q.type === 'CHECKBOX'
+          ? String(v).split(',').filter(Boolean).every((p: string) => q.options.includes(p))
+          : q.options.includes(v);
+        if (!ok) { delete next[q.id]; changed = true; }
+      }
+      return changed ? next : prev;
+    });
+  }, [form]);
+
   const visibleQuestions = form ? form.questions.filter((q: any) => !q.disabled) : [];
   const answered = visibleQuestions.filter((q: any) => responses[q.id] != null && responses[q.id] !== '').length;
 
@@ -254,7 +275,7 @@ export function LeanValidateFlow({ formCode, initialForm, regText, systemId, ini
         )}
       </Surface>
 
-      {onFormChange && <RuleAuthoringPanel form={form} regText={regText} onChange={(f) => { setForm(f); onFormChange(f); }} />}
+      {onFormChange && <RuleAuthoringPanel form={form} regText={regText} responses={responses} onChange={(f) => { setForm(f); onFormChange(f); }} />}
 
       {results && (
         <Surface className={cn('p-6', overall ? 'border-emerald-200' : 'border-amber-200')}>

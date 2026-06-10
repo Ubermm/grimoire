@@ -6,15 +6,18 @@
 import { useState } from 'react';
 import { Trash2, ChevronDown } from 'lucide-react';
 import { Surface, AccentButton, GhostButton, Spinner } from '@/components/module/ui';
+import { DebugBot } from '@/components/rules/DebugBot';
 import { cn } from '@/lib/utils';
 
-export function RuleAuthoringPanel({ form, regText, onChange }: { form: any; regText?: string; onChange: (f: any) => void }) {
+export function RuleAuthoringPanel({ form, regText, responses, onChange }: { form: any; regText?: string; responses?: Record<string, string>; onChange: (f: any) => void }) {
   const [open, setOpen] = useState(false);
   const [nl, setNl] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<any>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  // Which rule the edit console (GRIMOIRE/1) is open on, if any.
+  const [editIdx, setEditIdx] = useState<number | null>(null);
 
   const addRule = async () => {
     if (!nl.trim()) return;
@@ -100,17 +103,46 @@ export function RuleAuthoringPanel({ form, regText, onChange }: { form: any; reg
 
       {open && (
         <div className="mt-4 space-y-4">
-          <ul className="space-y-1.5">
-            {(form.queries || []).map((q: any, i: number) => (
-              <li key={i} className="flex items-start justify-between gap-3 border border-[var(--line)] px-3 py-2">
-                <span className="text-sm text-[var(--ink-muted)]">{q.description}</span>
-                <button onClick={() => removeRule(i)} className="shrink-0 p-1 text-[var(--ink-faint)] transition-colors hover:bg-red-50 hover:text-red-600" aria-label="Remove rule"><Trash2 className="h-3.5 w-3.5" /></button>
-              </li>
-            ))}
-          </ul>
-
           <div>
-            <label className="font-accent mb-1.5 block text-xs font-medium uppercase tracking-wide text-[var(--ink-muted)]">Add a rule in plain English</label>
+            <p className="font-accent mb-1.5 text-[0.68rem] uppercase tracking-[0.1em] text-[var(--ink-faint)]">
+              Edit — repair or reshape an existing rule (and its questions) · Delete — retires the rule and its questions
+            </p>
+            <ul className="space-y-1.5">
+              {(form.queries || []).map((q: any, i: number) => (
+                <li key={i} className={cn('border border-[var(--line)] px-3 py-2', editIdx === i && 'border-[var(--ink)]')}>
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="text-sm text-[var(--ink-muted)]">{q.description}</span>
+                    <span className="flex shrink-0 items-center gap-2">
+                      <button
+                        onClick={() => setEditIdx(editIdx === i ? null : i)}
+                        className="font-mono text-[0.65rem] uppercase tracking-[0.1em] text-[var(--ink-faint)] transition-colors hover:text-[var(--ink)]"
+                      >
+                        edit
+                      </button>
+                      <button onClick={() => { if (editIdx === i) setEditIdx(null); removeRule(i); }} className="p-1 text-[var(--ink-faint)] transition-colors hover:bg-red-50 hover:text-red-600" aria-label="Remove rule"><Trash2 className="h-3.5 w-3.5" /></button>
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            {editIdx != null && (form.queries || [])[editIdx] && (
+              <div className="mt-3">
+                <DebugBot
+                  key={editIdx}
+                  form={form}
+                  responses={responses || {}}
+                  queryIndex={editIdx}
+                  description={form.queries[editIdx].description}
+                  autoConsult={false}
+                  onApply={(f) => { onChange(f); setEditIdx(null); }}
+                  onClose={() => setEditIdx(null)}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="border-t border-[var(--line)] pt-4">
+            <label className="font-accent mb-1.5 block text-[0.68rem] uppercase tracking-[0.1em] text-[var(--ink-faint)]">Add — compile a new rule from plain English</label>
             <textarea value={nl} onChange={(e) => setNl(e.target.value)} placeholder="e.g. Flag for human review if the batch record is missing a second-person signature." className="ai-field min-h-[74px] resize-y" />
             {err && <p className="mt-2 text-sm text-amber-700">{err}</p>}
             <div className="mt-3 flex flex-wrap items-center gap-2">

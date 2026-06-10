@@ -116,6 +116,7 @@ RULES:
   Status atoms: pass | fail | escalate. Reason is a short single-quoted atom restating the outcome. The final fail clause is the default (no body).
 - Map intent: "must / required / compliant if" → pass condition; "violation / non-compliant if" → fail; "needs review / judgment / unclear" → escalate.
 - Encode ONLY what the auditor stated. Do not invent thresholds or extra conditions. Use a unique <slug> (lowercase, underscores) derived from the rule.
+- Design questions an auditor can answer in ONE entry: an aggregate yes/no, a count, or a date — NEVER a shape that requires enumerating items or team members one by one (ask "Are all QC team members female?" yes/no, not a per-member gender select).
 - The clause MUST parse: balanced parens, every clause ends with a period.`;
 
 export async function compileEnglishRule(nl: string, form: any, regText?: string): Promise<{ form: any; attempts: number; errors: string[]; description: string }> {
@@ -240,7 +241,10 @@ Output STRICT JSON only:
   } | null
 }
 
-PATCH RULES: prefer fixing the PROLOG to match the form's existing option strings over changing user-facing options. NEVER renumber or remove questions; NEVER change {i} references to different positions; keep ids unchanged. Omit arrays you don't patch. fix: null when the verdict is actually correct (then say so in the diagnosis).`;
+PATCH RULES — fix whichever layer is actually wrong:
+- If the Prolog merely mismatches the form's option strings (casing, quoting, wrong atom), fix the PROLOG to match the existing options.
+- If the QUESTION captures data in a shape an auditor cannot reasonably provide — e.g. enumerating an attribute per member of a large team, or free text where a yes/no or a count belongs — RESHAPE the question: rewrite its text/type/options so ONE answer captures the aggregate (a SELECT like "Are all QC team members female?" with options yes/no, or a NUMERIC count), and rewrite the fact template and validation to consume the new shape. You cannot ADD questions — work within the existing ones; prefer a single aggregate SELECT when only one question is available.
+- NEVER renumber or remove questions; NEVER change {i} references to different positions; keep ids unchanged. Omit arrays you don't patch. fix: null when the verdict is actually correct (then say so in the diagnosis).`;
 
 export async function debugRule(
   form: any,

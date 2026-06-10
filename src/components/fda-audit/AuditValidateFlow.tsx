@@ -148,6 +148,7 @@ function QuestionSet({
   meta,
   onValidated,
   onFormPatched,
+  onResponsesChange,
   ctaLabel = 'Validate',
 }: {
   cfrCode: string;
@@ -156,6 +157,7 @@ function QuestionSet({
   meta?: Record<string, { confidence?: string; source?: string }>;
   onValidated?: (r: Result, responses: Responses) => void;
   onFormPatched?: (f: any) => void;
+  onResponsesChange?: (r: Responses) => void;
   ctaLabel?: string;
 }) {
   // Default the yes/no (segmented) questions to their affirmative option so the
@@ -210,6 +212,29 @@ function QuestionSet({
   };
 
   const reset = () => { setResponses(buildDefaults()); setTouched(new Set()); setResults(null); };
+
+  // The rules panel lives outside this component; let it see live answers.
+  useEffect(() => { onResponsesChange?.(responses); }, [responses]);
+
+  // Self-heal: when the form mutates (rule edits, debug-bot patches), drop
+  // answers that no longer fit their question's shape.
+  useEffect(() => {
+    setResponses((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const q of form.questions || []) {
+        const v = next[q.id];
+        if (v == null || v === '') continue;
+        let ok = true;
+        if (q.type === 'NUMERIC') ok = /^-?\d+(\.\d+)?$/.test(String(v));
+        else if (q.options?.length) ok = q.type === 'CHECKBOX'
+          ? String(v).split(',').filter(Boolean).every((p: string) => q.options.includes(p))
+          : q.options.includes(v);
+        if (!ok) { delete next[q.id]; changed = true; }
+      }
+      return changed ? next : prev;
+    });
+  }, [form]);
 
   const visibleQuestions = form.questions.filter((q: any) => !q.disabled);
   const answered = visibleQuestions.filter((q: any) => responses[q.id] != null && responses[q.id] !== '').length;
@@ -376,6 +401,9 @@ export function AuditValidateFlow({
 }) {
   const [form, setForm] = useState<any>(null);
   const [missing, setMissing] = useState(false);
+  // Mirror of the base QuestionSet's live answers, for the rules panel's
+  // edit console (it diagnoses against the real program + real answers).
+  const [liveResponses, setLiveResponses] = useState<Responses>({});
 
   // Deep (warning-letter-driven) pass.
   const [deepForm, setDeepForm] = useState<any>(null);
@@ -445,10 +473,10 @@ export function AuditValidateFlow({
   return (
     <div className="space-y-8">
       <QuestionSet cfrCode={cfrCode} form={form} initial={initialResponses} meta={autofillMeta} onValidated={onValidated}
-        onFormPatched={(f) => { setForm(f); onFormChange?.(f); }} />
+        onFormPatched={(f) => { setForm(f); onFormChange?.(f); }} onResponsesChange={setLiveResponses} />
 
       {/* Inline rule authoring — edits persist to this audit's snapshot only. */}
-      {onFormChange && <RuleAuthoringPanel form={form} regText={regText} onChange={(f) => { setForm(f); onFormChange(f); }} />}
+      {onFormChange && <RuleAuthoringPanel form={form} regText={regText} responses={liveResponses} onChange={(f) => { setForm(f); onFormChange(f); }} />}
 
       {/* Deep validation — hindsight questions derived from real FDA warning letters. */}
       <div className="border border-dashed border-[var(--line-strong)] bg-black/[0.015] p-6">

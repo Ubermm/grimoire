@@ -24,6 +24,7 @@ export function DebugBot({
   description,
   onApply,
   onClose,
+  autoConsult = true,
 }: {
   form: any;
   responses: Record<string, string>;
@@ -32,6 +33,9 @@ export function DebugBot({
   // Receives the patched form; parent persists it to the audit snapshot.
   onApply: (patchedForm: any) => void;
   onClose: () => void;
+  // true → diagnose immediately (a failing verdict); false → edit mode: wait
+  // for the auditor to describe the change first.
+  autoConsult?: boolean;
 }) {
   const [transcript, setTranscript] = useState<Entry[]>([]);
   const [busy, setBusy] = useState(false);
@@ -80,10 +84,14 @@ export function DebugBot({
     if (ranFor.current === queryIndex) return;
     ranFor.current = queryIndex;
     setTranscript([
-      { tone: 'faint', text: `GRIMOIRE/1 — debug · query ${String(queryIndex + 1).padStart(2, '0')}` },
+      { tone: 'faint', text: `GRIMOIRE/1 — ${autoConsult ? 'debug' : 'edit'} · rule ${String(queryIndex + 1).padStart(2, '0')}` },
       ...(description ? [{ tone: 'sys', text: `% ${description}` } as Entry] : []),
     ]);
-    consult();
+    if (autoConsult) consult();
+    else say(
+      { tone: 'faint', text: ' ' },
+      { tone: 'sys', text: 'edit mode — describe what this rule should do differently. I will rewrite the program and, if the question itself captures the wrong shape of data, reshape the form too.' },
+    );
   }, [queryIndex]);
 
   useEffect(() => {
@@ -101,7 +109,7 @@ export function DebugBot({
 
   return (
     <TerminalPanel
-      title="debug — GRIMOIRE/1"
+      title={`${autoConsult ? 'debug' : 'edit'} — GRIMOIRE/1`}
       status={
         <span className="flex items-center gap-3">
           {proposal && !busy && (
@@ -132,7 +140,7 @@ export function DebugBot({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') submitFeedback(); }}
-              placeholder="tell the bot what the rule should actually mean…"
+              placeholder={autoConsult ? 'tell the bot what the rule should actually mean…' : 'describe the change — e.g. ask one aggregate yes/no instead of per-member entries…'}
               spellCheck={false}
               aria-label="Debug feedback"
               className="min-w-0 flex-1 border-0 bg-transparent p-0 text-[12.5px] outline-none placeholder:text-[#4ade80]/35"
