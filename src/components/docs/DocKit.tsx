@@ -2,14 +2,18 @@
 // serif headings, mono apparatus, hairline rules, typographic markers.
 import React from 'react';
 import { IconChip, Surface } from '@/components/module/ui';
+import { DocReadingProgress } from '@/components/docs/DocReadingProgress';
 import { cn } from '@/lib/utils';
 
 export function DocHero({ eyebrow, title, lead }: { eyebrow?: string; title: string; lead?: string }) {
   return (
-    <div className="mb-10 border-b border-[var(--line)] pb-8">
-      {eyebrow && <p className="font-accent mb-3 text-[0.7rem] font-medium uppercase tracking-[0.22em] text-[var(--ink-faint)]">{eyebrow}</p>}
-      <h1 className="text-[1.9rem] tracking-tight text-[var(--ink)] md:text-[2.4rem] md:leading-[1.08]">{title}</h1>
-      {lead && <p className="mt-3 max-w-2xl text-[1.02rem] leading-relaxed text-[var(--ink-muted)]">{lead}</p>}
+    <div className="mb-10">
+      <div className="border-b border-[var(--line)] pb-8">
+        {eyebrow && <p className="font-accent mb-3 text-[0.7rem] font-medium uppercase tracking-[0.22em] text-[var(--ink-faint)]">{eyebrow}</p>}
+        <h1 className="text-[1.9rem] tracking-tight text-[var(--ink)] md:text-[2.4rem] md:leading-[1.08]">{title}</h1>
+        {lead && <p className="mt-3 max-w-2xl text-[1.02rem] leading-relaxed text-[var(--ink-muted)]">{lead}</p>}
+      </div>
+      <DocReadingProgress eyebrow={eyebrow} />
     </div>
   );
 }

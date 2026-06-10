@@ -27,7 +27,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
       <div className="mx-auto max-w-6xl px-6 py-10 md:px-8 md:py-14">
         <div className="grid gap-10 lg:grid-cols-[220px_1fr] lg:items-start">
           <DocsSidebar />
-          <div className="ai-rise min-w-0 max-w-3xl">{children}</div>
+          <div data-doc-article className="ai-rise min-w-0 max-w-3xl">{children}</div>
         </div>
       </div>
     </div>

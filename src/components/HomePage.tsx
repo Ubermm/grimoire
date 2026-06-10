@@ -11,6 +11,7 @@ import {
   FnRef, Footnote, Panel, PrimaryCTA, SecondaryCTA, TextLink, EASE,
 } from '@/components/landing/ui';
 import MethodFigure from '@/components/landing/MethodFigure';
+import ScrollStory from '@/components/landing/ScrollStory';
 
 const FRAMEWORKS = ['FDA 21 CFR', 'EU AI Act 2024/1689', 'GxP', 'ISO/IEC 42001', '21 CFR Part 11'];
 
@@ -25,12 +26,6 @@ const REGS = [
     desc: 'Risk classification, Article 5 & 50 screening, GPAI obligations and Annex IV documentation.',
     cta: 'Classify a system',
   },
-];
-
-const STEPS = [
-  { n: 'i.', title: 'Compile the rule', body: 'Regulatory text is compiled into an executable Prolog program — the law as logic.' },
-  { n: 'ii.', title: 'Answer & assert', body: 'Your responses become facts. Documents autofill the forms; nothing is hand-waved.' },
-  { n: 'iii.', title: 'Derive the verdict', body: 'The engine derives pass, fail, or escalate — and records the exact rules behind it.' },
 ];
 
 const FAQ = [
@@ -257,15 +252,9 @@ export default function HomePage() {
       {/* =================================================== § 05 — Procedure */}
       <section className="py-20">
         <div className="mx-auto max-w-6xl px-6">
-          <Reveal><SectionRule n="05" title="Procedure" aside="three steps, one derivation" /></Reveal>
-          <div className="mt-12 grid gap-10 md:grid-cols-3">
-            {STEPS.map((s, i) => (
-              <Reveal key={s.title} delay={i * 0.07}>
-                <p className="font-serif-display text-2xl italic text-white/60">{s.n}</p>
-                <h3 className="font-serif-display mt-3 text-xl font-medium text-white">{s.title}</h3>
-                <p className="mt-2.5 text-sm leading-relaxed text-white/70">{s.body}</p>
-              </Reveal>
-            ))}
+          <Reveal><SectionRule n="05" title="Procedure" aside="scroll — the derivation unfolds" /></Reveal>
+          <div className="mt-12">
+            <ScrollStory />
           </div>
           <Reveal delay={0.2}>
             <p className="font-plex mt-12 text-[0.78rem] text-white/55">
