@@ -513,6 +513,13 @@ const AuditSubsectionSchema = new Schema({
     type: String,
     required: false
   },
+  // Per-audit snapshot of the deep-validation (warning-letter hindsight) form,
+  // frozen when first generated so debug-bot patches persist with the audit
+  // instead of evaporating on reload (the global CAdditional cache is shared).
+  deepForm: {
+    type: String,
+    required: false
+  },
   validationResults: {
     passed: [String],
     description: [String],

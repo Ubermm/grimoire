@@ -58,8 +58,9 @@ export default function AuditRunPage({ params }: { params: Promise<{ id: string 
   };
 
   // Persist auditor-edited rules to this audit's per-subsection snapshot only.
-  const saveForm = (idx: number, formObj: any) => {
-    const subs = audit.subsections.map((s: any, i: number) => (i === idx ? { ...s, form: JSON.stringify(formObj) } : s));
+  // `field` is 'form' (base) or 'deepForm' (warning-letter hindsight checks).
+  const saveSnapshot = (idx: number, field: 'form' | 'deepForm', formObj: any) => {
+    const subs = audit.subsections.map((s: any, i: number) => (i === idx ? { ...s, [field]: JSON.stringify(formObj) } : s));
     setAudit({ ...audit, subsections: subs });
     fetch('/api/audit', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ _id: id, subsections: subs }) });
   };
@@ -149,6 +150,7 @@ export default function AuditRunPage({ params }: { params: Promise<{ id: string 
             key={`${sub.id}:${fillNonce}`}
             cfrCode={sub.code}
             initialForm={sub.form}
+            initialDeepForm={sub.deepForm}
             initialResponses={initialResponses}
             initialDeepResponses={initialDeepResponses}
             autofillMeta={autofillMeta[active]}
@@ -156,7 +158,8 @@ export default function AuditRunPage({ params }: { params: Promise<{ id: string 
             initialDeepComment={sub.deepComment}
             onValidated={(data, responses) => saveMain(active, responses, data)}
             onDeepValidated={(data, responses) => saveDeep(active, responses, data)}
-            onFormChange={(f) => saveForm(active, f)}
+            onFormChange={(f) => saveSnapshot(active, 'form', f)}
+            onDeepFormChange={(f) => saveSnapshot(active, 'deepForm', f)}
             onComment={(text) => saveComment(active, 'comment', text)}
             onDeepComment={(text) => saveComment(active, 'deepComment', text)}
           />

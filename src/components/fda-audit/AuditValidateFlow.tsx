@@ -401,6 +401,7 @@ function CommentBlock({ label, initial, onSave }: { label: string; initial?: str
 export function AuditValidateFlow({
   cfrCode,
   initialForm,
+  initialDeepForm,
   regText,
   initialResponses,
   initialDeepResponses,
@@ -410,11 +411,13 @@ export function AuditValidateFlow({
   onValidated,
   onDeepValidated,
   onFormChange,
+  onDeepFormChange,
   onComment,
   onDeepComment,
 }: {
   cfrCode: string;
   initialForm?: string | any; // per-audit snapshot (JSON string or object); falls back to global
+  initialDeepForm?: string | any; // per-audit snapshot of the deep checks; absent until first generated
   regText?: string;
   initialResponses?: Responses;
   initialDeepResponses?: Responses;
@@ -424,6 +427,7 @@ export function AuditValidateFlow({
   onValidated?: (r: Result, responses: Responses) => void;
   onDeepValidated?: (r: Result, responses: Responses) => void;
   onFormChange?: (form: any) => void; // persist edited rules to the audit snapshot
+  onDeepFormChange?: (form: any) => void; // persist the deep snapshot (generation + debug patches)
   onComment?: (text: string) => void;
   onDeepComment?: (text: string) => void;
 }) {
@@ -433,15 +437,23 @@ export function AuditValidateFlow({
   // edit console (it diagnoses against the real program + real answers).
   const [liveResponses, setLiveResponses] = useState<Responses>({});
 
-  // Deep (warning-letter-driven) pass.
-  const [deepForm, setDeepForm] = useState<any>(null);
+  // Deep (warning-letter-driven) pass. Seeded from the audit's snapshot when
+  // one exists (the component remounts per subsection, so mount-time init is
+  // enough); otherwise generated on demand and snapshotted then.
+  const [deepForm, setDeepForm] = useState<any>(() => {
+    if (!initialDeepForm) return null;
+    try {
+      const d = typeof initialDeepForm === 'string' ? JSON.parse(initialDeepForm) : initialDeepForm;
+      return d?.questions?.length ? d : null;
+    } catch { return null; }
+  });
   const [deepLoading, setDeepLoading] = useState(false);
   const [deepError, setDeepError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      setForm(null); setMissing(false); setDeepForm(null); setDeepError(null);
+      setForm(null); setMissing(false); setDeepError(null);
       // Per-audit snapshot wins over the global template.
       if (initialForm) {
         try {
@@ -489,6 +501,7 @@ export function AuditValidateFlow({
       const df = data.form || data;
       if (!df?.questions?.length) { setDeepError('No additional questions were generated for this code.'); setDeepLoading(false); return; }
       setDeepForm(df);
+      onDeepFormChange?.(df); // freeze the generated checks onto this audit
     } catch {
       setDeepError('Deep validation failed. Please try again.');
     }
@@ -521,7 +534,7 @@ export function AuditValidateFlow({
           {deepForm && (
             <>
               <QuestionSet cfrCode={cfrCode} form={deepForm} initial={initialDeepResponses} onValidated={onDeepValidated}
-                onFormPatched={(f) => setDeepForm(f)} ctaLabel="Validate deep checks" />
+                onFormPatched={(f) => { setDeepForm(f); onDeepFormChange?.(f); }} ctaLabel="Validate deep checks" />
               <CommentBlock label="Auditor comment — deep validation stage" initial={initialDeepComment} onSave={onDeepComment} />
             </>
           )}

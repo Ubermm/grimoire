@@ -568,12 +568,22 @@ const AuditReportV2 = ({ audit, includeComments = true, includeDeep = true }) =>
     fetchAllData();
   }, [audit]);
 
-  // Deep forms are generation calls (/api/topk + /api/generate) — only fetch
-  // them when the deep apparatus is requested, and only for subsections we
-  // don't already have. If includeDeep flips on later, this fills the gaps.
+  // Deep forms: the audit's own per-subsection snapshot wins (it carries any
+  // debug-bot patches the auditor applied); only subsections without one fall
+  // back to a generation call (/api/topk + /api/generate). If includeDeep
+  // flips on later, this fills the gaps.
   useEffect(() => {
     if (!includeDeep) return;
-    const missing = audit.subsections.filter((s) => !deepForms[s.code]);
+    const snapshotted = {};
+    for (const s of audit.subsections) {
+      if (deepForms[s.code] || !s.deepForm) continue;
+      try {
+        const d = JSON.parse(s.deepForm);
+        if (d?.questions?.length) snapshotted[s.code] = d;
+      } catch { /* corrupted snapshot — fall back to generation */ }
+    }
+    if (Object.keys(snapshotted).length) setDeepForms((prev) => ({ ...prev, ...snapshotted }));
+    const missing = audit.subsections.filter((s) => !deepForms[s.code] && !snapshotted[s.code]);
     if (!missing.length) {
       setIsDeepLoading(false);
       return;
