@@ -54,7 +54,7 @@ export function AuditContextPanel({
     try {
       const fields: any[] = [];
       const parsed = subsections.map((s) => { try { return typeof s.form === 'string' ? JSON.parse(s.form) : s.form; } catch { return null; } });
-      parsed.forEach((f, si) => (f?.questions || []).forEach((q: any) => fields.push({ id: `${si}:${q.id}`, type: q.type, question: q.text, options: q.options })));
+      parsed.forEach((f, si) => (f?.questions || []).filter((q: any) => !q.disabled).forEach((q: any) => fields.push({ id: `${si}:${q.id}`, type: q.type, question: q.text, options: q.options })));
       const r = await fetch('/api/audit/autofill', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dossier: { text, files }, fields }) });
       const map = r.ok ? await r.json() : {};
       const perSub: Filled[] = subsections.map(() => ({ responses: {}, meta: {} }));

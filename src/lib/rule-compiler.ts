@@ -117,7 +117,65 @@ RULES:
 - Map intent: "must / required / compliant if" → pass condition; "violation / non-compliant if" → fail; "needs review / judgment / unclear" → escalate.
 - Encode ONLY what the auditor stated. Do not invent thresholds or extra conditions. Use a unique <slug> (lowercase, underscores) derived from the rule.
 - Design questions an auditor can answer in ONE entry: an aggregate yes/no, a count, or a date — NEVER a shape that requires enumerating items or team members one by one (ask "Are all QC team members female?" yes/no, not a per-member gender select).
+- NEVER hardcode an answer into a fact (e.g. pred('yes').) — every fact template MUST consume the auditor's answer through a {i} placeholder, otherwise the rule can never react to what they say.
+- The FIRST (pass) clause MUST have a body (:- …) that tests an asserted fact — a body-less pass clause would make the rule pass unconditionally.
 - The clause MUST parse: balanced parens, every clause ends with a period.`;
+
+// Split a Prolog source string into clauses on '.' boundaries, quote-aware so
+// periods inside atoms ('21 CFR 211.22') and decimals (2.5) don't split.
+function splitClauses(rule: string): string[] {
+  const out: string[] = [];
+  let cur = '';
+  let inQ = false;
+  for (let i = 0; i < rule.length; i++) {
+    const ch = rule[i];
+    if (ch === "'" && rule[i - 1] !== '\\') inQ = !inQ;
+    cur += ch;
+    if (!inQ && ch === '.' && (i + 1 >= rule.length || /\s/.test(rule[i + 1]))) {
+      if (cur.trim()) out.push(cur.trim());
+      cur = '';
+    }
+  }
+  if (cur.trim()) out.push(cur.trim());
+  return out;
+}
+
+// A tri-state validation is degenerate when any clause is a bare directive
+// (starts with ':-'), or when a clause other than the final default lacks a
+// body — both make the verdict independent of the auditor's answers. Returns
+// an error string or null. ("head. :- body." parses fine as fact + directive,
+// which is why the parse check alone can't catch this.)
+function vacuousValidation(rule: string): string | null {
+  const clauses = splitClauses(rule);
+  if (!clauses.length) return 'The validation has no clauses.';
+  for (const c of clauses) {
+    if (c.startsWith(':-')) return `"${c.slice(0, 60)}" is a bare directive, not a clause — the head got separated from its body by a stray period.`;
+  }
+  for (let i = 0; i < clauses.length - 1; i++) {
+    if (!clauses[i].includes(':-')) return `Clause "${clauses[i].slice(0, 80)}" has no body — only the FINAL default clause may be body-less; this one would return its verdict unconditionally.`;
+  }
+  return null;
+}
+
+// Reject degenerate fragments the parse-check can't catch: a fact that hardcodes
+// a value (no {i} → the rule can never react to an answer), a fact with no
+// question to bind, or a validation whose non-final clause has no body
+// (→ the rule passes unconditionally). The error string is fed back to the
+// model on retry.
+function fragmentProblems(fragment: any): string | null {
+  const qs = fragment.questions || [];
+  const facts = fragment.facts || [];
+  for (const f of facts) {
+    const t = String(f.template || '');
+    if (!/\{\d+\}/.test(t)) return `Fact "${t.slice(0, 80)}" hardcodes a value — every fact template must consume the auditor's answer via a {i} placeholder.`;
+  }
+  if (facts.length && !qs.length) return 'The fragment declares facts but no new questions — existing questions already have facts; reference their {i} positions inside the validation instead of emitting new facts.';
+  for (let i = 0; i < facts.length; i++) {
+    const qi = facts[i]._qIndex ?? i;
+    if (!qs[qi]) return `Fact ${i} does not bind to any fragment question (_qIndex ${qi} out of range).`;
+  }
+  return vacuousValidation(String(fragment.validation?.rule || ''));
+}
 
 export async function compileEnglishRule(nl: string, form: any, regText?: string): Promise<{ form: any; attempts: number; errors: string[]; description: string }> {
   const existingQs = (form.questions || []).map((q: any, i: number) => `  {${i + 1}} [${q.type}] ${q.text}${q.options ? ` (options: ${q.options.join('/')})` : ''}`).join('\n') || '  (none yet)';
@@ -128,10 +186,12 @@ export async function compileEnglishRule(nl: string, form: any, regText?: string
   let last = '';
   for (let attempt = 1; attempt <= 3; attempt++) {
     const user = attempt === 1 ? baseUser
-      : `${baseUser}\n\nYour previous JSON produced a Prolog program that failed to parse:\n${last}\nError: ${errors[errors.length - 1]}\nReturn corrected STRICT JSON only.`;
+      : `${baseUser}\n\nYour previous JSON was rejected:\n${last}\nProblem: ${errors[errors.length - 1]}\nReturn corrected STRICT JSON only.`;
     const text = await complete(COMPILE_SYSTEM, user);
     const fragment = extractJSON(text);
     if (!fragment || !fragment.query || !fragment.validation) { errors.push('Model did not return a valid fragment.'); last = text.slice(0, 400); continue; }
+    const degenerate = fragmentProblems(fragment);
+    if (degenerate) { errors.push(degenerate); last = JSON.stringify(fragment).slice(0, 400); continue; }
     const merged = mergeFragment(form, fragment);
     const probe = await checkParses(buildCheckProgram(merged));
     if (probe.ok) return { form: merged, attempts: attempt, errors, description: fragment.query.description || nl };
@@ -242,6 +302,7 @@ Output STRICT JSON only:
 }
 
 PATCH RULES — fix whichever layer is actually wrong:
+- NEVER hardcode an answer into a fact template (e.g. pred('yes').) — facts must keep their {i} placeholder so they consume the auditor's answer. NEVER give a tri-state rule a body-less FIRST clause — it would return that verdict unconditionally.
 - If the Prolog merely mismatches the form's option strings (casing, quoting, wrong atom), fix the PROLOG to match the existing options.
 - If the QUESTION captures data in a shape an auditor cannot reasonably provide — e.g. enumerating an attribute per member of a large team, or free text where a yes/no or a count belongs — RESHAPE the question: rewrite its text/type/options so ONE answer captures the aggregate (a SELECT like "Are all QC team members female?" with options yes/no, or a NUMERIC count), and rewrite the fact template and validation to consume the new shape. You cannot ADD questions — work within the existing ones; prefer a single aggregate SELECT when only one question is available.
 - NEVER renumber or remove questions; NEVER change {i} references to different positions; keep ids unchanged. Omit arrays you don't patch. fix: null when the verdict is actually correct (then say so in the diagnosis).`;
@@ -278,6 +339,20 @@ export async function debugRule(
     const out = extractJSON<any>(await complete(DEBUG_SYSTEM, user, 1400));
     if (!out?.diagnosis) { errors.push('Model did not return a diagnosis.'); continue; }
     if (!out.fix) return { diagnosis: out.diagnosis, summary: out.summary, attempts: attempt };
+
+    // Degenerate-patch gates: a fact may never lose its {i} placeholder
+    // (hardcoding the answer makes the rule blind to the form), and a patched
+    // tri-state rule may never begin with a body-less clause (it would return
+    // that verdict unconditionally).
+    const hardcoded = (out.fix.facts || []).find((p: any) => {
+      const orig = String((form.facts || [])[p.index]?.template || '');
+      return /\{\d+\}/.test(orig) && !/\{\d+\}/.test(String(p.template || ''));
+    });
+    if (hardcoded) { errors.push(`Your fact patch "${String(hardcoded.template).slice(0, 80)}" dropped the {i} placeholder — the fact must keep consuming the auditor's answer.`); continue; }
+    const vacuous = (out.fix.validations || [])
+      .map((p: any) => (/\bassess_/.test(String(p.rule || '')) ? vacuousValidation(String(p.rule || '')) : null))
+      .find(Boolean);
+    if (vacuous) { errors.push(`Your validation patch is degenerate: ${vacuous}`); continue; }
 
     // Apply the patch to a clone.
     const patched = {

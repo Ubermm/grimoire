@@ -7,6 +7,7 @@ import { generateText } from 'ai';
 import { auth } from '@/app/(auth)/auth';
 import { DEFAULT_MODEL_NAME } from '@/lib/ai/models';
 import { customModel } from '@/lib/ai';
+import { canonicalizeAnswer } from '@/lib/autofill';
 
 const SYSTEM = `You deduce answers to a compliance audit's questions from an auditor's context dossier (text and/or attached documents).
 
@@ -48,13 +49,16 @@ export async function POST(request: Request) {
     let parsed: any;
     try { parsed = JSON.parse(m[0]); } catch { return Response.json({}); }
 
-    // Keep only well-formed, grounded entries.
+    // Keep only well-formed, grounded entries — and canonicalize each value
+    // against the field's options so nothing the form can't accept gets stored.
     const out: Record<string, any> = {};
     for (const f of fields) {
       const e = parsed[f.id];
       if (e && typeof e === 'object' && e.value != null && String(e.value).trim() !== '') {
+        const canon = canonicalizeAnswer(e.value, f);
+        if (canon == null) continue;
         out[f.id] = {
-          value: String(e.value),
+          value: canon,
           confidence: ['high', 'medium', 'low'].includes(e.confidence) ? e.confidence : 'low',
           source: typeof e.source === 'string' ? e.source.slice(0, 160) : '',
         };

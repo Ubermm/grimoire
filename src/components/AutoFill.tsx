@@ -120,7 +120,8 @@ const AutoFill = memo(({ formFields, onAutofill, className }: AutoFillProps) => 
       const fieldsData = Object.entries(formFields).map(([id, field]) => ({
         id,
         type: field.type,
-        currentValue: field.value || '',
+        question: typeof field.question === 'string' ? field.question : field.question?.text || '',
+        options: field.options || field.question?.options,
       }));
 
       const response = await fetch('/api/autofill', {

@@ -180,7 +180,7 @@ export function LeanValidateFlow({ formCode, initialForm, regText, systemId, ini
           content: 'Fill the form from the attached document.',
           experimental_attachments: [{ url: blob.url, name: blob.pathname, contentType: blob.contentType }],
         },
-        fields: form.questions.filter((q: any) => !q.disabled).map((q: any) => ({ id: q.id, type: q.type, question: q.text })),
+        fields: form.questions.filter((q: any) => !q.disabled).map((q: any) => ({ id: q.id, type: q.type, question: q.text, options: q.options })),
       }),
     });
     if (!res.ok) throw new Error('autofill failed');
