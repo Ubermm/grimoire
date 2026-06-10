@@ -126,6 +126,7 @@ async function generateValidationQuestions(previous: string, cfrSubsection: stri
                 - Compare against specific option values
 
                 remember {x} will be the placeholder for the answer to question x.
+                Question ids MUST be q1, q2, q3… in order, each unique, and {x} must always refer to the question whose id is qx.
                 The json schema is strict, also don't make the mistake of making it questions[i].question, it's questions[i].text 
                 according to the schema. Look at the schema carefully.
                 Generate a valid json object with all fields and sub-fields present, even if they are empty.
@@ -142,27 +143,41 @@ async function generateValidationQuestions(previous: string, cfrSubsection: stri
   return text.replaceAll("\\\\", "REPLACE_FOR_BACKSLASH");
 }
 
-// Merge two JSON objects from different batches
-function mergeJsonResults(batch1: any, batch2: any): any {
-  // Create a merged JSON structure
-  const merged = {
-    questions: [...batch1.questions || [], ...batch2.questions || []],
-    facts: [...batch1.facts || [], ...batch2.facts || []],
-    validations: [...batch1.validations || [], ...batch2.validations || []],
-    queries: [...batch1.queries || [], ...batch2.queries || []]
-  };
-  
-  // Ensure IDs are unique for questions
-  const seenIds = new Set();
-  merged.questions = merged.questions.filter(question => {
-    if (seenIds.has(question.id)) {
-      return false;
-    }
-    seenIds.add(question.id);
-    return true;
+// Re-index a generated batch so question ids are positional (qN at position N
+// — the invariant /api/validate's {i}→qN mapping assumes) and every {i}
+// placeholder / question_id is shifted by the batch's offset in the merged form.
+function reindexBatch(batch: any, offset: number) {
+  const idMap: Record<string, string> = {};
+  const questions = (batch.questions || []).map((q: any, i: number) => {
+    const newId = `q${offset + i + 1}`;
+    if (q.id) idMap[q.id] = newId;
+    return { ...q, id: newId };
   });
-  
-  return merged;
+  const shift = (s: any) => String(s || '').replace(/\{(\d+)\}/g, (_: string, n: string) => `{${parseInt(n, 10) + offset}}`);
+  const facts = (batch.facts || []).map((f: any) => ({
+    ...f,
+    template: shift(f.template),
+    question_id: idMap[f.question_id] || f.question_id,
+  }));
+  const validations = (batch.validations || []).map((v: any) => ({ ...v, rule: shift(v.rule) }));
+  const queries = (batch.queries || []).map((q: any) => ({ ...q, query: shift(q.query) }));
+  return { questions, facts, validations, queries };
+}
+
+// Merge two independently-numbered batches: batch 2's questions, placeholders
+// and question_ids are shifted past batch 1 instead of colliding (the old
+// merge dropped duplicate-id questions while keeping their facts/queries,
+// leaving every batch-2 {i} pointing at the wrong batch-1 question).
+function mergeJsonResults(batch1: any, batch2: any): any {
+  const b1 = reindexBatch(batch1, 0);
+  const b2 = reindexBatch(batch2, b1.questions.length);
+  return {
+    _v: 2, // merge-format version — older cached forms regenerate
+    questions: [...b1.questions, ...b2.questions],
+    facts: [...b1.facts, ...b2.facts],
+    validations: [...b1.validations, ...b2.validations],
+    queries: [...b1.queries, ...b2.queries],
+  };
 }
 
 export async function POST(request: Request) {
@@ -177,9 +192,15 @@ export async function POST(request: Request) {
     
     const resp = await CAdditional.find({ cfrCode: cfrSubsection });
 
-    if(resp[0]){
-      
-      return Response.json({ form: JSON.parse(resp[0].FormText) }, { status: 200 });
+    if (resp[0]) {
+      try {
+        const cached = JSON.parse(resp[0].FormText);
+        // Only serve caches produced by the fixed (re-indexed) merge; older
+        // ones have batch-2 placeholders pointing at batch-1 questions.
+        if (cached?._v === 2) {
+          return Response.json({ form: cached }, { status: 200 });
+        }
+      } catch { /* corrupted cache — regenerate */ }
     }
     
     const previous = form;
@@ -199,10 +220,11 @@ export async function POST(request: Request) {
     // Merge the results
     const mergedQuestions = mergeJsonResults(json1, json2);
     
-    await CAdditional.create({
-      cfrCode: cfrSubsection,
-      FormText: JSON.stringify(mergedQuestions)
-    });
+    await CAdditional.findOneAndUpdate(
+      { cfrCode: cfrSubsection },
+      { FormText: JSON.stringify(mergedQuestions) },
+      { upsert: true },
+    );
 
     return Response.json({ form: mergedQuestions }, { status: 200 });
   } catch (error) {
