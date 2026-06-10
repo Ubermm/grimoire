@@ -39,8 +39,8 @@ export default function PricingPage() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, ease: EASE }}
             className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b rule pb-4"
           >
-            <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/45">Grimoire One — pricing</p>
-            <p className="font-plex hidden text-[0.7rem] tracking-[0.08em] text-white/30 sm:block" aria-hidden>three tiers · one engine</p>
+            <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/60">Grimoire One — pricing</p>
+            <p className="font-plex hidden text-[0.7rem] tracking-[0.08em] text-white/50 sm:block" aria-hidden>three tiers · one engine</p>
           </motion.div>
 
           <motion.h1
@@ -52,7 +52,7 @@ export default function PricingPage() {
 
           <motion.p
             initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.16, ease: EASE }}
-            className="mt-6 max-w-xl text-[0.97rem] leading-relaxed text-white/55"
+            className="mt-6 max-w-xl text-[0.97rem] leading-relaxed text-white/70"
           >
             Start free, scale when you ship. Every plan runs the same
             formally-verified engine. <QED />
@@ -73,9 +73,9 @@ export default function PricingPage() {
                   <span className="absolute inset-x-0 top-0 hidden h-px bg-white/60 lg:block" aria-hidden />
                 )}
                 <div className="flex items-baseline justify-between gap-4">
-                  <span className="font-plex text-[0.78rem] text-white/30">{t.n}</span>
+                  <span className="font-plex text-[0.78rem] text-white/50">{t.n}</span>
                   {t.highlight && (
-                    <span className="font-plex text-[0.65rem] uppercase tracking-[0.22em] text-white/55">Recommended</span>
+                    <span className="font-plex text-[0.65rem] uppercase tracking-[0.22em] text-white/70">Recommended</span>
                   )}
                 </div>
 
@@ -83,10 +83,10 @@ export default function PricingPage() {
 
                 <p className="mt-5 flex items-baseline gap-1.5 border-b rule pb-6">
                   <span className="font-serif-display serif-oldstyle-nums text-4xl font-medium tracking-tight text-white sm:text-5xl">{t.price}</span>
-                  {t.unit && <span className="font-plex text-[0.78rem] text-white/40">{t.unit}</span>}
+                  {t.unit && <span className="font-plex text-[0.78rem] text-white/60">{t.unit}</span>}
                 </p>
 
-                <p className="mt-5 text-sm leading-relaxed text-white/55">{t.blurb}</p>
+                <p className="mt-5 text-sm leading-relaxed text-white/70">{t.blurb}</p>
 
                 <ul className="mt-6 flex-1 space-y-3">
                   {t.features.map((f) => (
@@ -104,7 +104,7 @@ export default function PricingPage() {
           </div>
 
           <Reveal delay={0.2}>
-            <p className="font-plex mt-10 text-[0.78rem] text-white/35">
+            <p className="font-plex mt-10 text-[0.78rem] text-white/55">
               <span className="text-white/55" aria-hidden>∴</span>&ensp;the engine — and the proof it produces — is identical on every plan.
             </p>
           </Reveal>
@@ -115,7 +115,7 @@ export default function PricingPage() {
       <section className="pb-28">
         <Reveal className="mx-auto max-w-6xl px-6">
           <div className="border-t rule pt-14 text-center">
-            <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/40">Not sure which plan?</p>
+            <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/60">Not sure which plan?</p>
             <SerifTitle className="mx-auto mt-4 max-w-xl">
               We&apos;ll help you <em className="font-normal">scope it.</em>
             </SerifTitle>

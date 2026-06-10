@@ -27,8 +27,8 @@ export default function CompanyPage() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, ease: EASE }}
             className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b rule pb-4"
           >
-            <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/45">Company — on Grimoire One</p>
-            <p className="font-plex hidden text-[0.7rem] tracking-[0.08em] text-white/30 sm:block" aria-hidden>an editorial note</p>
+            <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/60">Company — on Grimoire One</p>
+            <p className="font-plex hidden text-[0.7rem] tracking-[0.08em] text-white/50 sm:block" aria-hidden>an editorial note</p>
           </motion.div>
 
           <motion.h1
@@ -40,7 +40,7 @@ export default function CompanyPage() {
 
           <motion.p
             initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.16, ease: EASE }}
-            className="mt-7 max-w-prose text-[0.98rem] leading-relaxed text-white/60"
+            className="mt-7 max-w-prose text-[0.98rem] leading-relaxed text-white/70"
           >
             Grimoire One turns regulations into executable logic, so regulated teams can prove
             adherence instead of arguing it.
@@ -52,7 +52,7 @@ export default function CompanyPage() {
       <section className="pb-20">
         <div className="mx-auto max-w-6xl px-6">
           <Reveal><SectionRule n="01" title="The argument" aside="why this exists" /></Reveal>
-          <Reveal delay={0.06} className="mt-10 max-w-prose space-y-5 text-[0.98rem] leading-relaxed text-white/60">
+          <Reveal delay={0.06} className="mt-10 max-w-prose space-y-5 text-[0.98rem] leading-relaxed text-white/70">
             <p>
               Most compliance tooling stores documents and tracks tasks. None of it can tell you
               whether you are actually compliant — it just records that someone said so.
@@ -81,9 +81,9 @@ export default function CompanyPage() {
             {VALUES.map((v, i) => (
               <Reveal key={v.title} delay={i * 0.06}>
                 <ProvesItem>
-                  <span className="font-plex mr-3 text-[0.72rem] text-white/30">{v.n}</span>
+                  <span className="font-plex mr-3 text-[0.72rem] text-white/50">{v.n}</span>
                   <span className="font-serif-display text-base font-medium text-white">{v.title}</span>
-                  <span className="mt-1.5 block text-sm leading-relaxed text-white/55">{v.body}</span>
+                  <span className="mt-1.5 block text-sm leading-relaxed text-white/70">{v.body}</span>
                 </ProvesItem>
               </Reveal>
             ))}
@@ -98,7 +98,7 @@ export default function CompanyPage() {
             <h2 className="font-serif-display max-w-2xl text-3xl font-medium leading-[1.1] tracking-[-0.01em] text-white sm:text-4xl">
               Building in a regulated space?
             </h2>
-            <p className="mt-4 max-w-lg text-[0.95rem] leading-relaxed text-white/55">
+            <p className="mt-4 max-w-lg text-[0.95rem] leading-relaxed text-white/70">
               We&apos;d love to hear what you&apos;re working on. <QED />
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">

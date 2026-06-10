@@ -355,11 +355,11 @@ ${validationResults.split('\n').map(line => `% ${line}`).join('\n')}
     return (
       <div className="mt-4 space-y-2">
         <div className="flex items-center justify-between">
-          <h4 className="text-sm font-medium text-white/60">{title}</h4>
+          <h4 className="text-sm font-medium text-white/70">{title}</h4>
           <div className="flex items-center gap-2">
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="text-white/60 hover:text-white">
+                <Button variant="outline" size="sm" className="text-white/70 hover:text-white">
                   <ZoomIn className="w-4 h-4" />
                 </Button>
               </DialogTrigger>
@@ -368,7 +368,7 @@ ${validationResults.split('\n').map(line => `% ${line}`).join('\n')}
                   <DialogTitle>{title}</DialogTitle>
                 </DialogHeader>
                 <div className="bg-white/5 p-4 rounded">
-                  <div className="text-sm text-white/60 mb-4">
+                  <div className="text-sm text-white/70 mb-4">
                     Click and use your mouse wheel to zoom in/out. The diagram quality will not be affected.
                   </div>
                   <MermaidChart chart={chart} />
@@ -392,7 +392,7 @@ ${validationResults.split('\n').map(line => `% ${line}`).join('\n')}
   const renderFindResults = (audit) => {
   if (!audit?.results?.length && !audit?.summary) {
     return (
-      <div className="flex items-center justify-center h-64 text-white/60">
+      <div className="flex items-center justify-center h-64 text-white/70">
         No results found. Try adjusting your search criteria.
       </div>
     );
@@ -403,7 +403,7 @@ ${validationResults.split('\n').map(line => `% ${line}`).join('\n')}
       {/* Header with stats */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-white">Search Results</h3>
-        <span className="text-white/60 text-sm bg-white/5 px-3 py-1 rounded-full">
+        <span className="text-white/70 text-sm bg-white/5 px-3 py-1 rounded-full">
           {audit.results?.length || 0} warning letters found
         </span>
       </div>
@@ -478,7 +478,7 @@ ${validationResults.split('\n').map(line => `% ${line}`).join('\n')}
                         ))}
                       </div>
                     ) : (
-                      <span className="text-white/40">None</span>
+                      <span className="text-white/60">None</span>
                     )}
                   </div>
                   
@@ -493,7 +493,7 @@ ${validationResults.split('\n').map(line => `% ${line}`).join('\n')}
                         ))}
                       </div>
                     ) : (
-                      <span className="text-white/40">None</span>
+                      <span className="text-white/60">None</span>
                     )}
                   </div>
                   
@@ -505,8 +505,8 @@ ${validationResults.split('\n').map(line => `% ${line}`).join('\n')}
                   </div>
                   
                   {/* Expandable details - all codes */}
-                  <details className="col-span-12 text-xs text-white/60 mt-1">
-                    <summary className="cursor-pointer text-white/40 hover:text-white/60 transition-colors">
+                  <details className="col-span-12 text-xs text-white/70 mt-1">
+                    <summary className="cursor-pointer text-white/60 hover:text-white/70 transition-colors">
                       View all violation codes...
                     </summary>
                     <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 pl-2 border-l-2 border-white/10">
@@ -533,7 +533,7 @@ ${validationResults.split('\n').map(line => `% ${line}`).join('\n')}
 const renderCompareResults = (audit) => {
   if (!audit?.content) {
     return (
-      <div className="flex items-center justify-center h-64 text-white/60">
+      <div className="flex items-center justify-center h-64 text-white/70">
         No comparison data available. Please select two warning letters to compare.
       </div>
     );
@@ -548,27 +548,27 @@ const renderCompareResults = (audit) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* First Letter */}
           <div className="bg-white/5 rounded p-3 hover:bg-white/10 transition-colors">
-            <h4 className="text-xs uppercase text-white/40 font-medium mb-2">First Letter</h4>
+            <h4 className="text-xs uppercase text-white/60 font-medium mb-2">First Letter</h4>
             {audit.firstUrl ? (
               <a href={audit.firstUrl} target="_blank" rel="noopener noreferrer" 
                  className="text-purple-400 hover:text-purple-300 text-sm font-medium break-all">
                 {audit.firstUrl.split('/').pop() || audit.firstUrl}
               </a>
             ) : (
-              <span className="text-white/60 text-sm">No document selected</span>
+              <span className="text-white/70 text-sm">No document selected</span>
             )}
           </div>
           
           {/* Second Letter */}
           <div className="bg-white/5 rounded p-3 hover:bg-white/10 transition-colors">
-            <h4 className="text-xs uppercase text-white/40 font-medium mb-2">Second Letter</h4>
+            <h4 className="text-xs uppercase text-white/60 font-medium mb-2">Second Letter</h4>
             {audit.secondUrl ? (
               <a href={audit.secondUrl} target="_blank" rel="noopener noreferrer"
                  className="text-purple-400 hover:text-purple-300 text-sm font-medium break-all">
                 {audit.secondUrl.split('/').pop() || audit.secondUrl}
               </a>
             ) : (
-              <span className="text-white/60 text-sm">No document selected</span>
+              <span className="text-white/70 text-sm">No document selected</span>
             )}
           </div>
         </div>
@@ -603,7 +603,7 @@ const renderCompareResults = (audit) => {
           <div className="p-4 space-y-4">
             {/* CFR Codes */}
             <div>
-              <h5 className="text-xs uppercase text-white/40 font-medium mb-2">CFR Codes</h5>
+              <h5 className="text-xs uppercase text-white/60 font-medium mb-2">CFR Codes</h5>
               {Array.isArray(audit.letterACodes?.cfrCodes) && audit.letterACodes.cfrCodes.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {audit.letterACodes.cfrCodes.map((code, index) => (
@@ -613,13 +613,13 @@ const renderCompareResults = (audit) => {
                   ))}
                 </div>
               ) : (
-                <p className="text-white/60 text-sm">None found</p>
+                <p className="text-white/70 text-sm">None found</p>
               )}
             </div>
             
             {/* FD&C Codes */}
             <div>
-              <h5 className="text-xs uppercase text-white/40 font-medium mb-2">FD&C Act Codes</h5>
+              <h5 className="text-xs uppercase text-white/60 font-medium mb-2">FD&C Act Codes</h5>
               {Array.isArray(audit.letterACodes?.fdcCodes) && audit.letterACodes.fdcCodes.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {audit.letterACodes.fdcCodes.map((code, index) => (
@@ -629,7 +629,7 @@ const renderCompareResults = (audit) => {
                   ))}
                 </div>
               ) : (
-                <p className="text-white/60 text-sm">None found</p>
+                <p className="text-white/70 text-sm">None found</p>
               )}
             </div>
           </div>
@@ -641,7 +641,7 @@ const renderCompareResults = (audit) => {
           <div className="p-4 space-y-4">
             {/* CFR Codes */}
             <div>
-              <h5 className="text-xs uppercase text-white/40 font-medium mb-2">CFR Codes</h5>
+              <h5 className="text-xs uppercase text-white/60 font-medium mb-2">CFR Codes</h5>
               {Array.isArray(audit.letterBCodes?.cfrCodes) && audit.letterBCodes.cfrCodes.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {audit.letterBCodes.cfrCodes.map((code, index) => (
@@ -651,13 +651,13 @@ const renderCompareResults = (audit) => {
                   ))}
                 </div>
               ) : (
-                <p className="text-white/60 text-sm">None found</p>
+                <p className="text-white/70 text-sm">None found</p>
               )}
             </div>
             
             {/* FD&C Codes */}
             <div>
-              <h5 className="text-xs uppercase text-white/40 font-medium mb-2">FD&C Act Codes</h5>
+              <h5 className="text-xs uppercase text-white/60 font-medium mb-2">FD&C Act Codes</h5>
               {Array.isArray(audit.letterBCodes?.fdcCodes) && audit.letterBCodes.fdcCodes.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {audit.letterBCodes.fdcCodes.map((code, index) => (
@@ -667,7 +667,7 @@ const renderCompareResults = (audit) => {
                   ))}
                 </div>
               ) : (
-                <p className="text-white/60 text-sm">None found</p>
+                <p className="text-white/70 text-sm">None found</p>
               )}
             </div>
           </div>
@@ -830,7 +830,7 @@ const renderCompareResults = (audit) => {
         <div className="space-y-6">
           {audits.length === 0 ? (
             <div className="flex flex-col items-center justify-center min-h-[400px] border border-white/10 rounded-lg">
-              <div className="text-center text-white/60 max-w-md space-y-4">
+              <div className="text-center text-white/70 max-w-md space-y-4">
                 <p className="text-2xl font-light mb-2">No audits yet</p>
                 <p className="text-base">
                   Click the "New Audit Flow" button to create your first audit.
@@ -867,7 +867,7 @@ const renderCompareResults = (audit) => {
                       {audit.analysisType === "compare" && <ArrowRightLeft className="w-4 h-4 text-purple-400" />}
                       <span className="text-lg font-medium capitalize">{audit.analysisType} Analysis</span>
                     </div>
-                    <div className="text-sm text-white/60">
+                    <div className="text-sm text-white/70">
                       {audit.timestamp}
                     </div>
                   </div>
@@ -884,7 +884,7 @@ const renderCompareResults = (audit) => {
                       variant="ghost"
                       size="sm"
                       onClick={() => toggleAudit(audit.id)}
-                      className="text-white/60 hover:text-white"
+                      className="text-white/70 hover:text-white"
                     >
                       {expandedAudits.has(audit.id) ? (
                         <ChevronUp className="w-4 h-4" />

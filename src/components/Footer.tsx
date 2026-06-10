@@ -45,8 +45,8 @@ export const Footer = () => {
   const light = pathname?.startsWith('/ai-act') || pathname?.startsWith('/audit') || pathname?.startsWith('/analytics') || pathname?.startsWith('/docs');
 
   const heading = light ? 'text-neutral-900' : 'text-white';
-  const muted = light ? 'text-neutral-500 hover:text-neutral-900' : 'text-white/50 hover:text-white';
-  const colTitle = light ? 'text-neutral-400' : 'text-white/35';
+  const muted = light ? 'text-neutral-500 hover:text-neutral-900' : 'text-white/65 hover:text-white';
+  const colTitle = light ? 'text-neutral-400' : 'text-white/55';
   const hairline = light ? 'border-black/[0.08]' : 'border-white/[0.14]';
 
   return (
@@ -54,7 +54,7 @@ export const Footer = () => {
       <div className="mx-auto max-w-6xl px-6 py-14 md:px-8">
         {/* running line, like a colophon's imprint */}
         <div className={`flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b pb-4 ${hairline}`}>
-          <p className={`font-plex text-[0.68rem] uppercase tracking-[0.22em] ${light ? 'text-neutral-400' : 'text-white/35'}`}>
+          <p className={`font-plex text-[0.68rem] uppercase tracking-[0.22em] ${light ? 'text-neutral-400' : 'text-white/55'}`}>
             Grimoire One — a compliance engine
           </p>
           <p className={`font-plex hidden text-[0.68rem] tracking-[0.08em] sm:block ${light ? 'text-neutral-300' : 'text-white/25'}`} aria-hidden>
@@ -69,7 +69,7 @@ export const Footer = () => {
               <Image src="/logoo.png" alt="Grimoire One logo" width={32} height={32} className="h-8 w-8 rounded-lg object-cover ring-1 ring-white/10" />
               <span className={`font-serif-display text-xl font-medium tracking-tight ${heading}`}>Grimoire One</span>
             </Link>
-            <p className={`mt-4 max-w-xs text-sm leading-relaxed ${light ? 'text-neutral-500' : 'text-white/50'}`}>
+            <p className={`mt-4 max-w-xs text-sm leading-relaxed ${light ? 'text-neutral-500' : 'text-white/65'}`}>
               Compliance you can prove. Regulations compiled into executable logic — for FDA 21 CFR
               and the EU AI Act.
             </p>
@@ -93,10 +93,10 @@ export const Footer = () => {
         </div>
 
         <div className={`mt-12 flex flex-col items-baseline justify-between gap-3 border-t pt-6 sm:flex-row ${hairline}`}>
-          <p className={`text-sm ${light ? 'text-neutral-500' : 'text-white/40'}`}>
+          <p className={`text-sm ${light ? 'text-neutral-500' : 'text-white/60'}`}>
             © {new Date().getFullYear()} Grimoire One. All rights reserved.
           </p>
-          <p className={`font-serif-display text-[0.95rem] italic ${light ? 'text-neutral-500' : 'text-white/55'}`}>
+          <p className={`font-serif-display text-[0.95rem] italic ${light ? 'text-neutral-500' : 'text-white/70'}`}>
             Prove it. Don&apos;t claim it.&ensp;<span className="font-plex not-italic text-[0.7rem]" aria-hidden>∎</span>
           </p>
         </div>

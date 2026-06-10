@@ -33,8 +33,8 @@ export default function ContactPage() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, ease: EASE }}
             className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b rule pb-4"
           >
-            <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/45">Contact — correspondence</p>
-            <p className="font-plex hidden text-[0.7rem] tracking-[0.08em] text-white/30 sm:block" aria-hidden>letters to the editor</p>
+            <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/60">Contact — correspondence</p>
+            <p className="font-plex hidden text-[0.7rem] tracking-[0.08em] text-white/50 sm:block" aria-hidden>letters to the editor</p>
           </motion.div>
 
           <motion.h1
@@ -46,7 +46,7 @@ export default function ContactPage() {
 
           <motion.p
             initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.16, ease: EASE }}
-            className="mt-7 max-w-prose text-[0.98rem] leading-relaxed text-white/60"
+            className="mt-7 max-w-prose text-[0.98rem] leading-relaxed text-white/70"
           >
             Questions about coverage, pricing or a deployment? Send a note and we&apos;ll get back to you.
           </motion.p>
@@ -62,7 +62,7 @@ export default function ContactPage() {
             {/* details, set like a masthead */}
             <Reveal className="space-y-8">
               <div className="border-t rule pt-4">
-                <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/40">Email</p>
+                <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/60">Email</p>
                 <a
                   href="mailto:support@grimoireone.com"
                   className="font-plex mt-3 inline-block text-[0.85rem] text-white/70 underline decoration-white/25 underline-offset-4 transition-colors hover:text-white hover:decoration-white/60"
@@ -71,8 +71,8 @@ export default function ContactPage() {
                 </a>
               </div>
               <div className="border-t rule pt-4">
-                <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/40">What to expect</p>
-                <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/55">
+                <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/60">What to expect</p>
+                <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/70">
                   A reply within two business days — usually faster.
                 </p>
               </div>
@@ -85,7 +85,7 @@ export default function ContactPage() {
                   <p className="font-serif-display text-2xl font-medium text-white">
                     Message sent. <QED className="text-base" />
                   </p>
-                  <p className="mt-3 text-sm leading-relaxed text-white/55">Thanks — we&apos;ll be in touch shortly.</p>
+                  <p className="mt-3 text-sm leading-relaxed text-white/70">Thanks — we&apos;ll be in touch shortly.</p>
                 </div>
               ) : (
                 <form onSubmit={submit} className="space-y-9">
@@ -141,8 +141,8 @@ export default function ContactPage() {
 function Field({ n, label, children }: any) {
   return (
     <label className="block">
-      <span className="font-plex mb-2 block text-[0.7rem] uppercase tracking-[0.22em] text-white/40">
-        <span className="mr-2.5 text-white/25">{n}</span>{label}
+      <span className="font-plex mb-2 block text-[0.7rem] uppercase tracking-[0.22em] text-white/60">
+        <span className="mr-2.5 text-white/45">{n}</span>{label}
       </span>
       {children}
     </label>

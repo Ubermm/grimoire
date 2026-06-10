@@ -56,7 +56,7 @@ export function Counter({ to, suffix = '', prefix = '', duration = 1.4 }: any) {
 
 // Mono meta label — small caps, wide tracking. The engine's voice.
 export function Eyebrow({ children, className }: any) {
-  return <p className={cn('font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/40', className)}>{children}</p>;
+  return <p className={cn('font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/60', className)}>{children}</p>;
 }
 
 // Statute-style section opener: a full-width hairline, then "§ 02 · Title"
@@ -65,12 +65,12 @@ export function SectionRule({ n, title, aside, className }: { n: string; title: 
   return (
     <div className={cn('border-t rule pt-4', className)}>
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-        <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/40">
-          <span className="text-white/65">§ {n}</span>
+        <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/60">
+          <span className="text-white/75">§ {n}</span>
           <span className="mx-2 text-white/20">·</span>
           {title}
         </p>
-        {aside && <p className="font-plex text-[0.7rem] tracking-[0.08em] text-white/30">{aside}</p>}
+        {aside && <p className="font-plex text-[0.7rem] tracking-[0.08em] text-white/50">{aside}</p>}
       </div>
     </div>
   );
@@ -91,7 +91,7 @@ export function SectionHeading({ eyebrow, title, lead, center = false }: any) {
     <div className={cn('max-w-2xl', center && 'mx-auto text-center')}>
       {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
       <SerifTitle className="mt-3">{title}</SerifTitle>
-      {lead && <p className="mt-4 text-[0.97rem] leading-relaxed text-white/55">{lead}</p>}
+      {lead && <p className="mt-4 text-[0.97rem] leading-relaxed text-white/70">{lead}</p>}
     </div>
   );
 }
@@ -119,7 +119,7 @@ export function FnRef({ n }: { n: number | string }) {
 }
 export function Footnote({ n, children, className }: any) {
   return (
-    <p className={cn('flex gap-2.5 text-[0.8rem] leading-relaxed text-white/40', className)}>
+    <p className={cn('flex gap-2.5 text-[0.8rem] leading-relaxed text-white/60', className)}>
       <span className="font-plex shrink-0 text-[0.7rem]">{n}.</span>
       <span>{children}</span>
     </p>
@@ -181,7 +181,7 @@ export function TextLink({ href, children, className }: any) {
     <Link
       href={href}
       className={cn(
-        'font-plex inline-flex items-baseline gap-1.5 text-[0.8rem] uppercase tracking-[0.12em] text-white/55 underline decoration-white/25 underline-offset-4 transition-colors hover:text-white hover:decoration-white/60',
+        'font-plex inline-flex items-baseline gap-1.5 text-[0.8rem] uppercase tracking-[0.12em] text-white/70 underline decoration-white/25 underline-offset-4 transition-colors hover:text-white hover:decoration-white/60',
         className,
       )}
     >

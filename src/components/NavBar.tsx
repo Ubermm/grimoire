@@ -33,7 +33,7 @@ const NavLink = ({ href, label }) => {
         font-plex relative px-3 py-2 text-[0.72rem] font-medium uppercase tracking-[0.14em] transition-colors
         ${isActive
           ? (light ? 'text-neutral-900' : 'text-white')
-          : (light ? 'text-neutral-500 hover:text-neutral-900' : 'text-white/50 hover:text-white')}
+          : (light ? 'text-neutral-500 hover:text-neutral-900' : 'text-white/65 hover:text-white')}
       `}
     >
       {isActive && <span className="absolute left-3 right-3 -bottom-px h-px bg-current" aria-hidden />}
@@ -57,7 +57,7 @@ const DocsDropdown = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className={`font-plex flex items-center gap-1.5 px-3 py-2 text-[0.72rem] font-medium uppercase tracking-[0.14em] transition-colors ${light ? 'text-neutral-500 hover:text-neutral-900' : 'text-white/50 hover:text-white'}`}>
+        <button className={`font-plex flex items-center gap-1.5 px-3 py-2 text-[0.72rem] font-medium uppercase tracking-[0.14em] transition-colors ${light ? 'text-neutral-500 hover:text-neutral-900' : 'text-white/65 hover:text-white'}`}>
           Docs
           <span className="text-[0.6rem]" aria-hidden>▾</span>
         </button>
@@ -66,10 +66,10 @@ const DocsDropdown = () => {
         {docPages.map((page, i) => (
           <DropdownMenuItem key={page.href} className="rounded-none p-0 focus:bg-white/[0.06]">
             <Link href={page.href} className="flex w-full items-baseline gap-3 border-b border-white/[0.07] px-4 py-3 last:border-b-0">
-              <span className="font-plex shrink-0 text-[0.65rem] text-white/30">{String(i + 1).padStart(2, '0')}</span>
+              <span className="font-plex shrink-0 text-[0.65rem] text-white/50">{String(i + 1).padStart(2, '0')}</span>
               <span className="flex flex-col">
                 <span className="text-sm font-medium text-white/90">{page.label}</span>
-                <span className="mt-0.5 text-xs text-white/45">{page.description}</span>
+                <span className="mt-0.5 text-xs text-white/60">{page.description}</span>
               </span>
             </Link>
           </DropdownMenuItem>
@@ -98,7 +98,7 @@ const AuthButton = () => {
   };
 
   if (status === 'loading') {
-    return <span className={`font-plex px-3 text-[0.72rem] uppercase tracking-[0.14em] ${light ? 'text-neutral-400' : 'text-white/40'}`}>…</span>;
+    return <span className={`font-plex px-3 text-[0.72rem] uppercase tracking-[0.14em] ${light ? 'text-neutral-400' : 'text-white/60'}`}>…</span>;
   }
 
   if (status === 'unauthenticated') {
@@ -149,7 +149,7 @@ const AuthButton = () => {
           onClick={handleSignOut}
           className="cursor-pointer rounded-none px-4 py-2.5 focus:bg-white/[0.06]"
         >
-          <LogOut className="mr-2 h-3.5 w-3.5 text-white/60" />
+          <LogOut className="mr-2 h-3.5 w-3.5 text-white/70" />
           <span className="font-plex text-[0.72rem] uppercase tracking-[0.12em] text-white/85">Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -249,11 +249,11 @@ export const NavBar = () => {
                   href={link.href}
                   className={`
                     font-plex flex items-baseline gap-3 py-3.5 text-[0.78rem] font-medium uppercase tracking-[0.14em] transition-colors
-                    ${pathname === link.href ? 'text-white' : 'text-white/55 hover:text-white'}
+                    ${pathname === link.href ? 'text-white' : 'text-white/70 hover:text-white'}
                   `}
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <span className="text-[0.65rem] text-white/30">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="text-[0.65rem] text-white/50">{String(i + 1).padStart(2, '0')}</span>
                   {link.label}
                 </Link>
               ))}
@@ -261,7 +261,7 @@ export const NavBar = () => {
 
             {/* Docs index */}
             <div className="mt-6 border-t border-white/[0.14] pt-5">
-              <span className="font-plex text-[0.65rem] uppercase tracking-[0.22em] text-white/35">
+              <span className="font-plex text-[0.65rem] uppercase tracking-[0.22em] text-white/55">
                 Documentation
               </span>
               <div className="mt-2 divide-y divide-white/[0.07]">
@@ -276,7 +276,7 @@ export const NavBar = () => {
                   <Link
                     key={item}
                     href={`/docs/${item.toLowerCase().replaceAll(' ', '-')}`}
-                    className="block py-2.5 text-sm text-white/60 transition-colors hover:text-white"
+                    className="block py-2.5 text-sm text-white/70 transition-colors hover:text-white"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item}

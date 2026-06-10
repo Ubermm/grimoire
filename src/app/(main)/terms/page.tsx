@@ -39,7 +39,7 @@ const SECTIONS = [
           'You agree to use the Service in compliance with all applicable laws and regulations.',
         ].map((item, i) => (
           <li key={i} className="flex items-start gap-3.5">
-            <span className="font-plex mt-px shrink-0 select-none text-[0.72rem] text-white/30" aria-hidden>
+            <span className="font-plex mt-px shrink-0 select-none text-[0.72rem] text-white/50" aria-hidden>
               {String(i + 1).padStart(2, '0')}
             </span>
             <span>{item}</span>
@@ -91,10 +91,10 @@ const TermsPage = () => {
       <div className="mx-auto max-w-3xl px-6 pb-28 pt-16 sm:pt-24">
         {/* running head */}
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b rule pb-4">
-          <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/45">
+          <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/60">
             Grimoire One — terms of service
           </p>
-          <p className="font-plex text-[0.7rem] uppercase tracking-[0.14em] text-white/30">
+          <p className="font-plex text-[0.7rem] uppercase tracking-[0.14em] text-white/50">
             last revised · 2025
           </p>
         </div>
@@ -104,7 +104,7 @@ const TermsPage = () => {
           <h1 className="font-serif-display text-[2.6rem] font-medium leading-[1.06] tracking-[-0.015em] text-white sm:text-[3.4rem]">
             Terms of Service.
           </h1>
-          <p className="font-plex mt-5 text-[0.7rem] uppercase tracking-[0.22em] text-white/40">
+          <p className="font-plex mt-5 text-[0.7rem] uppercase tracking-[0.22em] text-white/60">
             §§ 1–9 <span className="mx-2 text-white/20" aria-hidden>·</span> binding upon use of the service
           </p>
         </header>
@@ -113,14 +113,14 @@ const TermsPage = () => {
         <div className="mt-12 divide-y divide-white/[0.09] border-t rule">
           {SECTIONS.map((s) => (
             <section key={s.n} className="grid gap-3 py-9 sm:grid-cols-12 sm:gap-6">
-              <p className="font-plex pt-1 text-[0.78rem] text-white/35 sm:col-span-2">
+              <p className="font-plex pt-1 text-[0.78rem] text-white/55 sm:col-span-2">
                 § {s.n}
               </p>
               <div className="sm:col-span-10">
                 <h2 className="font-serif-display text-[1.35rem] font-medium leading-snug text-white sm:text-[1.55rem]">
                   {s.title}
                 </h2>
-                <div className="mt-3 text-[0.95rem] leading-relaxed text-white/60">
+                <div className="mt-3 text-[0.95rem] leading-relaxed text-white/70">
                   {s.body}
                 </div>
               </div>
@@ -130,7 +130,7 @@ const TermsPage = () => {
 
         {/* end of instrument */}
         <div className="flex items-baseline justify-between border-t rule pt-5">
-          <p className="font-plex text-[0.7rem] uppercase tracking-[0.18em] text-white/30">
+          <p className="font-plex text-[0.7rem] uppercase tracking-[0.18em] text-white/50">
             End of terms
           </p>
           <QED />

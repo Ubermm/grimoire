@@ -10,6 +10,7 @@ import {
   MarketingPage, Reveal, Counter, SectionRule, SerifTitle, ProvesItem, QED,
   FnRef, Footnote, Panel, PrimaryCTA, SecondaryCTA, TextLink, EASE,
 } from '@/components/landing/ui';
+import MethodFigure from '@/components/landing/MethodFigure';
 
 const FRAMEWORKS = ['FDA 21 CFR', 'EU AI Act 2024/1689', 'GxP', 'ISO/IEC 42001', '21 CFR Part 11'];
 
@@ -52,8 +53,8 @@ export default function HomePage() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, ease: EASE }}
             className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b rule pb-4"
           >
-            <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/45">Grimoire One — a compliance engine</p>
-            <p className="font-plex hidden text-[0.7rem] tracking-[0.08em] text-white/30 sm:block" aria-hidden>evidence ⊢ verdict</p>
+            <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/60">Grimoire One — a compliance engine</p>
+            <p className="font-plex hidden text-[0.7rem] tracking-[0.08em] text-white/50 sm:block" aria-hidden>evidence ⊢ verdict</p>
           </motion.div>
 
           <div className="mt-14 grid gap-12 lg:grid-cols-12 lg:gap-8">
@@ -84,8 +85,8 @@ export default function HomePage() {
               className="self-end lg:col-span-4"
             >
               <div className="border-l rule pl-5">
-                <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/40">Abstract</p>
-                <p className="mt-3 text-[0.92rem] leading-relaxed text-white/60">
+                <p className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/60">Abstract</p>
+                <p className="mt-3 text-[0.92rem] leading-relaxed text-white/70">
                   Grimoire One compiles regulations into executable logic and validates evidence
                   against them — turning FDA 21 CFR and the EU AI Act into derivable, auditable
                   verdicts. A pass is a theorem; the report is its proof. <QED />
@@ -99,9 +100,9 @@ export default function HomePage() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.38, ease: EASE }}
             className="mt-16 flex flex-wrap items-baseline gap-x-3 gap-y-2 border-t rule pt-4"
           >
-            <span className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/35">Coverage</span>
+            <span className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/55">Coverage</span>
             {FRAMEWORKS.map((f, i) => (
-              <span key={f} className="font-plex text-[0.78rem] text-white/55">
+              <span key={f} className="font-plex text-[0.78rem] text-white/70">
                 {f}{i < FRAMEWORKS.length - 1 && <span className="ml-3 text-white/20" aria-hidden>·</span>}
               </span>
             ))}
@@ -118,15 +119,15 @@ export default function HomePage() {
             {REGS.map((r, i) => (
               <Reveal key={r.href} delay={i * 0.07}>
                 <Link href={r.href} className="group grid gap-3 py-9 transition-colors sm:grid-cols-12 sm:items-baseline sm:gap-6">
-                  <span className="font-plex text-[0.78rem] text-white/30 sm:col-span-1">{r.n}</span>
+                  <span className="font-plex text-[0.78rem] text-white/50 sm:col-span-1">{r.n}</span>
                   <div className="sm:col-span-4">
                     <h3 className="font-serif-display text-[1.7rem] font-medium leading-tight text-white transition-colors group-hover:text-white/80 sm:text-[2rem]">
                       {r.title}
                     </h3>
-                    <p className="font-plex mt-1 text-[0.7rem] uppercase tracking-[0.14em] text-white/35">{r.sub}</p>
+                    <p className="font-plex mt-1 text-[0.7rem] uppercase tracking-[0.14em] text-white/55">{r.sub}</p>
                   </div>
-                  <p className="text-sm leading-relaxed text-white/55 sm:col-span-5">{r.desc}</p>
-                  <span className="font-plex text-[0.75rem] uppercase tracking-[0.12em] text-white/55 transition-colors group-hover:text-white sm:col-span-2 sm:text-right">
+                  <p className="text-sm leading-relaxed text-white/70 sm:col-span-5">{r.desc}</p>
+                  <span className="font-plex text-[0.75rem] uppercase tracking-[0.12em] text-white/70 transition-colors group-hover:text-white sm:col-span-2 sm:text-right">
                     {r.cta} <span className="inline-block transition-transform group-hover:translate-x-1" aria-hidden>→</span>
                   </span>
                 </Link>
@@ -144,9 +145,9 @@ export default function HomePage() {
           <div className="mt-12 grid items-start gap-12 lg:grid-cols-2">
             <Reveal>
               <SerifTitle>Every requirement becomes a rule; every answer, a fact.</SerifTitle>
-              <p className="mt-5 max-w-xl text-[0.95rem] leading-relaxed text-white/55">
+              <p className="mt-5 max-w-xl text-[0.95rem] leading-relaxed text-white/70">
                 Regulatory text is compiled into Prolog. Your evidence asserts the facts, and the
-                engine <em className="font-serif-display text-white/75">derives</em> the verdict —
+                engine <em className="font-serif-display text-white/85">derives</em> the verdict —
                 deterministic, repeatable, and impossible to fudge.
               </p>
               <ul className="mt-7 space-y-3">
@@ -157,20 +158,7 @@ export default function HomePage() {
             </Reveal>
 
             <Reveal delay={0.1}>
-              <Panel>
-                <div className="flex items-center justify-between border-b rule px-4 py-2.5">
-                  <span className="font-plex text-[0.7rem] uppercase tracking-[0.16em] text-white/40">classification.pl</span>
-                  <span className="font-plex text-[0.7rem] text-white/25">fig. 1</span>
-                </div>
-                <pre className="font-plex overflow-x-auto p-5 text-[12.5px] leading-relaxed text-white/70">
-<span className="text-white/35">% high-risk if a listed Annex III use</span>{'\n'}
-<span className="text-white">high_risk</span>(System) :-{'\n'}
-{'    '}annex_iii_use(System),{'\n'}
-{'    '}\+ article_6_3_exempt(System).{'\n\n'}
-<span className="text-white/35">?- </span>classify(acme_hiring_ai, Risk).{'\n'}
-Risk = <span className="text-emerald-300">high</span>.  <span className="text-white/40">∎</span>
-                </pre>
-              </Panel>
+              <MethodFigure />
             </Reveal>
           </div>
         </div>
@@ -184,14 +172,14 @@ Risk = <span className="text-emerald-300">high</span>.  <span className="text-wh
           <div className="mt-12 grid items-start gap-12 lg:grid-cols-2">
             <Reveal className="lg:order-2">
               <SerifTitle>Hand an auditor the derivation, not a deck.</SerifTitle>
-              <p className="mt-5 max-w-xl text-[0.95rem] leading-relaxed text-white/55">
+              <p className="mt-5 max-w-xl text-[0.95rem] leading-relaxed text-white/70">
                 Each audit and classification produces a report: the verdict, its basis, the
                 underlying logic, and timestamps.<FnRef n={1} /> Export it and move on.
               </p>
               <div className="mt-7 space-y-2 border-t rule pt-5">
                 {['Classification basis', 'Validation results', 'Annex IV sections', 'The Prolog itself'].map((t, i) => (
-                  <p key={t} className="font-plex text-[0.78rem] text-white/55">
-                    <span className="mr-3 text-white/30">{String(i + 1).padStart(2, '0')}</span>{t}
+                  <p key={t} className="font-plex text-[0.78rem] text-white/70">
+                    <span className="mr-3 text-white/50">{String(i + 1).padStart(2, '0')}</span>{t}
                   </p>
                 ))}
               </div>
@@ -200,13 +188,13 @@ Risk = <span className="text-emerald-300">high</span>.  <span className="text-wh
             <Reveal delay={0.1} className="lg:order-1">
               <Panel>
                 <div className="flex items-center justify-between border-b rule px-5 py-3">
-                  <span className="font-plex text-[0.7rem] uppercase tracking-[0.16em] text-white/40">Evidence report</span>
-                  <span className="font-plex text-xs text-white/30">ACT-7F3A</span>
+                  <span className="font-plex text-[0.7rem] uppercase tracking-[0.16em] text-white/60">Evidence report</span>
+                  <span className="font-plex text-xs text-white/50">ACT-7F3A</span>
                 </div>
 
                 <div className="px-5 pt-4">
                   <p className="font-serif-display text-lg text-white/90">ACME Hiring Model v2.3</p>
-                  <p className="font-plex mt-0.5 text-xs text-white/40">high-risk · Reg (EU) 2024/1689</p>
+                  <p className="font-plex mt-0.5 text-xs text-white/60">high-risk · Reg (EU) 2024/1689</p>
                 </div>
 
                 <div className="mt-4 border-t rule">
@@ -218,7 +206,7 @@ Risk = <span className="text-emerald-300">high</span>.  <span className="text-wh
                   ].map(([ref, label, val]) => (
                     <div key={ref} className="flex items-center justify-between gap-4 border-b rule px-5 py-2.5 last:border-b-0">
                       <div className="flex min-w-0 items-baseline gap-3">
-                        <span className="font-plex w-[5.5rem] shrink-0 text-xs text-white/45">{ref}</span>
+                        <span className="font-plex w-[5.5rem] shrink-0 text-xs text-white/60">{ref}</span>
                         <span className="truncate text-sm text-white/70">{label}</span>
                       </div>
                       <span className="font-plex text-xs text-white/80">{val}</span>
@@ -227,7 +215,7 @@ Risk = <span className="text-emerald-300">high</span>.  <span className="text-wh
                 </div>
 
                 <div className="flex items-center justify-between border-t rule px-5 py-3">
-                  <span className="font-plex text-[0.7rem] text-white/30">Derived by the Prolog engine</span>
+                  <span className="font-plex text-[0.7rem] text-white/50">Derived by the Prolog engine</span>
                   <QED className="text-[0.7rem]" />
                 </div>
               </Panel>
@@ -259,7 +247,7 @@ Risk = <span className="text-emerald-300">high</span>.  <span className="text-wh
                 <p className="font-serif-display serif-oldstyle-nums text-5xl font-medium tracking-tight text-white sm:text-6xl">
                   <Counter to={s.to} suffix={s.suffix} />
                 </p>
-                <p className="font-plex mt-3 text-[0.72rem] uppercase tracking-[0.14em] text-white/40">{s.label}</p>
+                <p className="font-plex mt-3 text-[0.72rem] uppercase tracking-[0.14em] text-white/60">{s.label}</p>
               </Reveal>
             ))}
           </div>
@@ -273,15 +261,15 @@ Risk = <span className="text-emerald-300">high</span>.  <span className="text-wh
           <div className="mt-12 grid gap-10 md:grid-cols-3">
             {STEPS.map((s, i) => (
               <Reveal key={s.title} delay={i * 0.07}>
-                <p className="font-serif-display text-2xl italic text-white/40">{s.n}</p>
+                <p className="font-serif-display text-2xl italic text-white/60">{s.n}</p>
                 <h3 className="font-serif-display mt-3 text-xl font-medium text-white">{s.title}</h3>
-                <p className="mt-2.5 text-sm leading-relaxed text-white/55">{s.body}</p>
+                <p className="mt-2.5 text-sm leading-relaxed text-white/70">{s.body}</p>
               </Reveal>
             ))}
           </div>
           <Reveal delay={0.2}>
-            <p className="font-plex mt-12 text-[0.78rem] text-white/35">
-              <span className="text-white/55" aria-hidden>∴</span>&ensp;the verdict follows from the evidence — not from anyone&apos;s say-so.
+            <p className="font-plex mt-12 text-[0.78rem] text-white/55">
+              <span className="text-white/70" aria-hidden>∴</span>&ensp;the verdict follows from the evidence — not from anyone&apos;s say-so.
             </p>
           </Reveal>
         </div>
@@ -295,7 +283,7 @@ Risk = <span className="text-emerald-300">high</span>.  <span className="text-wh
               Sampling tells you what you checked. Formal verification tells you what&apos;s
               true — across every requirement, every time. <QED className="not-italic" />
             </p>
-            <footer className="font-plex mt-6 text-[0.7rem] uppercase tracking-[0.18em] text-white/40">
+            <footer className="font-plex mt-6 text-[0.7rem] uppercase tracking-[0.18em] text-white/60">
               — The Grimoire One thesis
             </footer>
           </blockquote>
@@ -312,12 +300,12 @@ Risk = <span className="text-emerald-300">high</span>.  <span className="text-wh
                 <details className="group py-6">
                   <summary className="flex cursor-pointer list-none items-baseline justify-between gap-6">
                     <span className="flex items-baseline gap-4">
-                      <span className="font-plex shrink-0 text-[0.72rem] text-white/30">Q.{i + 1}</span>
+                      <span className="font-plex shrink-0 text-[0.72rem] text-white/50">Q.{i + 1}</span>
                       <span className="font-serif-display text-lg font-medium text-white/90 sm:text-xl">{f.q}</span>
                     </span>
-                    <span className="font-plex shrink-0 select-none text-white/40 transition-transform duration-300 group-open:rotate-45" aria-hidden>+</span>
+                    <span className="font-plex shrink-0 select-none text-white/60 transition-transform duration-300 group-open:rotate-45" aria-hidden>+</span>
                   </summary>
-                  <p className="mt-4 pl-[2.45rem] text-[0.97rem] leading-relaxed text-white/60">{f.a}</p>
+                  <p className="mt-4 pl-[2.45rem] text-[0.97rem] leading-relaxed text-white/70">{f.a}</p>
                 </details>
               </Reveal>
             ))}
@@ -332,7 +320,7 @@ Risk = <span className="text-emerald-300">high</span>.  <span className="text-wh
             <h2 className="font-serif-display mx-auto max-w-2xl text-4xl font-medium leading-[1.1] tracking-[-0.01em] text-white sm:text-5xl">
               Make your next inspection <em className="font-normal">a formality.</em>
             </h2>
-            <p className="mx-auto mt-5 max-w-xl text-[0.95rem] leading-relaxed text-white/55">
+            <p className="mx-auto mt-5 max-w-xl text-[0.95rem] leading-relaxed text-white/70">
               Start with a single CFR audit or classify an AI system against the EU AI Act — and
               walk away with proof.
             </p>

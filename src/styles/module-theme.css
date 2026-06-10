@@ -18,10 +18,11 @@
   --line: #e8e5df;
   --line-strong: #d9d5cd;
 
-  /* Text. */
+  /* Text. Muted/faint are kept dark enough for low-vision readers:
+     muted ≈ 6.9:1 on the canvas, faint ≈ 4.6:1 (WCAG AA for body text). */
   --ink: #141310;
-  --ink-muted: #6f6b62;
-  --ink-faint: #a09c92;
+  --ink-muted: #5b574d;
+  --ink-faint: #767163;
 
   /* Typefaces (loaded via next/font in the root layout). */
   --font-accent: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
