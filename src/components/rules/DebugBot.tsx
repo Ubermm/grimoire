@@ -69,7 +69,8 @@ export function DebugBot({
           { tone: 'faint', text: `compiler: parse ${v.parses ? '✓' : '✗'} · attempts ${d.attempts}` },
           { tone: v.after?.status === 'pass' ? 'bright' : v.after?.status === 'escalate' ? 'warn' : 'err',
             text: `re-run with your current answers: ${vline(v.before)} → ${vline(v.after)}` },
-          { tone: 'faint', text: 'apply to mutate the program and this audit’s stored form — or tell me what you actually meant below.' },
+          { tone: 'faint', text: ' ' },
+          { tone: 'bright', text: 'apply this fix? — y mutates the program and this audit’s stored form · n discards · or describe what to change.' },
         );
       } else {
         say({ tone: 'faint', text: ' ' }, { tone: 'warn', text: 'no patch proposed — the verdict appears to be correct for these answers. describe your intent below if I’m wrong.' });
@@ -104,6 +105,21 @@ export function DebugBot({
     if (!raw || busy) return;
     setInput('');
     say({ tone: 'user', text: `> ${raw}` });
+    // A pending proposal turns the prompt into an interactive y/n.
+    if (proposal) {
+      if (/^y(es)?$/i.test(raw)) {
+        onApply(proposal.form);
+        say({ tone: 'bright', text: '∎ program mutated — re-validate to derive fresh verdicts.' });
+        setProposal(null);
+        return;
+      }
+      if (/^n(o)?$/i.test(raw)) {
+        say({ tone: 'faint', text: 'discarded. describe what you’d rather change, or close.' });
+        setProposal(null);
+        return;
+      }
+      // Anything else is feedback — re-diagnose with it.
+    }
     consult(raw);
   };
 
@@ -111,21 +127,9 @@ export function DebugBot({
     <TerminalPanel
       title={`${autoConsult ? 'debug' : 'edit'} — GRIMOIRE/1`}
       status={
-        <span className="flex items-center gap-3">
-          {proposal && !busy && (
-            <button
-              type="button"
-              onClick={() => { onApply(proposal.form); say({ tone: 'bright', text: '∎ program mutated — re-validate to derive fresh verdicts.' }); setProposal(null); }}
-              className="underline-offset-2 hover:underline"
-              style={{ color: TERM.bright }}
-            >
-              ⊢ apply fix
-            </button>
-          )}
-          <button type="button" onClick={onClose} className="underline-offset-2 hover:underline" style={{ color: TERM.dim }}>
-            close ✕
-          </button>
-        </span>
+        <button type="button" onClick={onClose} className="underline-offset-2 hover:underline" style={{ color: TERM.dim }}>
+          close ✕
+        </button>
       }
     >
       <div ref={bodyRef} className="max-h-[22rem] min-h-[10rem] overflow-y-auto px-4 py-3 text-[12.5px] leading-[1.9]">
@@ -140,7 +144,7 @@ export function DebugBot({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') submitFeedback(); }}
-              placeholder={autoConsult ? 'tell the bot what the rule should actually mean…' : 'describe the change — e.g. ask one aggregate yes/no instead of per-member entries…'}
+              placeholder={proposal ? 'y to apply · n to discard · or describe what to change…' : autoConsult ? 'tell the bot what the rule should actually mean…' : 'describe the change — e.g. ask one aggregate yes/no instead of per-member entries…'}
               spellCheck={false}
               aria-label="Debug feedback"
               className="min-w-0 flex-1 border-0 bg-transparent p-0 text-[12.5px] outline-none placeholder:text-[#4ade80]/35"

@@ -10,7 +10,7 @@ import { DebugBot } from '@/components/rules/DebugBot';
 import { cn } from '@/lib/utils';
 
 export function RuleAuthoringPanel({ form, regText, responses, onChange }: { form: any; regText?: string; responses?: Record<string, string>; onChange: (f: any) => void }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [nl, setNl] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -104,14 +104,24 @@ export function RuleAuthoringPanel({ form, regText, responses, onChange }: { for
       {open && (
         <div className="mt-4 space-y-4">
           <div>
-            <p className="font-accent mb-1.5 text-[0.68rem] uppercase tracking-[0.1em] text-[var(--ink-faint)]">
-              Edit — repair or reshape an existing rule (and its questions) · Delete — retires the rule and its questions
-            </p>
+            <div className="mb-3 space-y-1.5 border-l-2 border-[var(--line-strong)] pl-3 text-[0.82rem] leading-relaxed text-[var(--ink-muted)]">
+              <p>
+                <span className="font-accent font-semibold uppercase tracking-[0.08em] text-[var(--ink)]">Edit</span>
+                {' '}— opens the engine&apos;s console on that rule. Describe the change in plain English; it
+                rewrites the Prolog <em>and</em>, when the question itself captures the wrong shape of data,
+                reshapes the form question too. Every patch is parse-checked and re-run before you apply it.
+              </p>
+              <p>
+                <span className="font-accent font-semibold uppercase tracking-[0.08em] text-[var(--ink)]">Delete</span>
+                {' '}— removes the rule and retires the questions only it used; the form and console stop
+                asking them.
+              </p>
+            </div>
             <ul className="space-y-1.5">
               {(form.queries || []).map((q: any, i: number) => (
                 <li key={i} className={cn('border border-[var(--line)] px-3 py-2', editIdx === i && 'border-[var(--ink)]')}>
                   <div className="flex items-start justify-between gap-3">
-                    <span className="text-sm text-[var(--ink-muted)]">{q.description}</span>
+                    <span className="min-w-0 flex-1 break-words text-sm leading-relaxed text-[var(--ink-muted)]">{q.description}</span>
                     <span className="flex shrink-0 items-center gap-2">
                       <button
                         onClick={() => setEditIdx(editIdx === i ? null : i)}
