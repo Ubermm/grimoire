@@ -51,9 +51,9 @@ function StageRule() {
         <span className="text-white">compliant</span>(B) :-
       </p>
       {CLAUSES.map((c) => (
-        <p key={c.term} className="flex items-baseline justify-between gap-4 pl-6">
+        <p key={c.term} className="flex flex-wrap items-baseline justify-between gap-x-4 pl-6">
           <span>{c.term}</span>
-          <span className="shrink-0 text-[11px] text-white/55">
+          <span className="text-[11px] text-white/55">
             % <span className="border-b border-white/25 pb-px">{c.phrase}</span>
           </span>
         </p>
@@ -78,9 +78,9 @@ function StageEvidence() {
     <div>
       <div className="divide-y divide-white/[0.09]">
         {LEDGER.map((r) => (
-          <div key={r.doc} className="flex items-baseline justify-between gap-4 py-2.5">
+          <div key={r.doc} className="flex flex-wrap items-baseline justify-between gap-x-4 py-2.5">
             <span className="text-sm text-white/80">{r.doc}</span>
-            <span className="font-plex shrink-0 text-[11px] text-white/60">{r.src} ✓</span>
+            <span className="font-plex text-[11px] text-white/60">{r.src} ✓</span>
           </div>
         ))}
       </div>
@@ -104,13 +104,13 @@ function StageVerdict() {
       <p>
         <span className="text-white/55">?- </span>compliant(batch_42).
       </p>
-      <p className="mt-2 flex items-baseline justify-between gap-4">
+      <p className="mt-2 flex flex-wrap items-baseline justify-between gap-x-4">
         <span>
           true<span className="text-white/55">.</span>{' '}
           <span className="text-emerald-300">⊢ compliant</span>{'  '}
           <span className="text-white/60">∎</span>
         </span>
-        <span className="shrink-0 text-[11px] uppercase tracking-[0.14em] text-white/60">
+        <span className="text-[11px] uppercase tracking-[0.14em] text-white/60">
           verdict · proven
         </span>
       </p>

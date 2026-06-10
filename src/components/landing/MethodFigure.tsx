@@ -67,7 +67,7 @@ export default function MethodFigure() {
           {/* 1 — evidence, asserted as facts */}
           <p className="text-white/55">% evidence, asserted as facts</p>
           {FACTS.map((f, i) => (
-            <Line key={f.head} on={step >= i + 1} className="flex items-baseline justify-between gap-4">
+            <Line key={f.head} on={step >= i + 1} className="flex flex-wrap items-baseline justify-between gap-x-4">
               <span>
                 <span className="text-white/55">→ </span>
                 <span className={step >= i + 5 ? 'text-white' : 'text-white/75'}>{f.head}</span>(batch_42).
@@ -95,7 +95,7 @@ export default function MethodFigure() {
           <Line on={step >= 8} className="mt-4">
             <span className="text-white/55">?- </span>compliant(batch_42).
           </Line>
-          <Line on={step >= LAST} className="flex items-baseline justify-between gap-4">
+          <Line on={step >= LAST} className="flex flex-wrap items-baseline justify-between gap-x-4">
             <span>
               true<span className="text-white/55">.</span>{' '}
               <span className="text-emerald-300">⊢ compliant</span>{'  '}
@@ -107,7 +107,7 @@ export default function MethodFigure() {
       </Panel>
 
       {/* the pipeline, restated — the active stage carries the underline */}
-      <figcaption className="mt-4 flex items-baseline gap-3 font-plex text-[0.7rem] uppercase tracking-[0.18em]">
+      <figcaption className="mt-4 flex flex-wrap items-baseline gap-3 font-plex text-[0.7rem] uppercase tracking-[0.18em]">
         {[
           ['evidence', 'evidence'],
           ['rules', 'rules'],
