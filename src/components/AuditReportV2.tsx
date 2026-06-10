@@ -226,7 +226,27 @@ const styles = StyleSheet.create({
     color: MUTED,
   },
 
-  /* comments */
+  /* consolidated auditor comments (front matter) */
+  commentSection: {
+    marginBottom: 30,
+  },
+  commentRow: {
+    paddingVertical: 6,
+  },
+  commentRowRule: {
+    borderTop: `1 solid ${HAIRLINE}`,
+  },
+  commentRef: {
+    fontFamily: 'Courier',
+    fontSize: 8,
+    color: MUTED,
+    marginBottom: 2,
+  },
+  commentDeepTag: {
+    fontFamily: 'Courier',
+    fontSize: 7.5,
+    color: MUTED,
+  },
   commentText: {
     fontFamily: 'Times-Italic',
     fontSize: 9.5,
@@ -333,7 +353,7 @@ const ValidationBlock = ({ label, results }) => {
   );
 };
 
-const AuditReportDoc = ({ audit, questionDetails, deepForms, includeComments = true }) => {
+const AuditReportDoc = ({ audit, questionDetails, deepForms, includeComments = true, includeDeep = true }) => {
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -350,6 +370,14 @@ const AuditReportDoc = ({ audit, questionDetails, deepForms, includeComments = t
     ['AUDIT TYPE', audit.metadata?.auditType || 'N/A'],
     ['GENERATED', formatDate(new Date())],
   ];
+
+  // Front-matter comment apparatus: one entry per subsection that carries a
+  // comment (or a deep-stage comment when the deep apparatus is included).
+  const commentEntries = includeComments
+    ? audit.subsections
+        .map((subsection, index) => ({ subsection, index }))
+        .filter(({ subsection }) => subsection.comment || (includeDeep && subsection.deepComment))
+    : [];
 
   return (
     <Document title={`Compliance audit report — ${audit.name || ''}`}>
@@ -377,12 +405,37 @@ const AuditReportDoc = ({ audit, questionDetails, deepForms, includeComments = t
           ))}
         </View>
 
+        {/* consolidated auditor comments — front matter, before the first § */}
+        {commentEntries.length > 0 && (
+          <View style={styles.commentSection}>
+            <Text style={styles.blockLabel}>AUDITOR COMMENTS</Text>
+            {commentEntries.map(({ subsection, index }, rowIdx) => (
+              <View
+                key={subsection.id || index}
+                style={rowIdx > 0 ? [styles.commentRow, styles.commentRowRule] : styles.commentRow}
+                wrap={false}
+              >
+                <Text style={styles.commentRef}>{`§ ${index + 1} — ${subsection.code}`}</Text>
+                {subsection.comment ? (
+                  <Text style={styles.commentText}>{subsection.comment}</Text>
+                ) : null}
+                {includeDeep && subsection.deepComment ? (
+                  <Text style={styles.commentText}>
+                    <Text style={styles.commentDeepTag}>{'deep — '}</Text>
+                    {subsection.deepComment}
+                  </Text>
+                ) : null}
+              </View>
+            ))}
+          </View>
+        )}
+
         {/* subsections */}
         {audit.subsections.map((subsection, index) => {
           const deepQuestions = (deepForms[subsection.code]?.questions || []).filter(
             (q) => parseInt(q.cfr_reference) === parseInt(subsection.code)
           );
-          const hasDeep = deepQuestions.length > 0 || !!subsection.deepValidationResults;
+          const hasDeep = includeDeep && (deepQuestions.length > 0 || !!subsection.deepValidationResults);
 
           return (
             <View key={subsection.id || index} style={styles.section}>
@@ -440,20 +493,6 @@ const AuditReportDoc = ({ audit, questionDetails, deepForms, includeComments = t
                   )}
                 </View>
               )}
-
-              {/* auditor comments — only when present and requested */}
-              {includeComments && subsection.comment ? (
-                <View wrap={false}>
-                  <Text style={styles.blockLabel}>COMMENTS</Text>
-                  <Text style={styles.commentText}>{subsection.comment}</Text>
-                </View>
-              ) : null}
-              {includeComments && subsection.deepComment ? (
-                <View wrap={false}>
-                  <Text style={styles.blockLabel}>DEEP-STAGE COMMENT</Text>
-                  <Text style={styles.commentText}>{subsection.deepComment}</Text>
-                </View>
-              ) : null}
             </View>
           );
         })}
@@ -482,10 +521,11 @@ const AuditReportDoc = ({ audit, questionDetails, deepForms, includeComments = t
 
 /* --------------------------------------------------------------- component */
 
-const AuditReportV2 = ({ audit, includeComments = true }) => {
+const AuditReportV2 = ({ audit, includeComments = true, includeDeep = true }) => {
   const [questionDetails, setQuestionDetails] = useState({});
   const [deepForms, setDeepForms] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeepLoading, setIsDeepLoading] = useState(true);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -518,10 +558,32 @@ const AuditReportV2 = ({ audit, includeComments = true }) => {
           }
         }
         setQuestionDetails(details);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-        // Fetch deep form data for each subsection
+    fetchAllData();
+  }, [audit]);
+
+  // Deep forms are generation calls (/api/topk + /api/generate) — only fetch
+  // them when the deep apparatus is requested, and only for subsections we
+  // don't already have. If includeDeep flips on later, this fills the gaps.
+  useEffect(() => {
+    if (!includeDeep) return;
+    const missing = audit.subsections.filter((s) => !deepForms[s.code]);
+    if (!missing.length) {
+      setIsDeepLoading(false);
+      return;
+    }
+
+    const fetchDeepForms = async () => {
+      setIsDeepLoading(true);
+      try {
         const deepFormsData = {};
-        for (const subsection of audit.subsections) {
+        for (const subsection of missing) {
           // Create a simple form representation to pass to the API
           const currentFormData = {
             responses: subsection.responses?.reduce((acc, response) => {
@@ -535,24 +597,25 @@ const AuditReportV2 = ({ audit, includeComments = true }) => {
             deepFormsData[subsection.code] = deepFormResult.form;
           }
         }
-        setDeepForms(deepFormsData);
+        setDeepForms((prev) => ({ ...prev, ...deepFormsData }));
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching deep forms:', error);
       } finally {
-        setIsLoading(false);
+        setIsDeepLoading(false);
       }
     };
 
-    fetchAllData();
-  }, [audit]);
+    fetchDeepForms();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audit, includeDeep]);
 
   const openInNewWindow = async () => {
-    const blob = await pdf(<AuditReportDoc audit={audit} questionDetails={questionDetails} deepForms={deepForms} includeComments={includeComments} />).toBlob();
+    const blob = await pdf(<AuditReportDoc audit={audit} questionDetails={questionDetails} deepForms={deepForms} includeComments={includeComments} includeDeep={includeDeep} />).toBlob();
     const url = URL.createObjectURL(blob);
     window.open(url, '_blank');
   };
 
-  if (isLoading) {
+  if (isLoading || (includeDeep && isDeepLoading)) {
     return <div>Loading audit report...</div>;
   }
 
@@ -567,7 +630,7 @@ const AuditReportV2 = ({ audit, includeComments = true }) => {
 
       <div className="flex-1">
         <PDFViewer className="w-full h-full">
-          <AuditReportDoc audit={audit} questionDetails={questionDetails} deepForms={deepForms} includeComments={includeComments} />
+          <AuditReportDoc audit={audit} questionDetails={questionDetails} deepForms={deepForms} includeComments={includeComments} includeDeep={includeDeep} />
         </PDFViewer>
       </div>
     </div>

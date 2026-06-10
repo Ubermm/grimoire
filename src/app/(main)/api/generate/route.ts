@@ -206,16 +206,21 @@ export async function POST(request: Request) {
     const previous = form;
     
 
-    // Split warning letters into two batches of three
+    // Split warning letters into two batches of three. The batches cover
+    // DIFFERENT letters, so they run in parallel — the old serial chain
+    // (batch 2 waiting on batch 1's output) doubled the wall time for a
+    // marginal dedup benefit. Batch 2 only runs when it has a full three
+    // letters (the prompt indexes all three).
     const batch1 = warningLetters.slice(0, 3);
     const batch2 = warningLetters.slice(3, 6);
-    
-    const response1 = await generateValidationQuestions(previous, cfrSubsection, batch1, "");
-    const response2 = await generateValidationQuestions(previous, cfrSubsection, batch2, extractJsonFromText(response1));
-    
-    // Extract JSON from text responses
+
+    const [response1, response2] = await Promise.all([
+      generateValidationQuestions(previous, cfrSubsection, batch1, ""),
+      batch2.length >= 3 ? generateValidationQuestions(previous, cfrSubsection, batch2, "") : Promise.resolve(null),
+    ]);
+
     const json1 = extractJsonFromText(response1);
-    const json2 = extractJsonFromText(response2);
+    const json2 = response2 ? extractJsonFromText(response2) : { questions: [], facts: [], validations: [], queries: [] };
     
     // Merge the results
     const mergedQuestions = mergeJsonResults(json1, json2);

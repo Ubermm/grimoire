@@ -513,7 +513,7 @@ export function AuditValidateFlow({
       <CollapsibleSection
         defaultOpen={false}
         title="Deep validation — optional"
-        hint="Generate extra checks from real FDA warning letters that cite this CFR code, to catch issues the base form might miss. Only available for codes with enough cited letters."
+        hint="Generate extra checks from real FDA warning letters that cite this CFR code, to catch issues the base form might miss. Only available for codes with enough cited letters. The first generation takes ~30s; it's cached for every later run."
       >
         <div className="space-y-6">
           {!deepForm && <GhostButton onClick={runDeep} disabled={deepLoading}>{deepLoading ? <Spinner /> : null} Generate checks</GhostButton>}

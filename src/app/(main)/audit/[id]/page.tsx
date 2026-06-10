@@ -24,6 +24,7 @@ export default function AuditRunPage({ params }: { params: Promise<{ id: string 
   const [active, setActive] = useState(0);
   const [report, setReport] = useState(false);
   const [includeComments, setIncludeComments] = useState(true);
+  const [includeDeep, setIncludeDeep] = useState(true);
   const [autofillMeta, setAutofillMeta] = useState<any[]>([]);
   const [fillNonce, setFillNonce] = useState(0);
 
@@ -174,11 +175,15 @@ export default function AuditRunPage({ params }: { params: Promise<{ id: string 
                   <input type="checkbox" checked={includeComments} onChange={(e) => setIncludeComments(e.target.checked)} />
                   Include auditor comments
                 </label>
+                <label className="font-accent flex cursor-pointer select-none items-center gap-2 text-xs text-[var(--ink-muted)]">
+                  <input type="checkbox" checked={includeDeep} onChange={(e) => setIncludeDeep(e.target.checked)} />
+                  Include deep validation
+                </label>
                 <button onClick={() => setReport(false)} className="p-1.5 text-[var(--ink-faint)] hover:bg-black/5 hover:text-[var(--ink)]"><X className="h-4 w-4" /></button>
               </div>
             </div>
             <div className="flex-1 overflow-auto p-4">
-              <AuditReport audit={audit} includeComments={includeComments} />
+              <AuditReport audit={audit} includeComments={includeComments} includeDeep={includeDeep} />
             </div>
           </div>
         </div>,
