@@ -4,7 +4,7 @@
 // confidence + source citations, which the auditor then reviews and confirms.
 import { useState } from 'react';
 import { Paperclip, FileText, X } from 'lucide-react';
-import { Surface, AccentButton, GhostButton, Spinner } from '@/components/module/ui';
+import { CollapsibleSection, AccentButton, Spinner } from '@/components/module/ui';
 import { generateUUID } from '@/lib/utils';
 
 type Filled = { responses: Record<string, string>; meta: Record<string, any> };
@@ -20,7 +20,6 @@ export function AuditContextPanel({
   onDossierChange: (d: { text: string; files: any[] }) => void;
   onFilled: (perSub: Filled[]) => void;
 }) {
-  const [open, setOpen] = useState(false);
   const [text, setText] = useState(dossier?.text || '');
   const [files, setFiles] = useState<any[]>(dossier?.files || []);
   const [uploading, setUploading] = useState(false);
@@ -73,15 +72,12 @@ export function AuditContextPanel({
   const hasContext = !!(text.trim() || files.length);
 
   return (
-    <Surface className="p-5">
-      <button onClick={() => setOpen((o) => !o)} className="flex w-full items-center justify-between">
-        <span className="font-accent flex items-center gap-2 text-[0.78rem] font-semibold uppercase tracking-[0.12em] text-[var(--ink)]"><span aria-hidden>§</span> Context &amp; autofill {hasContext && <span className="font-normal tracking-normal text-[var(--ink-faint)]">· ready</span>}</span>
-        <span className="font-accent text-xs uppercase tracking-[0.08em] text-[var(--ink-faint)]">{open ? 'Hide' : 'Add documents'}</span>
-      </button>
-
-      {open && (
-        <div className="mt-4 space-y-4">
-          <p className="text-sm text-[var(--ink-muted)]">Paste context or attach documents (SOPs, batch records, a system dossier). We&apos;ll deduce as many answers as we can across every section — you review and confirm.</p>
+    <CollapsibleSection
+      defaultOpen={true}
+      title={<>Autofill — answer the audit from your documents{hasContext && <span className="font-normal normal-case tracking-normal text-[var(--ink-faint)]"> · ready</span>}</>}
+      hint="Upload or paste SOPs, batch records and logs; the engine deduces answers across every section with a source and confidence for you to review. Nothing is accepted without your confirmation."
+    >
+        <div className="space-y-4">
           <textarea value={text} onChange={(e) => setText(e.target.value)} onBlur={() => persist(text, files)} placeholder="Paste relevant context here…" className="ai-field min-h-[96px] resize-y" />
 
           {files.length > 0 && (
@@ -104,7 +100,6 @@ export function AuditContextPanel({
             {filledCount != null && <span className="text-sm text-[var(--ink-muted)]">Deduced {filledCount} answer{filledCount === 1 ? '' : 's'} — review &amp; confirm in each section.</span>}
           </div>
         </div>
-      )}
-    </Surface>
+    </CollapsibleSection>
   );
 }

@@ -7,7 +7,7 @@
 // Mirrors the AI Act LeanValidateFlow; the engine APIs are untouched.
 import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
-import { Surface, AccentButton, GhostButton, Spinner, EmptyState } from '@/components/module/ui';
+import { Surface, AccentButton, GhostButton, Spinner, EmptyState, CollapsibleSection } from '@/components/module/ui';
 import { RuleAuthoringPanel } from '@/components/rules/RuleAuthoringPanel';
 import { DebugBot } from '@/components/rules/DebugBot';
 import { ConsoleInterview } from '@/components/module/ConsoleInterview';
@@ -379,6 +379,25 @@ function QuestionSet({
   );
 }
 
+// Free-text auditor note saved with the section — persists upward onBlur,
+// only when the text actually changed.
+function CommentBlock({ label, initial, onSave }: { label: string; initial?: string; onSave?: (text: string) => void }) {
+  const [text, setText] = useState(initial ?? '');
+  const [saved, setSaved] = useState(initial ?? '');
+  return (
+    <Surface className="p-5">
+      <p className="font-accent mb-2.5 text-[0.72rem] font-medium uppercase tracking-[0.16em] text-[var(--ink)]">{label}</p>
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onBlur={() => { if (text !== saved) { setSaved(text); onSave?.(text); } }}
+        placeholder="Observations, context, or judgment calls for the record…"
+        className="ai-field min-h-[70px] resize-y"
+      />
+    </Surface>
+  );
+}
+
 export function AuditValidateFlow({
   cfrCode,
   initialForm,
@@ -386,9 +405,13 @@ export function AuditValidateFlow({
   initialResponses,
   initialDeepResponses,
   autofillMeta,
+  initialComment,
+  initialDeepComment,
   onValidated,
   onDeepValidated,
   onFormChange,
+  onComment,
+  onDeepComment,
 }: {
   cfrCode: string;
   initialForm?: string | any; // per-audit snapshot (JSON string or object); falls back to global
@@ -396,9 +419,13 @@ export function AuditValidateFlow({
   initialResponses?: Responses;
   initialDeepResponses?: Responses;
   autofillMeta?: Record<string, { confidence?: string; source?: string }>;
+  initialComment?: string;
+  initialDeepComment?: string;
   onValidated?: (r: Result, responses: Responses) => void;
   onDeepValidated?: (r: Result, responses: Responses) => void;
   onFormChange?: (form: any) => void; // persist edited rules to the audit snapshot
+  onComment?: (text: string) => void;
+  onDeepComment?: (text: string) => void;
 }) {
   const [form, setForm] = useState<any>(null);
   const [missing, setMissing] = useState(false);
@@ -476,26 +503,30 @@ export function AuditValidateFlow({
       <QuestionSet cfrCode={cfrCode} form={form} initial={initialResponses} meta={autofillMeta} onValidated={onValidated}
         onFormPatched={(f) => { setForm(f); onFormChange?.(f); }} onResponsesChange={setLiveResponses} />
 
+      {/* Auditor's free-text note for the record — saved with this section. */}
+      <CommentBlock label="Auditor comment — recorded with this section" initial={initialComment} onSave={onComment} />
+
       {/* Inline rule authoring — edits persist to this audit's snapshot only. */}
       {onFormChange && <RuleAuthoringPanel form={form} regText={regText} responses={liveResponses} onChange={(f) => { setForm(f); onFormChange(f); }} />}
 
       {/* Deep validation — hindsight questions derived from real FDA warning letters. */}
-      <div className="border border-dashed border-[var(--line-strong)] bg-black/[0.015] p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="font-accent flex items-center gap-2 text-[0.78rem] font-semibold uppercase tracking-[0.12em] text-[var(--ink)]"><span aria-hidden>§</span> Deep validation <span className="font-normal normal-case tracking-normal text-[var(--ink-faint)]">· optional</span></p>
-            <p className="mt-1 max-w-xl text-sm text-[var(--ink-muted)]">Generate extra checks from real FDA warning letters that cite this CFR code, to catch issues the base form might miss. Only available for codes with enough cited letters.</p>
-          </div>
+      <CollapsibleSection
+        defaultOpen={false}
+        title="Deep validation — optional"
+        hint="Generate extra checks from real FDA warning letters that cite this CFR code, to catch issues the base form might miss. Only available for codes with enough cited letters."
+      >
+        <div className="space-y-6">
           {!deepForm && <GhostButton onClick={runDeep} disabled={deepLoading}>{deepLoading ? <Spinner /> : null} Generate checks</GhostButton>}
+          {deepError && <p className="text-sm text-[var(--ink-muted)]">{deepError}</p>}
+          {deepForm && (
+            <>
+              <QuestionSet cfrCode={cfrCode} form={deepForm} initial={initialDeepResponses} onValidated={onDeepValidated}
+                onFormPatched={(f) => setDeepForm(f)} ctaLabel="Validate deep checks" />
+              <CommentBlock label="Auditor comment — deep validation stage" initial={initialDeepComment} onSave={onDeepComment} />
+            </>
+          )}
         </div>
-        {deepError && <p className="mt-4 text-sm text-[var(--ink-muted)]">{deepError}</p>}
-        {deepForm && (
-          <div className="mt-6">
-            <QuestionSet cfrCode={cfrCode} form={deepForm} initial={initialDeepResponses} onValidated={onDeepValidated}
-              onFormPatched={(f) => setDeepForm(f)} ctaLabel="Validate deep checks" />
-          </div>
-        )}
-      </div>
+      </CollapsibleSection>
     </div>
   );
 }

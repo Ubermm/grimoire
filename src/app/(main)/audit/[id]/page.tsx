@@ -23,6 +23,7 @@ export default function AuditRunPage({ params }: { params: Promise<{ id: string 
   const [missing, setMissing] = useState(false);
   const [active, setActive] = useState(0);
   const [report, setReport] = useState(false);
+  const [includeComments, setIncludeComments] = useState(true);
   const [autofillMeta, setAutofillMeta] = useState<any[]>([]);
   const [fillNonce, setFillNonce] = useState(0);
 
@@ -58,6 +59,14 @@ export default function AuditRunPage({ params }: { params: Promise<{ id: string 
   // Persist auditor-edited rules to this audit's per-subsection snapshot only.
   const saveForm = (idx: number, formObj: any) => {
     const subs = audit.subsections.map((s: any, i: number) => (i === idx ? { ...s, form: JSON.stringify(formObj) } : s));
+    setAudit({ ...audit, subsections: subs });
+    fetch('/api/audit', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ _id: id, subsections: subs }) });
+  };
+
+  // Auditor comments — saved against the active subsection; status/checkpoint
+  // are untouched (mirrors the saveForm pattern).
+  const saveComment = (idx: number, field: 'comment' | 'deepComment', text: string) => {
+    const subs = audit.subsections.map((s: any, i: number) => (i === idx ? { ...s, [field]: text } : s));
     setAudit({ ...audit, subsections: subs });
     fetch('/api/audit', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ _id: id, subsections: subs }) });
   };
@@ -142,9 +151,13 @@ export default function AuditRunPage({ params }: { params: Promise<{ id: string 
             initialResponses={initialResponses}
             initialDeepResponses={initialDeepResponses}
             autofillMeta={autofillMeta[active]}
+            initialComment={sub.comment}
+            initialDeepComment={sub.deepComment}
             onValidated={(data, responses) => saveMain(active, responses, data)}
             onDeepValidated={(data, responses) => saveDeep(active, responses, data)}
             onFormChange={(f) => saveForm(active, f)}
+            onComment={(text) => saveComment(active, 'comment', text)}
+            onDeepComment={(text) => saveComment(active, 'deepComment', text)}
           />
         </div>
       </div>
@@ -156,10 +169,16 @@ export default function AuditRunPage({ params }: { params: Promise<{ id: string 
           <div className="flex h-[85vh] w-full max-w-4xl flex-col overflow-hidden border border-[var(--line)] bg-[var(--surface)]" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-3">
               <p className="font-accent text-[0.78rem] font-semibold uppercase tracking-[0.12em] text-[var(--ink)]">Audit report — {audit.name}</p>
-              <button onClick={() => setReport(false)} className="p-1.5 text-[var(--ink-faint)] hover:bg-black/5 hover:text-[var(--ink)]"><X className="h-4 w-4" /></button>
+              <div className="flex items-center gap-4">
+                <label className="font-accent flex cursor-pointer select-none items-center gap-2 text-xs text-[var(--ink-muted)]">
+                  <input type="checkbox" checked={includeComments} onChange={(e) => setIncludeComments(e.target.checked)} />
+                  Include auditor comments
+                </label>
+                <button onClick={() => setReport(false)} className="p-1.5 text-[var(--ink-faint)] hover:bg-black/5 hover:text-[var(--ink)]"><X className="h-4 w-4" /></button>
+              </div>
             </div>
             <div className="flex-1 overflow-auto p-4">
-              <AuditReport audit={audit} />
+              <AuditReport audit={audit} includeComments={includeComments} />
             </div>
           </div>
         </div>,

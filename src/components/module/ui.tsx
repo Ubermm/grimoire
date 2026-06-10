@@ -54,6 +54,36 @@ export function SectionCard({
   );
 }
 
+// Disclosure surface — a square hairline block whose header explains what the
+// block does before it is opened. The "+" rotates to "×" like the landing FAQ.
+export function CollapsibleSection({
+  title,
+  hint,
+  defaultOpen = false,
+  children,
+  className,
+}: {
+  title: React.ReactNode;
+  hint?: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const [open, setOpen] = React.useState(defaultOpen);
+  return (
+    <Surface className={className}>
+      <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="flex w-full items-start justify-between gap-4 px-5 py-4 text-left">
+        <span className="min-w-0">
+          <span className="font-accent block text-[0.78rem] font-semibold uppercase tracking-[0.12em] text-[var(--ink)]">{title}</span>
+          {hint && <span className="mt-1 block text-left text-sm font-normal normal-case tracking-normal leading-relaxed text-[var(--ink-muted)]">{hint}</span>}
+        </span>
+        <span className={cn('font-accent shrink-0 select-none text-lg leading-none text-[var(--ink-faint)] transition-transform duration-300', open && 'rotate-45')} aria-hidden>+</span>
+      </button>
+      {open && <div className="border-t border-[var(--line)] px-5 py-5">{children}</div>}
+    </Surface>
+  );
+}
+
 /* ------------------------------------------------------------------ buttons */
 
 export function AccentButton({ className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {

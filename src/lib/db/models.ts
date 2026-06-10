@@ -530,6 +530,13 @@ const AuditSubsectionSchema = new Schema({
     type: String,
     required: false
   },
+  // Auditor note recorded against the deep-validation stage, kept separate from
+  // the base-section comment.
+  deepComment: {
+    type: String,
+    required: false,
+    default: ''
+  },
 });
 
 const AuditSchema = new Schema<SchemaTypes.Audit>({

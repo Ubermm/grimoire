@@ -333,7 +333,7 @@ const ValidationBlock = ({ label, results }) => {
   );
 };
 
-const AuditReportDoc = ({ audit, questionDetails, deepForms }) => {
+const AuditReportDoc = ({ audit, questionDetails, deepForms, includeComments = true }) => {
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -441,11 +441,17 @@ const AuditReportDoc = ({ audit, questionDetails, deepForms }) => {
                 </View>
               )}
 
-              {/* auditor comments — only when present */}
-              {subsection.comment ? (
+              {/* auditor comments — only when present and requested */}
+              {includeComments && subsection.comment ? (
                 <View wrap={false}>
                   <Text style={styles.blockLabel}>COMMENTS</Text>
                   <Text style={styles.commentText}>{subsection.comment}</Text>
+                </View>
+              ) : null}
+              {includeComments && subsection.deepComment ? (
+                <View wrap={false}>
+                  <Text style={styles.blockLabel}>DEEP-STAGE COMMENT</Text>
+                  <Text style={styles.commentText}>{subsection.deepComment}</Text>
                 </View>
               ) : null}
             </View>
@@ -476,7 +482,7 @@ const AuditReportDoc = ({ audit, questionDetails, deepForms }) => {
 
 /* --------------------------------------------------------------- component */
 
-const AuditReportV2 = ({ audit }) => {
+const AuditReportV2 = ({ audit, includeComments = true }) => {
   const [questionDetails, setQuestionDetails] = useState({});
   const [deepForms, setDeepForms] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -541,7 +547,7 @@ const AuditReportV2 = ({ audit }) => {
   }, [audit]);
 
   const openInNewWindow = async () => {
-    const blob = await pdf(<AuditReportDoc audit={audit} questionDetails={questionDetails} deepForms={deepForms} />).toBlob();
+    const blob = await pdf(<AuditReportDoc audit={audit} questionDetails={questionDetails} deepForms={deepForms} includeComments={includeComments} />).toBlob();
     const url = URL.createObjectURL(blob);
     window.open(url, '_blank');
   };
@@ -561,7 +567,7 @@ const AuditReportV2 = ({ audit }) => {
 
       <div className="flex-1">
         <PDFViewer className="w-full h-full">
-          <AuditReportDoc audit={audit} questionDetails={questionDetails} deepForms={deepForms} />
+          <AuditReportDoc audit={audit} questionDetails={questionDetails} deepForms={deepForms} includeComments={includeComments} />
         </PDFViewer>
       </div>
     </div>
