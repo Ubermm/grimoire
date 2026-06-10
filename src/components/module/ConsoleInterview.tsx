@@ -143,6 +143,29 @@ export function ConsoleInterview({
     say(...questionBlock(questions[idx], idx, total, responses[questions[idx].id]));
   }, [idx, done, total]);
 
+  // React to live rule authoring: when the auditor compiles a new rule into
+  // this audit's snapshot, announce it and — if the deposition had already
+  // ended — reopen at the first new question.
+  const prevCounts = useRef({ q: total, r: (form?.queries || []).length });
+  const ruleCount = (form?.queries || []).length;
+  useEffect(() => {
+    const { q: qPrev, r: rPrev } = prevCounts.current;
+    if (ruleCount > rPrev) {
+      const added = (form.queries || []).slice(rPrev).map((x: any) => x.description).filter(Boolean);
+      say({ tone: 'sys', text: `% rule compiled into the program${added.length ? `: ${added.join(' · ')}` : ''}` });
+    }
+    if (total > qPrev) {
+      const n = total - qPrev;
+      say({ tone: 'faint', text: `% ${n} new question${n > 1 ? 's' : ''} appended to the deposition.` });
+      if (done) {
+        setDone(false);
+        printedFor.current = -1;
+        setIdx(qPrev);
+      }
+    }
+    prevCounts.current = { q: total, r: ruleCount };
+  }, [total, ruleCount, done]);
+
   // Pin scroll to the latest line.
   useEffect(() => {
     const el = bodyRef.current;
