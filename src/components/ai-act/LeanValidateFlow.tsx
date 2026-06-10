@@ -10,6 +10,10 @@ import { TerminalPanel, PrologView } from '@/components/module/terminal';
 import { ExecutionReplay } from '@/components/module/ExecutionReplay';
 import { ConsoleInterview } from '@/components/module/ConsoleInterview';
 import { cn, generateUUID } from '@/lib/utils';
+import { toast } from 'sonner';
+
+// Once per page load, not per flow instance.
+let consoleToastShown = false;
 
 const statusOf = (r: any, i: number) => r.status?.[i] || (r.passed[i] ? 'pass' : 'fail');
 
@@ -60,10 +64,18 @@ export function LeanValidateFlow({ formCode, initialForm, regText, systemId, ini
   const [loading, setLoading] = useState(false);
   // Bumped on each successful validate so the ExecutionReplay restarts.
   const [runId, setRunId] = useState(0);
-  // Console deposition by default on a blank set; form when answers pre-exist.
-  const [mode, setMode] = useState<'console' | 'form'>(() =>
-    Object.values(initialResponses || {}).some((v) => v != null && v !== '') ? 'form' : 'console');
+  // Console deposition by default; saved answers surface in the console as
+  // "current: … — enter to keep".
+  const [mode, setMode] = useState<'console' | 'form'>('console');
   const [showEngine, setShowEngine] = useState(false);
+
+  // One quiet heads-up per page load: the form is always a toggle away.
+  useEffect(() => {
+    if (!consoleToastShown) {
+      consoleToastShown = true;
+      toast('Console deposition — switch to the form at any time with the toggle, or type :form.');
+    }
+  }, []);
 
   useEffect(() => {
     // Per-audit snapshot wins over the global template.

@@ -13,6 +13,10 @@ import { ConsoleInterview } from '@/components/module/ConsoleInterview';
 import { TerminalPanel, PrologView } from '@/components/module/terminal';
 import { ExecutionReplay } from '@/components/module/ExecutionReplay';
 import { cn, generateUUID } from '@/lib/utils';
+import { toast } from 'sonner';
+
+// Once per page load, not per QuestionSet (the deep pass reuses the component).
+let consoleToastShown = false;
 
 type Responses = Record<string, string>;
 type Result = { passed: boolean[]; description: string[]; status?: string[]; reason?: string[] };
@@ -162,10 +166,18 @@ function QuestionSet({
   // Bumped on each successful validate so the ExecutionReplay restarts.
   const [runId, setRunId] = useState(0);
 
-  // Console vs form. A fresh set opens as a console deposition; a set arriving
-  // with saved answers opens straight on the reviewable form.
-  const [mode, setMode] = useState<'console' | 'form'>(() => (initial && Object.keys(initial).length ? 'form' : 'console'));
+  // Console vs form. Every set opens as a console deposition; saved answers
+  // surface in the console as "current: … — enter to keep".
+  const [mode, setMode] = useState<'console' | 'form'>('console');
   const [showEngine, setShowEngine] = useState(false);
+
+  // One quiet heads-up per page load: the form is always a toggle away.
+  useEffect(() => {
+    if (!consoleToastShown) {
+      consoleToastShown = true;
+      toast('Console deposition — switch to the form at any time with the toggle, or type :form.');
+    }
+  }, []);
 
   // Question ids the user has actually asserted (form edits, console answers,
   // autofill) — as opposed to the seeded yes-defaults. The console is only ever
