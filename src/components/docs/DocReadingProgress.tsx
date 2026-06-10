@@ -69,7 +69,7 @@ export function DocReadingProgress({ eyebrow }: { eyebrow?: string }) {
       )}
     >
       <div className="flex items-baseline justify-between pb-1.5 pt-2">
-        <span className="font-accent text-[0.65rem] uppercase tracking-[0.18em] text-[var(--ink-muted)]">
+        <span className="font-accent text-[0.65rem] uppercase tracking-[0.18em] text-[#0d9488]">
           {eyebrow}
         </span>
         <span className="font-accent text-[0.65rem] uppercase tracking-[0.18em] tabular-nums text-[#047857]">

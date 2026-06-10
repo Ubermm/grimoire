@@ -51,8 +51,8 @@ export default function MethodFigure() {
     <figure>
       <Panel>
         <div className="flex items-center justify-between border-b rule px-4 py-2.5">
-          <span className="font-plex text-[0.7rem] uppercase tracking-[0.16em] text-white/60">derivation — batch_42</span>
-          <span className="font-plex text-[0.7rem] text-white/45" aria-hidden>
+          <span className="font-plex text-[0.7rem] uppercase tracking-[0.16em] text-emerald-300/90">derivation — batch_42</span>
+          <span className={`font-plex text-[0.7rem] ${step >= LAST ? 'text-emerald-300' : 'text-white/45'}`} aria-hidden>
             {step >= LAST ? 'Q.E.D.' : 'fig. 1'}
           </span>
         </div>
@@ -117,7 +117,7 @@ export default function MethodFigure() {
             {i > 0 && <span className="text-white/45" aria-hidden>{i === 2 ? '⊢' : '→'}</span>}
             <span
               className={`border-b pb-1 transition-colors duration-300 ${
-                stage === key ? 'border-emerald-300/80 text-white' : 'border-transparent text-white/55'
+                stage === key ? 'border-emerald-300/80 text-emerald-300' : 'border-transparent text-white/55'
               }`}
             >
               {label}

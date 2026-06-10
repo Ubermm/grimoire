@@ -179,9 +179,9 @@ function StepCopy({ s, active = true }) {
 function PanelHeader({ label, index }) {
   return (
     <div className="flex items-center justify-between border-b rule px-5 py-3">
-      <span className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-white/60">{label}</span>
-      <span className="font-plex text-[0.7rem] text-white/50">
-        <span className="text-emerald-300/90">0{index + 1}</span> / 04
+      <span className="font-plex text-[0.7rem] uppercase tracking-[0.22em] text-emerald-300/90">{label}</span>
+      <span className="font-plex text-[0.7rem] text-emerald-300/50">
+        <span className="text-emerald-300">0{index + 1}</span> / 04
       </span>
     </div>
   );
