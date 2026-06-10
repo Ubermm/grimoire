@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { Surface, AccentButton, GhostButton, Spinner, EmptyState } from '@/components/module/ui';
 import { RuleAuthoringPanel } from '@/components/rules/RuleAuthoringPanel';
+import { DebugBot } from '@/components/rules/DebugBot';
 import { ConsoleInterview } from '@/components/module/ConsoleInterview';
 import { TerminalPanel, PrologView } from '@/components/module/terminal';
 import { ExecutionReplay } from '@/components/module/ExecutionReplay';
@@ -66,7 +67,7 @@ function QuestionField({ q, value, onChange }: { q: any; value: any; onChange: (
   return <Segmented options={q.options || ['true', 'false']} value={value} onChange={onChange} />;
 }
 
-function ResultsPanel({ results }: { results: Result }) {
+function ResultsPanel({ results, onDebug }: { results: Result; onDebug?: (i: number) => void }) {
   const states = results.description.map((_, i) => statusOf(results, i));
   const overall = states.every((s) => s === 'pass');
   const anyFail = states.some((s) => s === 'fail');
@@ -89,6 +90,12 @@ function ResultsPanel({ results }: { results: Result }) {
                 {d}
                 {results.reason?.[i] ? <span className="text-[var(--ink-faint)]"> — {results.reason[i]}</span> : null}
               </span>
+              {onDebug && st !== 'pass' && (
+                <button type="button" onClick={() => onDebug(i)}
+                  className="ml-auto shrink-0 font-mono text-[0.65rem] uppercase tracking-[0.1em] text-[var(--ink-faint)] transition-colors hover:text-[var(--ink)]">
+                  debug
+                </button>
+              )}
             </li>
           );
         })}
@@ -140,6 +147,7 @@ function QuestionSet({
   initial,
   meta,
   onValidated,
+  onFormPatched,
   ctaLabel = 'Validate',
 }: {
   cfrCode: string;
@@ -147,6 +155,7 @@ function QuestionSet({
   initial?: Responses;
   meta?: Record<string, { confidence?: string; source?: string }>;
   onValidated?: (r: Result, responses: Responses) => void;
+  onFormPatched?: (f: any) => void;
   ctaLabel?: string;
 }) {
   // Default the yes/no (segmented) questions to their affirmative option so the
@@ -166,6 +175,8 @@ function QuestionSet({
   const [loading, setLoading] = useState(false);
   // Bumped on each successful validate so the ExecutionReplay restarts.
   const [runId, setRunId] = useState(0);
+  // Which failing/escalated verdict the debug bot is consulting on, if any.
+  const [debugIdx, setDebugIdx] = useState<number | null>(null);
 
   // Console vs form. Every set opens as a console deposition; saved answers
   // surface in the console as "current: … — enter to keep".
@@ -216,6 +227,28 @@ function QuestionSet({
       onValidated?.(data, responses);
     }
     setLoading(false);
+  };
+
+  // The debug bot verified a patched program; persist it upward, drop answers the
+  // patch invalidated, and clear the now-stale verdicts.
+  const handleDebugApply = (patchedForm: any) => {
+    onFormPatched?.(patchedForm);
+    const stale: string[] = [];
+    for (const q of patchedForm.questions || []) {
+      const v = responses[q.id];
+      if (v == null || v === '' || !q.options?.length) continue;
+      const ok = q.type === 'CHECKBOX'
+        ? String(v).split(',').filter(Boolean).every((p: string) => q.options.includes(p))
+        : q.options.includes(v);
+      if (!ok) stale.push(q.id);
+    }
+    if (stale.length) {
+      setResponses((prev) => { const next = { ...prev }; for (const id of stale) delete next[id]; return next; });
+      setTouched((prev) => { const next = new Set(prev); for (const id of stale) next.delete(id); return next; });
+    }
+    setResults(null);
+    setDebugIdx(null);
+    toast('Program repaired — re-validate to derive fresh verdicts.');
   };
 
   return (
@@ -300,9 +333,20 @@ function QuestionSet({
       </Surface>
       {results && (
         <>
-          <ResultsPanel results={results} />
+          <ResultsPanel results={results} onDebug={setDebugIdx} />
           {/* The same verdicts, replayed in the engine's voice. */}
           <ExecutionReplay key={runId} form={form} responses={responses} results={results} contextLabel={cfrCode} />
+          {debugIdx != null && (
+            <DebugBot
+              key={debugIdx}
+              form={form}
+              responses={responses}
+              queryIndex={debugIdx}
+              description={results.description?.[debugIdx]}
+              onApply={handleDebugApply}
+              onClose={() => setDebugIdx(null)}
+            />
+          )}
         </>
       )}
     </div>
@@ -400,7 +444,8 @@ export function AuditValidateFlow({
 
   return (
     <div className="space-y-8">
-      <QuestionSet cfrCode={cfrCode} form={form} initial={initialResponses} meta={autofillMeta} onValidated={onValidated} />
+      <QuestionSet cfrCode={cfrCode} form={form} initial={initialResponses} meta={autofillMeta} onValidated={onValidated}
+        onFormPatched={(f) => { setForm(f); onFormChange?.(f); }} />
 
       {/* Inline rule authoring — edits persist to this audit's snapshot only. */}
       {onFormChange && <RuleAuthoringPanel form={form} regText={regText} onChange={(f) => { setForm(f); onFormChange(f); }} />}
@@ -417,7 +462,8 @@ export function AuditValidateFlow({
         {deepError && <p className="mt-4 text-sm text-[var(--ink-muted)]">{deepError}</p>}
         {deepForm && (
           <div className="mt-6">
-            <QuestionSet cfrCode={cfrCode} form={deepForm} initial={initialDeepResponses} onValidated={onDeepValidated} ctaLabel="Validate deep checks" />
+            <QuestionSet cfrCode={cfrCode} form={deepForm} initial={initialDeepResponses} onValidated={onDeepValidated}
+              onFormPatched={(f) => setDeepForm(f)} ctaLabel="Validate deep checks" />
           </div>
         )}
       </div>

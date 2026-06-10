@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { Surface, AccentButton, Spinner, EmptyState } from './ui';
 import { RuleAuthoringPanel } from '@/components/rules/RuleAuthoringPanel';
+import { DebugBot } from '@/components/rules/DebugBot';
 import { TerminalPanel, PrologView } from '@/components/module/terminal';
 import { ExecutionReplay } from '@/components/module/ExecutionReplay';
 import { ConsoleInterview } from '@/components/module/ConsoleInterview';
@@ -64,6 +65,8 @@ export function LeanValidateFlow({ formCode, initialForm, regText, systemId, ini
   const [loading, setLoading] = useState(false);
   // Bumped on each successful validate so the ExecutionReplay restarts.
   const [runId, setRunId] = useState(0);
+  // Which failing/escalated verdict the debug bot is consulting on, if any.
+  const [debugIdx, setDebugIdx] = useState<number | null>(null);
   // Console deposition by default; saved answers surface in the console as
   // "current: … — enter to keep".
   const [mode, setMode] = useState<'console' | 'form'>('console');
@@ -114,6 +117,29 @@ export function LeanValidateFlow({ formCode, initialForm, regText, systemId, ini
       onValidated?.(data, responses);
     }
     setLoading(false);
+  };
+
+  // The debug bot verified a patched program; persist it (same path as
+  // RuleAuthoringPanel edits), drop answers the patch invalidated, and clear
+  // the now-stale verdicts.
+  const handleDebugApply = (patchedForm: any) => {
+    setForm(patchedForm);
+    onFormChange?.(patchedForm);
+    const stale: string[] = [];
+    for (const q of patchedForm.questions || []) {
+      const v = responses[q.id];
+      if (v == null || v === '' || !q.options?.length) continue;
+      const ok = q.type === 'CHECKBOX'
+        ? String(v).split(',').filter(Boolean).every((p: string) => q.options.includes(p))
+        : q.options.includes(v);
+      if (!ok) stale.push(q.id);
+    }
+    if (stale.length) {
+      setResponses((prev) => { const next = { ...prev }; for (const id of stale) delete next[id]; return next; });
+    }
+    setResults(null);
+    setDebugIdx(null);
+    toast('Program repaired — re-validate to derive fresh verdicts.');
   };
 
   // Console :attach — mirrors AutoFill.tsx: blob upload, then /api/autofill.
@@ -247,6 +273,12 @@ export function LeanValidateFlow({ formCode, initialForm, regText, systemId, ini
                   <span className={st === 'pass' ? 'text-[var(--ink-muted)]' : 'text-[var(--ink)]'}>
                     {d}{results.reason?.[i] ? <span className="text-[var(--ink-faint)]"> — {results.reason[i]}</span> : null}
                   </span>
+                  {st !== 'pass' && (
+                    <button type="button" onClick={() => setDebugIdx(i)}
+                      className="ml-auto shrink-0 font-mono text-[0.65rem] uppercase tracking-[0.1em] text-[var(--ink-faint)] transition-colors hover:text-[var(--ink)]">
+                      debug
+                    </button>
+                  )}
                 </li>
               );
             })}
@@ -257,6 +289,18 @@ export function LeanValidateFlow({ formCode, initialForm, regText, systemId, ini
       {results && (
         /* The same verdicts, replayed in the engine's voice. */
         <ExecutionReplay key={runId} form={form} responses={responses} results={results} contextLabel={formCode} />
+      )}
+
+      {results && debugIdx != null && (
+        <DebugBot
+          key={debugIdx}
+          form={form}
+          responses={responses}
+          queryIndex={debugIdx}
+          description={results.description?.[debugIdx]}
+          onApply={handleDebugApply}
+          onClose={() => setDebugIdx(null)}
+        />
       )}
     </div>
   );

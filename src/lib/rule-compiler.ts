@@ -140,6 +140,178 @@ export async function compileEnglishRule(nl: string, form: any, regText?: string
   throw new Error(`Could not compile rule after 3 attempts: ${errors[errors.length - 1]}`);
 }
 
+/* ------------------------------------------------------------- debug bot */
+// Mirrors /api/validate's convertToPrologValue exactly.
+function toPrologValue(value: string, type: string): string {
+  switch (type) {
+    case 'BOOLEAN': return value.toLowerCase() === 'true' ? 'true' : 'false';
+    case 'NUMERIC': return value;
+    case 'SELECT':
+    case 'TEXT': return `'${value.replace(/'/g, "\\'")}'`;
+    case 'CHECKBOX': return `[${value.split(',').map((v) => `'${v.trim().replace(/'/g, "\\'")}'`).join(', ')}]`;
+    default: return `'${value.replace(/'/g, "\\'")}'`;
+  }
+}
+
+// The live program exactly as /api/validate assembles it for these responses.
+export function buildLiveProgram(form: any, responses: Record<string, string>): string {
+  let program = ':- use_module(library(lists)).\n';
+  const subVals = (s: string) =>
+    String(s).replaceAll('REPLACE_FOR_BACKSLASH', '\\').replaceAll('"', "'")
+      .replace(/\{(\d+)\}/g, (_: string, m: string) => {
+        const q = form.questions[parseInt(m, 10) - 1];
+        return q && responses[q.id] ? toPrologValue(responses[q.id], q.type) : `{${m}}`;
+      });
+  for (const f of form.facts || []) {
+    const q = (form.questions || []).find((x: any) => x.id === f.question_id);
+    if (q?.disabled) continue;
+    if (!q || !responses[f.question_id] || responses[f.question_id] === 'Does not apply') continue;
+    program += subVals(f.template) + '\n';
+  }
+  for (const v of form.validations || []) {
+    program += String(v.rule).replaceAll('REPLACE_FOR_BACKSLASH', '\\').replaceAll('"', "'") + '\n';
+  }
+  return program;
+}
+
+export function substituteQuery(form: any, responses: Record<string, string>, queryDef: any): string {
+  return String(queryDef.query)
+    .replaceAll('REPLACE_FOR_BACKSLASH', '\\').replaceAll('"', "'")
+    .replace('?-', '').trim()
+    .replace(/\{(\d+)\}/g, (_: string, m: string) => {
+      const q = form.questions[parseInt(m, 10) - 1];
+      return q && responses[q.id] ? toPrologValue(responses[q.id], q.type) : `{${m}}`;
+    });
+}
+
+export function runQuery(program: string, queryText: string): Promise<{ answers: string[]; error?: string }> {
+  return new Promise((resolve) => {
+    try {
+      const session = pl.create(50000);
+      session.consult(program, {
+        success: () => {
+          session.query(queryText.endsWith('.') ? queryText : queryText + '.', {
+            success: () => {
+              const answers: string[] = [];
+              const step = () => session.answer({
+                success: (a: any) => { answers.push(session.format_answer(a)); answers.length < 3 ? step() : resolve({ answers }); },
+                fail: () => resolve({ answers: answers.length ? answers : ['false'] }),
+                error: (e: any) => resolve({ answers, error: String(e) }),
+                limit: () => resolve({ answers, error: 'inference limit' }),
+              });
+              step();
+            },
+            error: (e: any) => resolve({ answers: [], error: String(e) }),
+          });
+        },
+        error: (e: any) => resolve({ answers: [], error: String(e) }),
+      });
+    } catch (e: any) { resolve({ answers: [], error: String(e?.message || e) }); }
+  });
+}
+
+function verdictOf(answers: string[], isStatus: boolean): { status: string; reason?: string } {
+  if (isStatus) {
+    const ans = answers.find((a) => /Status\s*=/.test(a)) || answers[0] || '';
+    const sm = ans.match(/Status\s*=\s*(pass|fail|escalate)/i);
+    const rm = ans.match(/Reason\s*=\s*'([^']*)'/);
+    return { status: sm ? sm[1].toLowerCase() : 'fail', reason: rm?.[1] };
+  }
+  return { status: answers[0] === 'true.' || answers[0] === 'true' ? 'pass' : 'fail' };
+}
+
+const DEBUG_SYSTEM = `You are the GRIMOIRE/1 debug bot: you diagnose and repair Prolog rules inside a grimoire validation form run by Tau-Prolog.
+
+HOW VALUES ARRIVE (critical — most bugs live here): responses are substituted into {i} placeholders ({i} = the i-th question, 1-based). BOOLEAN → bare true/false. SELECT/TEXT/DATE → the EXACT option string, single-quoted, CASE-SENSITIVE (option "Female" arrives as 'Female', never 'female'). CHECKBOX → a list of quoted options (test with member/2). NUMERIC → bare number. A rule comparing against an atom that is not EXACTLY one of the question's option strings can never succeed.
+
+Tri-state rules define assess_<slug>(Status, Reason) clauses evaluated top-down: pass first, escalate next, a body-less fail clause as default. Never use 'not' — use \\+. Every clause ends with a period.
+
+You receive the form slice, the live program, the failing query, the user's responses, the engine verdict, and possibly human feedback. Diagnose WHY the verdict happened — name the precise mismatch (predicate, arity, quoting, casing, wrong option text, missing fact, clause order). Then, if the rule (not the user's honest answer) is at fault, propose a MINIMAL patch.
+
+Output STRICT JSON only:
+{
+  "diagnosis": "<plain English, 2-4 sentences, name the exact mismatch>",
+  "summary": "<one line: what the fix changes>",
+  "fix": {
+    "questions":   [ { "index": <0-based into form.questions>, "patch": { "text"?: "...", "options"?: [...], "type"?: "..." } } ],
+    "facts":       [ { "index": <0-based into form.facts>, "template": "<corrected template, keep {i} refs>" } ],
+    "validations": [ { "index": <0-based into form.validations>, "rule": "<corrected clauses>" } ],
+    "queries":     [ { "index": <0-based into form.queries>, "query"?: "...", "description"?: "..." } ]
+  } | null
+}
+
+PATCH RULES: prefer fixing the PROLOG to match the form's existing option strings over changing user-facing options. NEVER renumber or remove questions; NEVER change {i} references to different positions; keep ids unchanged. Omit arrays you don't patch. fix: null when the verdict is actually correct (then say so in the diagnosis).`;
+
+export async function debugRule(
+  form: any,
+  responses: Record<string, string>,
+  queryIndex: number,
+  feedback?: string,
+  priorDiagnosis?: string,
+): Promise<{ diagnosis: string; summary?: string; form?: any; verification?: any; attempts: number }> {
+  const queryDef = (form.queries || [])[queryIndex];
+  if (!queryDef) throw new Error('No such query.');
+  const isStatus = queryDef.mode === 'status' || /\bStatus\b/.test(queryDef.query);
+
+  const liveProgram = buildLiveProgram(form, responses);
+  const liveQuery = substituteQuery(form, responses, queryDef);
+  const current = await runQuery(liveProgram, liveQuery);
+  const currentVerdict = current.error ? { status: 'error', reason: current.error } : verdictOf(current.answers, isStatus);
+
+  const qIndex = (form.questions || []).map((q: any, i: number) =>
+    `  [${i}] {${i + 1}} id=${q.id} [${q.type}${q.disabled ? ' · DISABLED' : ''}] ${String(q.text).slice(0, 140)}${q.options ? ` (options: ${q.options.join(' / ')})` : ''} → answered: ${responses[q.id] ?? '(blank)'}`).join('\n');
+  const fIndex = (form.facts || []).map((f: any, i: number) => `  [${i}] (${f.question_id}) ${String(f.template).slice(0, 200)}`).join('\n');
+  const vIndex = (form.validations || []).map((v: any, i: number) => `  [${i}] ${String(v.rule).slice(0, 400)}`).join('\n');
+
+  const baseUser = `FORM QUESTIONS (index, {position}, id, type, options, current answer):\n${qIndex}\n\nFACT TEMPLATES:\n${fIndex}\n\nVALIDATIONS:\n${vIndex}\n\nFAILING QUERY [index ${queryIndex}]: ${queryDef.query}\nDescription: ${queryDef.description || '(none)'}\n\nLIVE PROGRAM (as executed):\n${liveProgram.slice(0, 3500)}\n\nSUBSTITUTED QUERY: ${liveQuery}\nENGINE VERDICT: ${currentVerdict.status}${currentVerdict.reason ? ` — ${currentVerdict.reason}` : ''}${current.error ? ` (engine error: ${current.error})` : ''}` +
+    (priorDiagnosis ? `\n\nYOUR PREVIOUS DIAGNOSIS:\n${priorDiagnosis}` : '') +
+    (feedback ? `\n\nHUMAN FEEDBACK (what the auditor actually intends):\n"""${feedback}"""` : '');
+
+  const errors: string[] = [];
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const user = attempt === 1 ? baseUser
+      : `${baseUser}\n\nYour previous patch failed verification: ${errors[errors.length - 1]}\nReturn corrected STRICT JSON only.`;
+    const out = extractJSON<any>(await complete(DEBUG_SYSTEM, user, 1400));
+    if (!out?.diagnosis) { errors.push('Model did not return a diagnosis.'); continue; }
+    if (!out.fix) return { diagnosis: out.diagnosis, summary: out.summary, attempts: attempt };
+
+    // Apply the patch to a clone.
+    const patched = {
+      ...form,
+      questions: (form.questions || []).map((q: any, i: number) => {
+        const p = (out.fix.questions || []).find((x: any) => x.index === i);
+        return p ? { ...q, ...(p.patch || {}) } : q;
+      }),
+      facts: (form.facts || []).map((f: any, i: number) => {
+        const p = (out.fix.facts || []).find((x: any) => x.index === i);
+        return p ? { ...f, template: p.template } : f;
+      }),
+      validations: (form.validations || []).map((v: any, i: number) => {
+        const p = (out.fix.validations || []).find((x: any) => x.index === i);
+        return p ? { ...v, rule: p.rule } : v;
+      }),
+      queries: (form.queries || []).map((q: any, i: number) => {
+        const p = (out.fix.queries || []).find((x: any) => x.index === i);
+        return p ? { ...q, ...(p.query ? { query: p.query } : {}), ...(p.description ? { description: p.description } : {}) } : q;
+      }),
+    };
+
+    // Verify: parse-check, then re-run the target query live.
+    const probe = await checkParses(buildCheckProgram(patched));
+    if (!probe.ok) { errors.push(`parse error: ${probe.error}`); continue; }
+    const rerun = await runQuery(buildLiveProgram(patched, responses), substituteQuery(form, responses, patched.queries[queryIndex]));
+    const verdict = rerun.error ? { status: 'error', reason: rerun.error } : verdictOf(rerun.answers, isStatus);
+    return {
+      diagnosis: out.diagnosis,
+      summary: out.summary,
+      form: patched,
+      verification: { parses: true, before: currentVerdict, after: verdict },
+      attempts: attempt,
+    };
+  }
+  throw new Error(`Debug failed after 3 attempts: ${errors[errors.length - 1] || 'no usable output'}`);
+}
+
 /* ------------------------------------------------- contradiction/coverage */
 const ANALYZE_SYSTEM = `You audit a grimoire validation form's rules for an auditor.
 
