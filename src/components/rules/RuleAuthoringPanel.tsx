@@ -29,31 +29,57 @@ export function RuleAuthoringPanel({ form, regText, onChange }: { form: any; reg
   };
 
   const removeRule = (i: number) => {
+    // A rule consumes questions through a chain: question → fact template
+    // (carries the {i} placeholder and question_id) → fact predicate →
+    // validation body → query head. Deleting the rule must walk that chain:
+    // drop the validation, drop facts nothing else calls, and DISABLE the
+    // questions only those facts consumed. Disabled, not spliced — {i}
+    // placeholders and qN ids are positional, so splicing would corrupt
+    // every later reference.
     const queries = form.queries || [];
+    const validations = form.validations || [];
+    const facts = form.facts || [];
     const removed = queries[i];
-    const remaining = queries.filter((_: any, idx: number) => idx !== i);
+    const remainingQueries = queries.filter((_: any, idx: number) => idx !== i);
 
-    // Question positions {p} the removed rule consumed vs. those any remaining
-    // rule still consumes.
-    const refs = (s: string) => Array.from(String(s || '').matchAll(/\{(\d+)\}/g)).map((m) => parseInt(m[1], 10));
-    const removedRefs = new Set(refs(removed?.query));
-    const live = new Set(remaining.flatMap((q: any) => refs(q.query)));
-
-    // Questions only this rule consumed are DISABLED, not spliced — every {i}
-    // placeholder and qN id is positional, so removal would corrupt the
-    // references of every later fact and rule.
-    const questions = (form.questions || []).map((q: any, qi: number) =>
-      removedRefs.has(qi + 1) && !live.has(qi + 1) ? { ...q, disabled: true } : q);
-
-    // Drop the validation that defines the removed query's predicate; fall
-    // back to the parallel index for seeded forms.
+    // 1. The validation(s) defining the removed query's head predicate;
+    //    parallel-index fallback for seeded forms.
     const head = String(removed?.query || '').replace(/^\s*\?-\s*/, '').match(/^([a-z_][A-Za-z0-9_]*)/)?.[1];
     const defines = (rule: string) => !!head && new RegExp(`(^|\\n)\\s*${head}\\s*\\(`).test(String(rule || ''));
-    const validations = (form.validations || []).some((v: any) => defines(v.rule))
-      ? form.validations.filter((v: any) => !defines(v.rule))
-      : (form.validations || []).filter((_: any, idx: number) => idx !== i);
+    const hasNamed = validations.some((v: any) => defines(v.rule));
+    const remainingValidations = hasNamed
+      ? validations.filter((v: any) => !defines(v.rule))
+      : validations.filter((_: any, idx: number) => idx !== i);
 
-    onChange({ ...form, questions, queries: remaining, validations });
+    // 2. A fact is live iff something that still runs calls its predicate.
+    const liveText = [
+      ...remainingValidations.map((v: any) => String(v.rule || '')),
+      ...remainingQueries.map((q: any) => String(q.query || '')),
+    ].join('\n');
+    const predOf = (t: string) => String(t || '').match(/(^|\n)\s*([a-z_][A-Za-z0-9_]*)\s*\(/)?.[2];
+    const isCalled = (pred?: string) => !!pred && new RegExp(`\\b${pred}\\s*\\(`).test(liveText);
+    const liveFacts: any[] = [];
+    const deadFacts: any[] = [];
+    for (const f of facts) (isCalled(predOf(f.template)) ? liveFacts : deadFacts).push(f);
+
+    // 3. Question positions/ids still consumed vs. consumed only by the dead chain.
+    const refs = (s: string) => Array.from(String(s || '').matchAll(/\{(\d+)\}/g)).map((m) => parseInt(m[1], 10));
+    const livePos = new Set([
+      ...liveFacts.flatMap((f: any) => refs(f.template)),
+      ...remainingQueries.flatMap((q: any) => refs(q.query)),
+    ]);
+    const liveIds = new Set(liveFacts.map((f: any) => f.question_id).filter(Boolean));
+    const deadPos = new Set([...deadFacts.flatMap((f: any) => refs(f.template)), ...refs(removed?.query)]);
+    const deadIds = new Set(deadFacts.map((f: any) => f.question_id).filter(Boolean));
+
+    const questions = (form.questions || []).map((q: any, qi: number) => {
+      const pos = qi + 1;
+      const touchedByDead = deadPos.has(pos) || deadIds.has(q.id);
+      const stillLive = livePos.has(pos) || liveIds.has(q.id);
+      return touchedByDead && !stillLive ? { ...q, disabled: true } : q;
+    });
+
+    onChange({ ...form, questions, facts: liveFacts, queries: remainingQueries, validations: remainingValidations });
   };
 
   const analyze = async () => {
