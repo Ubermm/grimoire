@@ -118,6 +118,7 @@ RULES:
 - Encode ONLY what the auditor stated. Do not invent thresholds or extra conditions. Use a unique <slug> (lowercase, underscores) derived from the rule.
 - Design questions an auditor can answer in ONE entry: an aggregate yes/no, a count, or a date — NEVER a shape that requires enumerating items or team members one by one (ask "Are all QC team members female?" yes/no, not a per-member gender select).
 - NEVER hardcode an answer into a fact (e.g. pred('yes').) — every fact template MUST consume the auditor's answer through a {i} placeholder, otherwise the rule can never react to what they say.
+- EVERY predicate the validation body calls must be DEFINED: either an existing fact predicate from the form, or a NEW fact your fragment asserts (bound to a NEW question via {i}). If the rule needs information no existing question captures (e.g. the document's font), you MUST add a question for it — a rule calling an unasserted predicate can never run.
 - The FIRST (pass) clause MUST have a body (:- …) that tests an asserted fact — a body-less pass clause would make the rule pass unconditionally.
 - The clause MUST parse: balanced parens, every clause ends with a period.`;
 
@@ -157,6 +158,46 @@ function vacuousValidation(rule: string): string | null {
   return null;
 }
 
+// Closed-world check: every predicate called in a validation body or query
+// must be defined somewhere — as a fact template's head or a validation
+// clause's head. Tau-prolog parses programs with undefined predicates happily
+// and only throws existence_error at query time, so this is the only place a
+// rule like "assess_x(...) :- font('serif')." (where nothing ever asserts
+// font/1) can be caught. Returns the undefined predicate names.
+const PROLOG_BUILTINS = new Set([
+  'member', 'memberchk', 'append', 'length', 'nth0', 'nth1', 'sort', 'msort', 'reverse', 'last',
+  'is', 'true', 'fail', 'false', 'between', 'succ', 'abs', 'atom', 'number', 'integer', 'var', 'nonvar',
+  'atom_length', 'atom_string', 'number_codes', 'atom_codes', 'findall', 'forall', 'not', 'write', 'nl',
+]);
+export function undefinedPredicates(form: any): string[] {
+  const defined = new Set<string>();
+  for (const f of form.facts || []) {
+    const p = String(f.template || '').match(/([a-z_][A-Za-z0-9_]*)\s*\(/)?.[1];
+    if (p) defined.add(p);
+  }
+  for (const v of form.validations || []) {
+    for (const clause of splitClauses(String(v.rule || ''))) {
+      const head = clause.match(/^\s*([a-z_][A-Za-z0-9_]*)\s*\(/)?.[1];
+      if (head) defined.add(head);
+    }
+  }
+  const missing = new Set<string>();
+  const scanBody = (body: string) => {
+    const clean = String(body).replace(/'[^']*'/g, "''").replace(/"[^"]*"/g, '""');
+    for (const m of clean.matchAll(/([a-z_][A-Za-z0-9_]*)\s*\(/g)) {
+      if (!defined.has(m[1]) && !PROLOG_BUILTINS.has(m[1])) missing.add(m[1]);
+    }
+  };
+  for (const v of form.validations || []) {
+    for (const clause of splitClauses(String(v.rule || ''))) {
+      const i = clause.indexOf(':-');
+      if (i >= 0) scanBody(clause.slice(i + 2));
+    }
+  }
+  for (const q of form.queries || []) scanBody(String(q.query || '').replace(/^\s*\?-\s*/, ''));
+  return Array.from(missing);
+}
+
 // Reject degenerate fragments the parse-check can't catch: a fact that hardcodes
 // a value (no {i} → the rule can never react to an answer), a fact with no
 // question to bind, or a validation whose non-final clause has no body
@@ -193,6 +234,16 @@ export async function compileEnglishRule(nl: string, form: any, regText?: string
     const degenerate = fragmentProblems(fragment);
     if (degenerate) { errors.push(degenerate); last = JSON.stringify(fragment).slice(0, 400); continue; }
     const merged = mergeFragment(form, fragment);
+    // Closed-world gate: the fragment may not call predicates nothing asserts.
+    // Compared against the base form's own gaps so pre-existing template debt
+    // doesn't block new rules.
+    const before = new Set(undefinedPredicates(form));
+    const introduced = undefinedPredicates(merged).filter((p) => !before.has(p));
+    if (introduced.length) {
+      errors.push(`Your rule calls ${introduced.map((p) => `${p}(...)`).join(', ')} but nothing asserts ${introduced.length > 1 ? 'them' : 'it'} — no existing fact and no new fact in your fragment. Add a NEW question that captures this information and a fact template binding it via {i}, then have the validation consume that fact.`);
+      last = JSON.stringify(fragment).slice(0, 400);
+      continue;
+    }
     const probe = await checkParses(buildCheckProgram(merged));
     if (probe.ok) return { form: merged, attempts: attempt, errors, description: fragment.query.description || nl };
     errors.push(probe.error || 'parse error');
@@ -303,6 +354,7 @@ Output STRICT JSON only:
 
 PATCH RULES — fix whichever layer is actually wrong:
 - NEVER hardcode an answer into a fact template (e.g. pred('yes').) — facts must keep their {i} placeholder so they consume the auditor's answer. NEVER give a tri-state rule a body-less FIRST clause — it would return that verdict unconditionally.
+- NEVER repurpose an existing fact for different data (renaming its predicate breaks every validation that calls it, and its {i} still feeds it a different question's answer). If a rule calls a predicate nothing asserts, rewrite the RULE to consume facts that exist — you cannot add questions or facts.
 - If the Prolog merely mismatches the form's option strings (casing, quoting, wrong atom), fix the PROLOG to match the existing options.
 - If the QUESTION captures data in a shape an auditor cannot reasonably provide — e.g. enumerating an attribute per member of a large team, or free text where a yes/no or a count belongs — RESHAPE the question: rewrite its text/type/options so ONE answer captures the aggregate (a SELECT like "Are all QC team members female?" with options yes/no, or a NUMERIC count), and rewrite the fact template and validation to consume the new shape. You cannot ADD questions — work within the existing ones; prefer a single aggregate SELECT when only one question is available.
 - NEVER renumber or remove questions; NEVER change {i} references to different positions; keep ids unchanged. Omit arrays you don't patch. fix: null when the verdict is actually correct (then say so in the diagnosis).`;
@@ -375,11 +427,27 @@ export async function debugRule(
       }),
     };
 
+    // Closed-world gate: the patch may not break the program's predicate graph
+    // (e.g. renaming a fact other validations still call, or calling a
+    // predicate nothing asserts).
+    const beforeMissing = new Set(undefinedPredicates(form));
+    const introduced = undefinedPredicates(patched).filter((p) => !beforeMissing.has(p));
+    if (introduced.length) {
+      errors.push(`Your patch leaves ${introduced.map((p) => `${p}(...)`).join(', ')} undefined — either it renamed a fact some validation still calls, or it calls a predicate nothing asserts. Patch the consumers together with the fact, and never repurpose an existing fact for a different question.`);
+      continue;
+    }
+
     // Verify: parse-check, then re-run the target query live.
     const probe = await checkParses(buildCheckProgram(patched));
     if (!probe.ok) { errors.push(`parse error: ${probe.error}`); continue; }
     const rerun = await runQuery(buildLiveProgram(patched, responses), substituteQuery(form, responses, patched.queries[queryIndex]));
     const verdict = rerun.error ? { status: 'error', reason: rerun.error } : verdictOf(rerun.answers, isStatus);
+    // A repaired rule must at least execute: an engine error after the patch
+    // means the repair is wrong (or incomplete) — retry with the error in hand.
+    if (verdict.status === 'error') {
+      errors.push(`After your patch the query still throws: ${String(verdict.reason).slice(0, 200)}. The patch must leave the target query executable.`);
+      continue;
+    }
     return {
       diagnosis: out.diagnosis,
       summary: out.summary,
