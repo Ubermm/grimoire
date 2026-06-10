@@ -28,7 +28,7 @@ function optionsOf(q: any): string[] {
   return q.options && q.options.length ? q.options : ['true', 'false'];
 }
 
-function questionBlock(q: any, idx: number, total: number): Entry[] {
+function questionBlock(q: any, idx: number, total: number, current?: string): Entry[] {
   const out: Entry[] = [{ tone: 'faint', text: '' }];
   out.push({ tone: 'bright', text: `Q.${pad2(idx + 1)}/${pad2(total)}  ${q.text}` });
   const ref = q.reference || q.cfr_reference;
@@ -39,6 +39,7 @@ function questionBlock(q: any, idx: number, total: number): Entry[] {
   if (q.type === 'NUMERIC') out.push({ tone: 'faint', text: '        enter a number' });
   if (q.type === 'DATE') out.push({ tone: 'faint', text: '        enter a date, YYYY-MM-DD' });
   if (q.type === 'TIME') out.push({ tone: 'faint', text: '        enter a time, HH:MM' });
+  if (current) out.push({ tone: 'faint', text: `        current: ${current} — press enter to keep` });
   return out;
 }
 
@@ -111,10 +112,9 @@ export function ConsoleInterview({
   const total = questions.length;
 
   const [responses, setResponses] = useState<Responses>(() => ({ ...(initialResponses || {}) }));
-  const [idx, setIdx] = useState(() => {
-    const first = questions.findIndex((q: any) => !(initialResponses || {})[q.id]);
-    return first === -1 ? 0 : first;
-  });
+  // The deposition always walks every question in order; pre-answered ones
+  // show their current value and accept a bare Enter to keep it.
+  const [idx, setIdx] = useState(0);
   const [transcript, setTranscript] = useState<Entry[]>(() => [
     { tone: 'faint', text: `${systemName} — expert system${contextLabel ? ` · ${contextLabel}` : ''}` },
     { tone: 'sys', text: `interrogation begins. ${total} assertions required.` },
@@ -140,7 +140,7 @@ export function ConsoleInterview({
   useEffect(() => {
     if (done || idx >= total || printedFor.current === idx) return;
     printedFor.current = idx;
-    say(...questionBlock(questions[idx], idx, total));
+    say(...questionBlock(questions[idx], idx, total, responses[questions[idx].id]));
   }, [idx, done, total]);
 
   // Pin scroll to the latest line.
@@ -160,20 +160,9 @@ export function ConsoleInterview({
   };
 
   const advance = (next: Responses) => {
-    // Move to the next unanswered question after idx; finish when none remain.
-    for (let i = idx + 1; i < total; i++) {
-      if (!next[questions[i].id]) { setIdx(i); return; }
-    }
-    // Nothing unanswered ahead — check behind (a :skip may have left gaps).
-    for (let i = 0; i < total; i++) {
-      if (!next[questions[i].id] && i !== idx) {
-        say({ tone: 'faint', text: `returning to Q.${pad2(i + 1)} — left unanswered.` });
-        printedFor.current = -1;
-        setIdx(i);
-        return;
-      }
-    }
-    finish(true, next);
+    // Strictly sequential: every question gets its turn, answered or not.
+    if (idx + 1 < total) { setIdx(idx + 1); return; }
+    finish(questions.every((q: any) => next[q.id]), next);
   };
 
   const handleCommand = (cmd: string) => {
@@ -212,7 +201,15 @@ export function ConsoleInterview({
   const submit = () => {
     if (busy || done) return;
     const raw = input;
-    if (!raw.trim()) return;
+    if (!raw.trim()) {
+      // Bare Enter keeps an existing answer and flows on.
+      const q = questions[idx];
+      if (q && responses[q.id]) {
+        say({ tone: 'user', text: '>' }, { tone: 'faint', text: `kept: ${q.id} = ${responses[q.id]}` });
+        advance(responses);
+      }
+      return;
+    }
     setInput('');
     say({ tone: 'user', text: `> ${raw}` });
 
@@ -296,11 +293,11 @@ export function ConsoleInterview({
         )}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t px-4 py-1.5" style={{ borderColor: TERM.line }}>
-        <span className="text-[0.65rem] tracking-[0.08em]" style={{ color: TERM.faint }}>
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t px-4 py-2" style={{ borderColor: TERM.line }}>
+        <span className="text-[0.7rem] tracking-[0.08em]" style={{ color: 'rgba(134,239,172,0.85)' }}>
           answer to assert · :skip :back {uploadAutofill ? ':attach ' : ''}:form :help
         </span>
-        <span className="text-[0.65rem] tracking-[0.08em]" style={{ color: TERM.faint }} aria-hidden>
+        <span className="text-[0.7rem] tracking-[0.08em]" style={{ color: TERM.dim }} aria-hidden>
           evidence ⊢ verdict
         </span>
       </div>

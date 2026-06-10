@@ -13,8 +13,8 @@ export const TERM = {
   line: '#1c3527',
   green: '#4ade80',
   bright: '#86efac',
-  dim: 'rgba(74,222,128,0.62)',
-  faint: 'rgba(74,222,128,0.36)',
+  dim: 'rgba(74,222,128,0.75)',
+  faint: 'rgba(74,222,128,0.52)',
   user: '#e8e6e1',
   warn: '#fbbf24',
 };

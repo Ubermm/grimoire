@@ -13,7 +13,7 @@ import { AuditContextPanel } from '@/components/audit-shared/AuditContextPanel';
 import { cn } from '@/lib/utils';
 
 // react-pdf needs the browser; keep it out of SSR + the initial bundle.
-const AuditReport = dynamic(() => import('@/components/AuditReport'), { ssr: false, loading: () => <div className="flex justify-center py-16"><Spinner className="h-6 w-6 text-[var(--ink-faint)]" /></div> });
+const AuditReport = dynamic(() => import('@/components/AuditReportV2'), { ssr: false, loading: () => <div className="flex justify-center py-16"><Spinner className="h-6 w-6 text-[var(--ink-faint)]" /></div> });
 
 type Result = { passed: boolean[]; description: string[]; status?: string[]; reason?: string[] };
 

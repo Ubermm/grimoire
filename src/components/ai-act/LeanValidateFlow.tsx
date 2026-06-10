@@ -6,7 +6,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { Surface, AccentButton, Spinner, EmptyState } from './ui';
 import { RuleAuthoringPanel } from '@/components/rules/RuleAuthoringPanel';
-import { TerminalPanel, PrologView, TERM } from '@/components/module/terminal';
+import { TerminalPanel, PrologView } from '@/components/module/terminal';
+import { ExecutionReplay } from '@/components/module/ExecutionReplay';
 import { ConsoleInterview } from '@/components/module/ConsoleInterview';
 import { cn, generateUUID } from '@/lib/utils';
 
@@ -57,6 +58,8 @@ export function LeanValidateFlow({ formCode, initialForm, regText, systemId, ini
   const [responses, setResponses] = useState<Record<string, string>>(initialResponses || {});
   const [results, setResults] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  // Bumped on each successful validate so the ExecutionReplay restarts.
+  const [runId, setRunId] = useState(0);
   // Console deposition by default on a blank set; form when answers pre-exist.
   const [mode, setMode] = useState<'console' | 'form'>(() =>
     Object.values(initialResponses || {}).some((v) => v != null && v !== '') ? 'form' : 'console');
@@ -84,6 +87,7 @@ export function LeanValidateFlow({ formCode, initialForm, regText, systemId, ini
     if (res.ok) {
       const data = await res.json(); // { passed: boolean[], description: string[] }
       setResults(data);
+      setRunId((n) => n + 1);
       if (systemId) {
         try {
           const cur = await (await fetch(`/api/ai-act/systems/${systemId}`)).json();
@@ -238,24 +242,8 @@ export function LeanValidateFlow({ formCode, initialForm, regText, systemId, ini
       )}
 
       {results && (
-        <TerminalPanel title="derivation" status={overall ? 'Q.E.D.' : anyFail ? 'refuted' : 'escalated'}>
-          <div className="max-h-[24rem] space-y-3 overflow-y-auto p-4 text-[12.5px] leading-[1.85]">
-            {results.description.map((d: string, i: number) => {
-              const st = states[i];
-              return (
-                <div key={i} className="whitespace-pre-wrap break-words">
-                  <div style={{ color: TERM.green }}>
-                    <span style={{ color: TERM.faint }}>?- </span>{d}
-                  </div>
-                  <div style={{ color: st === 'pass' ? TERM.bright : st === 'escalate' ? TERM.warn : '#f87171' }}>
-                    {st === 'pass' ? 'true.  ⊢ proven' : st === 'escalate' ? 'escalate. ! review' : 'false. ✗ refuted'}
-                    {results.reason?.[i] ? <span style={{ color: TERM.faint }}>  — {results.reason[i]}</span> : null}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </TerminalPanel>
+        /* The same verdicts, replayed in the engine's voice. */
+        <ExecutionReplay key={runId} form={form} responses={responses} results={results} contextLabel={formCode} />
       )}
     </div>
   );

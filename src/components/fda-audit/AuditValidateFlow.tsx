@@ -10,7 +10,8 @@ import { CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { Surface, AccentButton, GhostButton, Spinner, EmptyState } from '@/components/module/ui';
 import { RuleAuthoringPanel } from '@/components/rules/RuleAuthoringPanel';
 import { ConsoleInterview } from '@/components/module/ConsoleInterview';
-import { TerminalPanel, PrologView, TERM } from '@/components/module/terminal';
+import { TerminalPanel, PrologView } from '@/components/module/terminal';
+import { ExecutionReplay } from '@/components/module/ExecutionReplay';
 import { cn, generateUUID } from '@/lib/utils';
 
 type Responses = Record<string, string>;
@@ -67,7 +68,6 @@ function ResultsPanel({ results }: { results: Result }) {
   const anyFail = states.some((s) => s === 'fail');
   const anyEscalate = states.some((s) => s === 'escalate');
   return (
-    <>
     <Surface className={cn('p-6', overall ? 'border-emerald-200' : 'border-amber-200')}>
       <p className={cn('font-accent mb-4 flex items-center gap-2 text-sm font-semibold', overall ? 'text-emerald-700' : 'text-amber-700')}>
         {overall ? <CheckCircle2 className="h-5 w-5" /> : anyFail ? <XCircle className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
@@ -90,29 +90,6 @@ function ResultsPanel({ results }: { results: Result }) {
         })}
       </ul>
     </Surface>
-    {/* The same verdicts, in the engine's voice. */}
-    <TerminalPanel title="derivation" status={overall ? 'Q.E.D.' : anyFail ? 'refuted' : 'escalated'}>
-      <div className="max-h-[24rem] overflow-y-auto p-4 text-[12.5px] leading-[1.85]">
-        {results.description.map((d, i) => {
-          const st = states[i];
-          return (
-            <div key={i} className="mb-2 last:mb-0">
-              <div className="whitespace-pre-wrap break-words">
-                <span style={{ color: TERM.faint }}>?- </span>
-                <span style={{ color: TERM.green }}>{d}</span>
-              </div>
-              <div className="whitespace-pre-wrap break-words pl-5">
-                <span style={{ color: st === 'pass' ? TERM.bright : st === 'fail' ? '#f87171' : TERM.warn }}>
-                  {st === 'pass' ? 'true.  ⊢ proven' : st === 'fail' ? 'false. ✗ refuted' : 'escalate. ! review'}
-                </span>
-                {results.reason?.[i] ? <span style={{ color: TERM.faint }}> — {results.reason[i]}</span> : null}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </TerminalPanel>
-    </>
   );
 }
 
@@ -182,6 +159,8 @@ function QuestionSet({
   const [responses, setResponses] = useState<Responses>(() => ({ ...buildDefaults(), ...(initial || {}) }));
   const [results, setResults] = useState<Result | null>(null);
   const [loading, setLoading] = useState(false);
+  // Bumped on each successful validate so the ExecutionReplay restarts.
+  const [runId, setRunId] = useState(0);
 
   // Console vs form. A fresh set opens as a console deposition; a set arriving
   // with saved answers opens straight on the reviewable form.
@@ -219,6 +198,7 @@ function QuestionSet({
     if (res.ok) {
       const data: Result = await res.json();
       setResults(data);
+      setRunId((n) => n + 1);
       onValidated?.(data, responses);
     }
     setLoading(false);
@@ -304,7 +284,13 @@ function QuestionSet({
           </div>
         )}
       </Surface>
-      {results && <ResultsPanel results={results} />}
+      {results && (
+        <>
+          <ResultsPanel results={results} />
+          {/* The same verdicts, replayed in the engine's voice. */}
+          <ExecutionReplay key={runId} form={form} responses={responses} results={results} contextLabel={cfrCode} />
+        </>
+      )}
     </div>
   );
 }
